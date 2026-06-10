@@ -2,84 +2,222 @@ import { useState } from 'react';
 import '../../styles/navbar-admin.css';
 import { Search, ChevronRight, Edit, Trash2, Plus, ArrowLeft, Save, X } from 'lucide-react';
 import Swal from 'sweetalert2';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
+import axiosClient from '../../api/axiosClient'; 
 
 function BanDoControl() {
-    const [isHcmOpen, setIsHcmOpen] = useState(true);
-    const [isQuan1Open, setIsQuan1Open] = useState(true);
-    const [selectedRegion, setSelectedRegion] = useState('Phường Bến Nghé');
+    const queryClient = useQueryClient(); 
     const [viewMode, setViewMode] = useState('list');
+    const [selectedRegion, setSelectedRegion] = useState('Tất cả');
 
+    // 1. Các state quản lý bộ lọc hành chính ở Sidebar bên trái
     const [tinhthanh, setTinhThanh] = useState('');
     const [xa, setXa] = useState('');
     const [ap, setAp] = useState('');
     const [searchMap, setSearchMap] = useState('');
 
-    const { data: mapData = [], isLoading, refetch } = useQuery(
-        {
-            queryKey: ['maps', tinhthanh, xa, ap, searchMap],
-            queryFn: async () => {
-                const params = new URLSearchParams();
-                if (tinhthanh) params.append('ID_TinhThanh', tinhthanh);
-                if (xa) params.append('ID_Xa', xa);
-                if (ap) params.append('ID_Ap', ap);
-                if (searchMap) params.append('search_map', searchMap);
-                const api = `/admin/MapControl${params.toString() ? `?${params.toString()}` : ''}`;
-                const response = await axiosClient.get(api);
-                return response.data?.data?.data || response.data?.data || [];
-            },
-            staleTime: 2000,
-        }
-    );
+    // 2. CÁC STATE QUẢN LÝ FORM (THÊM / SỬA)
+    const [editingId, setEditingId] = useState(null); 
+    const [formValues, setFormValues] = useState({
+        TenDacSan: '',
+        ViDo: '',
+        KinhDo: '',
+        MoTa: '',
+        PhanLoai: 'Đặc sản',
+        ID_TinhThanh: '',
+        ID_Xa: '',
+        ID_Ap: ''
+    });
+    const [hinhAnhFile, setHinhAnhFile] = useState(null); 
+
+    // ==================== CÁC KHỐI HOOK GỌI API (DANH SÁCH) ====================
+    const { data: mapData = [], isLoading } = useQuery({
+        queryKey: ['maps', tinhthanh, xa, ap, searchMap],
+        queryFn: async () => {
+            const params = new URLSearchParams();
+            if (tinhthanh) params.append('ID_TinhThanh', tinhthanh);
+            if (xa) params.append('ID_Xa', xa);
+            if (ap) params.append('ID_Ap', ap);
+            if (searchMap) params.append('search_map', searchMap);
+            
+            const api = `/admin/bandoControl${params.toString() ? `?${params.toString()}` : ''}`;
+            const response = await axiosClient.get(api);
+            return response?.data?.data?.data  
+                || response?.data?.data        
+                || response?.data              
+                || [];
+        },
+        staleTime: 1000,
+    });
 
     const { data: TinhThanh = [] } = useQuery({
         queryKey: ['tinhthanh'],
         queryFn: async () => {
-            const api = '/tinh-thanh';
-            const response = await axiosClient.get(api);
+            const response = await axiosClient.get('/tinh-thanh');
             return response.data?.data?.data || response.data?.data || response.data || [];
-
         },
-        staleTime: 3000,
-    })
+        staleTime: 30000,
+    });
+
     const { data: Xa = [] } = useQuery({
-        queryKey: ['Xa', 'tinhthanh'],
+        queryKey: ['Xa', tinhthanh], 
         queryFn: async () => {
-            const api = '/xa';
-            const response = await axiosClient.get(api);
-            return response.data?.data?.data || response.data?.data || response.data || [];
+            const response = await axiosClient.get(`/xa?ID_TinhThanh=${tinhthanh}`);
+            return response.data?.data?.data || response.data?.data || [];
         },
-        staleTime: 3000,
-    })
-    const { data: Ap = [] } = useQuery({
-        queryKey: ['Ap', 'xa'],
-        queryFn: async () => {
-            const api = '/ap';
-            const response = await axiosClient.get(api);
-            return response.data?.data?.data || response.data?.data || response.data || [];
-        },
-        staleTime: 3000,
-    })
+        enabled: !!tinhthanh, 
+        staleTime: 10000,
+    });
 
+    const { data: Ap = [] } = useQuery({
+        queryKey: ['Ap', xa], 
+        queryFn: async () => {
+            const response = await axiosClient.get(`/ap?ID_Xa=${xa}`);
+            return response.data?.data?.data || response.data?.data || [];
+        },
+        enabled: !!xa, 
+        staleTime: 10000,
+    });
+
+    // Các bộ query riêng biệt để phục vụ dropdown động TRONG Form Thêm/Sửa
+    const { data: FormXa = [] } = useQuery({
+        queryKey: ['FormXa', formValues.ID_TinhThanh],
+        queryFn: async () => {
+            const response = await axiosClient.get(`/xa?ID_TinhThanh=${formValues.ID_TinhThanh}`);
+            return response.data?.data?.data || response.data?.data || [];
+        },
+        enabled: !!formValues.ID_TinhThanh,
+    });
+
+    const { data: FormAp = [] } = useQuery({
+        queryKey: ['FormAp', formValues.ID_Xa],
+        queryFn: async () => {
+            const response = await axiosClient.get(`/ap?ID_Xa=${formValues.ID_Xa}`);
+            return response.data?.data?.data || response.data?.data || [];
+        },
+        enabled: !!formValues.ID_Xa,
+    });
+
+
+    // ==================== KHỐI XỬ LÝ MUTATION (THÊM, XÓA, SỬA) ====================
+    // HÀM MUTATION: THÊM MỚI (STORE)
+    const addMutation = useMutation({
+        mutationFn: async (formData) => {
+            return await axiosClient.post('/admin/bandoControl', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+        },
+        onSuccess: () => {
+            Swal.fire('Thành công', 'Thêm điểm ghim mới thành công!', 'success');
+            queryClient.invalidateQueries({ queryKey: ['maps'] }); 
+            setTinhThanh(''); setXa(''); setAp(''); setSelectedRegion('Tất cả'); 
+            setViewMode('list');
+        },
+        onError: (err) => Swal.fire('Lỗi hệ thống', err.response?.data?.message || err.message, 'error')
+    });
+
+    // HÀM MUTATION: CẬP NHẬT (UPDATE)
+    const updateMutation = useMutation({
+        mutationFn: async ({ id, formData }) => {
+            formData.append('_method', 'PUT'); 
+            return await axiosClient.post(`/admin/bandoControl/${id}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+        },
+        onSuccess: () => {
+            Swal.fire('Thành công', 'Cập nhật điểm ghim thành công!', 'success');
+            queryClient.invalidateQueries({ queryKey: ['maps'] }); 
+            
+            setViewMode('list');
+        },
+        onError: (err) => Swal.fire('Lỗi hệ thống', err.response?.data?.message || err.message, 'error')
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id) => {
+            return await axiosClient.delete(`/admin/bandoControl/${id}`);
+        },
+        onSuccess: () => {
+            Swal.fire('Đã xóa!', 'Điểm ghim đã được gỡ bỏ khỏi hệ thống.', 'success');
+            queryClient.invalidateQueries(['maps']);
+        },
+        onError: (err) => Swal.fire('Lỗi xóa file', err.response?.data?.message || err.message, 'error')
+    });
+
+
+    // ==================== CÁC SỰ KIỆN TƯƠNG TÁC GIAO DIỆN ====================
     const handleOpenAdd = () => {
+        setEditingId(null);
+        setFormValues({
+            TenDacSan: '', ViDo: '', KinhDo: '', MoTa: '', PhanLoai: 'Đặc sản',
+            ID_TinhThanh: tinhthanh, ID_Xa: xa, ID_Ap: ap 
+        });
+        setHinhAnhFile(null);
         setViewMode('add');
+    };
+
+    const handleEditClick = (item) => {
+        setEditingId(item.ID || item.id || item.ID_map); // 🌟 ĐÃ SỬA: Bỏ biến 'data' không tồn tại
+        setFormValues({
+            TenDacSan: item.TenDacSan || item.TenDiaDiem || '',
+            ViDo: item.ViDo || '',
+            KinhDo: item.KinhDo || '',
+            MoTa: item.MoTa || '',
+            PhanLoai: item.PhanLoai || 'Đặc sản',
+            ID_TinhThanh: item.ID_TinhThanh || '',
+            ID_Xa: item.ID_Xa || '',
+            ID_Ap: item.ID_Ap || ''
+        });
+        setHinhAnhFile(null); 
+        setViewMode('edit');
+    };
+
+    const handleDeleteClick = (item) => {
+        const id = item.ID || item.id || item.ID_map;
+        Swal.fire({
+            title: 'Xác nhận xóa?',
+            text: `Bạn có chắc muốn xóa điểm ghim "${item.TenDacSan || item.TenDiaDiem}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Vâng, xóa ngay!',
+            cancelButtonText: 'Hủy bỏ'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteMutation.mutate(id);
+            }
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormValues(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSaveSubmit = (e) => {
         e.preventDefault();
-        Swal.fire('Thành công', 'Thông tin điểm ghim đã được ghi nhận!', 'success');
-        setViewMode('list');
+        const fd = new FormData();
+        Object.keys(formValues).forEach(key => {
+            fd.append(key, formValues[key]);
+        });
+        if (hinhAnhFile) {
+            fd.append('HinhAnh', hinhAnhFile);
+        }
+
+        if (viewMode === 'add') {
+            addMutation.mutate(fd);
+        } else {
+            updateMutation.mutate({ id: editingId, formData: fd });
+        }
     };
 
     return (
         <>
+            {/* THANH TIÊU ĐỀ TRÊN CÙNG */}
             <div className="admin-top-bar" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
                 {viewMode !== 'list' && (
-                    <button
-                        className="icon-btn"
-                        onClick={() => setViewMode('list')}
-                        style={{ borderRadius: '50%', width: '40px', height: '40px' }}
-                    >
+                    <button className="icon-btn" onClick={() => setViewMode('list')} style={{ borderRadius: '50%', width: '40px', height: '40px' }}>
                         <ArrowLeft size={18} />
                     </button>
                 )}
@@ -90,175 +228,193 @@ function BanDoControl() {
                 </h1>
             </div>
 
-            {/* 1. MÀN HÌNH DANH SÁCH & CÂY THƯ MỤC */}
-            <div className="province-list">
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Khu vực hành chính
-                </h2>
+            {/* 1. MÀN HÌNH DANH SÁCH CHÍNH */}
+            {viewMode === 'list' && (
+                <div id="admin-regions" className="view-section">
+                    <div className="admin-filters">
+                        <div className="search-box">
+                            <Search size={18} color="#6B7280" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm điểm ghim (đặc sản)..."
+                                value={searchMap} 
+                                onChange={(e) => setSearchMap(e.target.value)}
+                            />
+                        </div>
+                        <button className="btn-action btn-primary" onClick={handleOpenAdd} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Plus size={16} /> Thêm điểm ghim mới
+                        </button>
+                    </div>
 
-                {/* TẦNG 1: LẶP DANH SÁCH TỈNH THÀNH (Ví dụ: TP. Hồ Chí Minh, Tây Ninh...) */}
-                {TinhThanh && TinhThanh.map((tinh) => {
-                    // Kiểm tra xem Tỉnh này có đang được chọn hay không
-                    const isProvinceActive = tinhthanh === String(tinh.ID_TinhThanh);
-
-                    return (
-                        <div className="tree-node-container" key={tinh.ID_TinhThanh} style={{ marginBottom: '0.4rem' }}>
-                            <div
-                                // Nếu đang active thì tự động nhận class 'active' để đổi màu nền đen như ảnh
-                                className={`province-item ${isProvinceActive ? 'active' : ''}`}
-                                onClick={() => {
-                                    setTinhThanh(isProvinceActive ? '' : String(tinh.ID_TinhThanh));
-                                    setSelectedRegion(tinh.TenTinhThanh); // Cập nhật chữ ở tiêu đề bảng bên phải
-                                    setXa(''); // Đổi tỉnh thì xoá xã cũ
-                                    setAp(''); // Đổi tỉnh thì xoá ấp cũ
-                                }}
-                            >
-                                <span>{tinh.TenTinhThanh}</span>
-                                <ChevronRight
-                                    size={16}
-                                    // Tự động xoay mũi tên chúi xuống 90 độ khi mở ra giống ảnh
-                                    style={{
-                                        transition: 'transform 0.25s',
-                                        transform: isProvinceActive ? 'rotate(90deg)' : 'none'
-                                    }}
-                                />
+                    <div className="map-config-layout" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                        {/* CỘT TRÁI: CÂY THƯ MỤC */}
+                        <div className="province-list" style={{ width: '300px', flexShrink: 0 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: 'var(--text-main)', textTransform: 'uppercase' }}>Khu vực hành chính</h2>
+                                {(tinhthanh || xa || ap) && (
+                                    <button onClick={() => { setTinhThanh(''); setXa(''); setAp(''); setSelectedRegion('Tất cả'); }} style={{ fontSize: '0.8rem', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Xóa lọc</button>
+                                )}
                             </div>
 
-                            {/* TẦNG 2: LẶP DANH SÁCH XÃ/QUẬN (Chỉ hiển thị khi Tỉnh cha đang được mở) */}
-                            {isProvinceActive && Xa && Xa.length > 0 && (
-                                <div className="tree-children">
-                                    {Xa.map((xaxa) => {
-                                        // Kiểm tra xem Xã/Quận này có đang được chọn hay không
-                                        const isXaActive = xa === String(xaxa.ID_Xa);
+                            {TinhThanh.map((tinh) => {
+                                const isProvinceActive = tinhthanh === String(tinh.ID_TinhThanh);
+                                return (
+                                    <div className="tree-node-container" key={tinh.ID_TinhThanh} style={{ marginBottom: '0.4rem' }}>
+                                        <div className={`province-item ${isProvinceActive ? 'active' : ''}`} onClick={() => { setTinhThanh(isProvinceActive ? '' : String(tinh.ID_TinhThanh)); setSelectedRegion(tinh.TenTinhThanh); setXa(''); setAp(''); }}>
+                                            <span>{tinh.TenTinhThanh}</span>
+                                            <ChevronRight size={16} style={{ transition: 'transform 0.25s', transform: isProvinceActive ? 'rotate(90deg)' : 'none' }} />
+                                        </div>
 
-                                        return (
-                                            <div className="tree-node-container" key={xaxa.ID_Xa}>
-                                                <div
-                                                    className={`tree-item ${isXaActive ? 'active' : ''}`}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation(); // Ngăn sự kiện click bị lan lên thẻ Tỉnh cha
-                                                        setXa(isXaActive ? '' : String(xaxa.ID_Xa));
-                                                        setSelectedRegion(`${tinh.TenTinhThanh} - ${xaxa.TenXa}`);
-                                                        setAp(''); // Đổi xã thì xoá ấp cũ
-                                                    }}
-                                                >
-                                                    <span>{xaxa.TenXa}</span>
-                                                    <ChevronRight
-                                                        size={14}
-                                                        style={{
-                                                            transition: 'transform 0.25s',
-                                                            transform: isXaActive ? 'rotate(90deg)' : 'none'
-                                                        }}
-                                                    />
-                                                </div>
+                                        {isProvinceActive && Xa.length > 0 && (
+                                            <div className="tree-children" style={{ paddingLeft: '15px', marginTop: '4px' }}>
+                                                {Xa.map((xaxa) => {
+                                                    const isXaActive = xa === String(xaxa.ID_Xa);
+                                                    const tenXaSach = xaxa.Ten_xa || "Chưa có tên";
+                                                    return (
+                                                        <div className="tree-node-container" key={xaxa.ID_Xa}>
+                                                            <div className={`tree-item ${isXaActive ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setXa(isXaActive ? '' : String(xaxa.ID_Xa)); setSelectedRegion(`${tinh.TenTinhThanh} - ${tenXaSach}`); setAp(''); }}>
+                                                                <span>{tenXaSach}</span>
+                                                                <ChevronRight size={14} style={{ transition: 'transform 0.25s', transform: isXaActive ? 'rotate(90deg)' : 'none' }} />
+                                                            </div>
 
-                                                {/* TẦNG 3: LẶP DANH SÁCH ẤP/PHƯỜNG (Chỉ hiển thị khi Xã/Quận cha đang được mở) */}
-                                                {isXaActive && Ap && Ap.length > 0 && (
-                                                    <div className="tree-sub-children">
-                                                        {Ap.map((apap) => {
-                                                            // Kiểm tra xem Ấp/Phường này có đang được chọn hay không
-                                                            const isApActive = ap === String(apap.ID_Ap);
-
-                                                            return (
-                                                                <div
-                                                                    key={apap.ID_Ap}
-                                                                    className={`tree-sub-item ${isApActive ? 'active' : ''}`}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation(); // Ngăn sự kiện click lan lên cấp trên
-                                                                        setAp(isApActive ? '' : String(apap.ID_Ap));
-                                                                        setSelectedRegion(`${tinh.TenTinhThanh} - ${xaxa.TenXa} - ${apap.TenAp}`);
-                                                                    }}
-                                                                >
-                                                                    {apap.TenAp}
+                                                            {isXaActive && Ap.length > 0 && (
+                                                                <div className="tree-sub-children" style={{ paddingLeft: '15px', marginTop: '4px' }}>
+                                                                    {Ap.map((apap) => {
+                                                                        const isApActive = ap === String(apap.ID_Ap);
+                                                                        const tenApSach = apap.Ten_ap || "Chưa có tên";
+                                                                        return (
+                                                                            <div key={apap.ID_Ap} className={`tree-sub-item ${isApActive ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setAp(isApActive ? '' : String(apap.ID_Ap)); setSelectedRegion(`${tinh.TenTinhThanh} - ${tenXaSach} - ${tenApSach}`); }}>
+                                                                                {tenApSach}
+                                                                            </div>
+                                                                        );
+                                                                    })}
                                                                 </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
-                    );
-                })}
-            </div>
 
-            {/* 2. MÀN HÌNH FORM THÊM MỚI / CHỈNH SỬA ĐIỂM GHIM
+                        {/* CỘT PHẢI: BẢNG DỮ LIỆU */}
+                        <div className="map-pins-area" style={{ flexGrow: 1 }}>
+                            <div className="admin-card" style={{ marginBottom: 0 }}>
+                                <div className="card-header" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <h3 style={{ fontSize: '1.1rem', fontWeight: 750, margin: 0 }}>Điểm ghim tại: <span style={{ color: 'var(--sidebar-active)' }}>{selectedRegion}</span></h3>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>{mapData.length} địa điểm</span>
+                                </div>
+
+                                <div className="admin-table-wrapper">
+                                    {mapData.length > 0 ? (
+                                        <table className="admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ảnh & Đặc sản</th>
+                                                    <th>Tọa độ (Lat, Lng)</th>
+                                                    <th>Mô tả chi tiết</th>
+                                                    <th style={{ textAlign: 'right' }}>Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {mapData.map((data, index) => (
+                                                    <tr key={data.ID || data.id || data.ID_map || index}>
+                                                        <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                            <img src={data.HinhAnh ? `http://127.0.0.1:8000/storage/${data.HinhAnh}` : "https://via.placeholder.com/80x60?text=No+Image"} alt={data.TenDacSan} style={{ width: '70px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                            <div>
+                                                                <div style={{ fontWeight: 650, color: 'var(--text-main)' }}>{data.TenDacSan || data.TenDiaDiem}</div>
+                                                                <span style={{ fontSize: '0.72rem', color: '#2563EB', backgroundColor: '#EFF6FF', padding: '2px 6px', borderRadius: '4px' }}>{data.PhanLoai || 'Đặc sản'}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td><code style={{ backgroundColor: '#F3F4F6', padding: '3px 6px', borderRadius: '4px' }}>{data.ViDo || 0} , {data.KinhDo || 0}</code></td>
+                                                        <td><div style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={data.MoTa}>{data.MoTa || '---'}</div></td>
+                                                        <td style={{ textAlign: 'right' }}>
+                                                            <button onClick={() => handleEditClick(data)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563EB', marginRight: '0.75rem' }}><Edit size={18} /></button>
+                                                            <button onClick={() => handleDeleteClick(data)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444' }}><Trash2 size={18} /></button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>Không có điểm ghim nào tại khu vực này.</div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 2. MÀN HÌNH FORM THÊM MỚI / CHỈNH SỬA ĐIỂM GHIM */}
             {(viewMode === 'add' || viewMode === 'edit') && (
                 <div className="admin-card view-section">
                     <form onSubmit={handleSaveSubmit}>
                         <div className="admin-form-group">
                             <label>Tên đặc sản / Địa điểm ghim <span style={{ color: '#EF4444' }}>*</span></label>
-                            <input
-                                type="text"
-                                className="admin-form-control"
-                                placeholder="Nhập tên đặc sản (ví dụ: Kẹo Dừa Bến Tre...)"
-                                required
-                            />
+                            <input type="text" name="TenDacSan" value={formValues.TenDacSan} onChange={handleInputChange} className="admin-form-control" placeholder="Nhập tên đặc sản..." required />
                         </div>
 
-                        <div className="admin-form-row">
-                            <div className="admin-form-group">
+                        <div className="admin-form-row" style={{ display: 'flex', gap: '15px', marginBottom: '1rem' }}>
+                            <div className="admin-form-group" style={{ flex: 1 }}>
                                 <label>Tọa độ Vĩ độ (Latitude) <span style={{ color: '#EF4444' }}>*</span></label>
-                                <input
-                                    type="text"
-                                    className="admin-form-control"
-                                    placeholder="Ví dụ: 10.2435"
-                                    required
-                                />
+                                <input type="text" name="ViDo" value={formValues.ViDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 10.2435" required />
                             </div>
-                            <div className="admin-form-group">
+                            <div className="admin-form-group" style={{ flex: 1 }}>
                                 <label>Tọa độ Kinh độ (Longitude) <span style={{ color: '#EF4444' }}>*</span></label>
-                                <input
-                                    type="text"
-                                    className="admin-form-control"
-                                    placeholder="Ví dụ: 106.3752"
-                                    required
-                                />
+                                <input type="text" name="KinhDo" value={formValues.KinhDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 106.3752" required />
                             </div>
                         </div>
 
-                        <div className="admin-form-row">
-                            <div className="admin-form-group">
-                                <label>Thuộc khu vực hành chính</label>
-                                <input
-                                    type="text"
-                                    className="admin-form-control"
-                                    placeholder="Nhập phường/quận/tỉnh..."
-                                />
+                        <div className="admin-form-row" style={{ display: 'flex', gap: '15px', marginBottom: '1rem' }}>
+                            <div className="admin-form-group" style={{ flex: 1 }}>
+                                <label>Tỉnh Thành <span style={{ color: '#EF4444' }}>*</span></label>
+                                <select name="ID_TinhThanh" value={formValues.ID_TinhThanh} onChange={(e) => { handleInputChange(e); setFormValues(p => ({...p, ID_Xa: '', ID_Ap: ''})); }} className="admin-form-control" required>
+                                    <option value="">-- Chọn Tỉnh --</option>
+                                    {TinhThanh.map((t, index) => <option key={t.ID_TinhThanh || index} value={t.ID_TinhThanh}>{t.TenTinhThanh}</option>)}
+                                </select>
                             </div>
-                            <div className="admin-form-group">
-                                <label>Ảnh đại diện đặc sản (URL)</label>
-                                <input
-                                    type="text"
-                                    className="admin-form-control"
-                                    placeholder="Dán link ảnh đại diện..."
-                                />
+                            <div className="admin-form-group" style={{ flex: 1 }}>
+                                <label>Xã / Phường <span style={{ color: '#EF4444' }}>*</span></label>
+                                <select name="ID_Xa" value={formValues.ID_Xa} onChange={(e) => { handleInputChange(e); setFormValues(p => ({...p, ID_Ap: ''})); }} className="admin-form-control" disabled={!formValues.ID_TinhThanh} required>
+                                    <option value="">-- Chọn Xã --</option>
+                                    {FormXa.map((x, index) => <option key={x.ID_Xa || index} value={x.ID_Xa}>{x.Ten_xa}</option>)}
+                                </select>
                             </div>
+                            <div className="admin-form-group" style={{ flex: 1 }}>
+                                <label>Ấp / Khu Phố</label>
+                                <select name="ID_Ap" value={formValues.ID_Ap} onChange={handleInputChange} className="admin-form-control" disabled={!formValues.ID_Xa}> {/* 🌟 ĐÃ SỬA: Bỏ biến lỗi ID_ID_Xa */}
+                                    <option value="">-- Chọn Ấp (Không bắt buộc) --</option>
+                                    {FormAp.map((a, index) => <option key={a.ID_Ap || index} value={a.ID_Ap}>{a.Ten_ap}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label>Phân loại</label>
+                            <input type="text" name="PhanLoai" value={formValues.PhanLoai} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: Đặc sản, Địa danh..." />
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label>Mô tả chi tiết</label>
+                            <textarea name="MoTa" value={formValues.MoTa} onChange={handleInputChange} className="admin-form-control" style={{ height: '100px' }} placeholder="Nhập mô tả về điểm ghim này..."></textarea>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label>Hình ảnh đặc sản</label>
+                            <input type="file" accept="image/*" onChange={(e) => setHinhAnhFile(e.target.files[0])} className="admin-form-control" />
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-                            <button
-                                type="button"
-                                className="filter-btn"
-                                onClick={() => setViewMode('list')}
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                            >
-                                <X size={16} /> Hủy bỏ
-                            </button>
-                            <button
-                                type="submit"
-                                className="btn-action btn-primary"
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                            >
-                                <Save size={16} /> Lưu thông tin
-                            </button>
+                            <button type="button" className="filter-btn" onClick={() => setViewMode('list')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><X size={16} /> Hủy bỏ</button>
+                            <button type="submit" className="btn-action btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={16} /> Lưu thông tin</button>
                         </div>
                     </form>
                 </div>
-            )} */}
+            )}
         </>
     );
 }

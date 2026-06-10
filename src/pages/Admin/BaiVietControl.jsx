@@ -14,6 +14,7 @@ const initialFormState = {
 };
 function BaiVietControler() {
     const [viewMode, setViewMode] = useState('list');
+    const [selectedBlog, setSelectedBlog] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [addFormData, setAddFormData] = useState({
         tittel: "",
@@ -32,7 +33,7 @@ function BaiVietControler() {
         ID_TinhThanh: ""
     });
     const [formErrors, setFormErrors] = useState({});
-    const { data: blogs = [], isLoading: loading, refetch } = useQuery({
+    const { data: blogs = [], refetch } = useQuery({
         queryKey: ['blogs', searchTerm],
         queryFn: async () => {
             const api = searchTerm
@@ -42,7 +43,7 @@ function BaiVietControler() {
             const response = await axiosClient.get(api);
             return response.data?.data?.data || response.data?.data || [];
         },
-        staleTime: 1000,
+        staleTime: 100,
     });
     const { data: TinhThanh = [] } = useQuery({
         queryKey: ['tinhthanh'],
@@ -248,7 +249,7 @@ function BaiVietControler() {
                                                         onClick={() => handleDeleteClick(blog)}>
                                                         <Trash2 size={16} />
                                                     </button>
-                                                    <button className="icon-btn" onClick={() => setViewMode('view')}>
+                                                    <button className="icon-btn" onClick={() => { setSelectedBlog(blog); setViewMode('view'); }}>
                                                         <Eye size={16} />
                                                     </button>
                                                 </td>
@@ -441,20 +442,20 @@ function BaiVietControler() {
                     </div>
                 );
             })()}
-            {/* 3. MÀN HÌNH XEM CHI TIẾT BÀI VIẾT
-            {viewMode === 'view' && (
+            {/* 3. MÀN HÌNH XEM CHI TIẾT BÀI VIẾT */}
+            {viewMode === 'view' && selectedBlog && (
                 <div className="admin-card view-section">
                     <div className="post-detail-layout">
                         <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, color: 'var(--text-muted)' }}>
-                            Tiêu đề bài viết chi tiết
+                            {selectedBlog.tittel}
                         </h2>
 
                         <div className="post-meta-info">
                             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <User size={16} /> Tác giả: --
+                                <User size={16} /> Tác giả: {selectedBlog.user?.HoTen || '--'}
                             </span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Calendar size={16} /> Đăng ngày: --
+                                <Calendar size={16} /> Đăng ngày: {selectedBlog.ngaydang || '--'}
                             </span>
                             <span>
                                 Trạng thái: &nbsp;
@@ -462,8 +463,22 @@ function BaiVietControler() {
                             </span>
                         </div>
 
-                        <div className="post-body-content">
-                            <p style={{ color: 'var(--text-muted)' }}>Không có nội dung cho bài viết này.</p>
+                        {selectedBlog.hinhanh && (
+                            <div style={{ margin: '1.5rem 0' }}>
+                                <img 
+                                    src={`http://127.0.0.1:8000/storage/${selectedBlog.hinhanh}`} 
+                                    alt={selectedBlog.tittel} 
+                                    style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '8px' }} 
+                                />
+                            </div>
+                        )}
+                        <div className="post-body-content" style={{ marginTop: '1.5rem', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                            <b>Tóm tắt :</b>
+                            {selectedBlog.tomtat || 'Không có nội dung cho bài viết này.'}
+                        </div>
+                        <div className="post-body-content" style={{ marginTop: '1.5rem', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                            <b>Nội dung :</b>
+                            {selectedBlog.noidung || 'Không có nội dung cho bài viết này.'}
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '2.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
@@ -477,7 +492,7 @@ function BaiVietControler() {
                             <button
                                 type="button"
                                 className="btn-action btn-primary"
-                                onClick={() => setViewMode('edit')}
+                                onClick={() => handleEditClick(selectedBlog)}
                                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <Edit size={16} /> Chỉnh sửa bài viết
@@ -485,7 +500,7 @@ function BaiVietControler() {
                         </div>
                     </div>
                 </div>
-            )} */}
+            )}
         </>
     );
 }
