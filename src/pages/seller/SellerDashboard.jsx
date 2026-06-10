@@ -147,9 +147,9 @@ export default function SellerDashboard() {
             {/* Mini stats */}
             <div className="seller-stats-row">
               {[
-                { icon: '📦', value: '—', label: 'Sản phẩm' },
-                { icon: '🛒', value: '—', label: 'Đơn hàng' },
-                { icon: '⭐', value: '—', label: 'Đánh giá' },
+                { icon: '📦', value: '0', label: 'Sản phẩm' },
+                { icon: '🛒', value: '0', label: 'Đơn hàng' },
+                { icon: '⭐', value: '0', label: 'Đánh giá' },
               ].map((s, i) => (
                 <div key={i} className="seller-stat-card">
                   <span className="seller-stat-icon">{s.icon}</span>
@@ -163,15 +163,18 @@ export default function SellerDashboard() {
             <div className="seller-shop-card">
 
               {/* Banner */}
-              {shop.baner ? (
-                <img
-                  src={`${BASE_URL}${shop.baner}`}
-                  alt="Banner gian hàng"
-                  className="seller-shop-banner"
-                />
-              ) : (
-                <div className="seller-shop-banner-placeholder">🌴</div>
-              )}
+              <div className="seller-shop-banner-container">
+                {shop.baner ? (
+                  <img
+                    src={`${BASE_URL}${shop.baner}`}
+                    alt="Banner gian hàng"
+                    className="seller-shop-banner"
+                  />
+                ) : (
+                  <div className="seller-shop-banner-placeholder">🌴</div>
+                )}
+                <div className="seller-shop-banner-overlay"></div>
+              </div>
 
               {/* Head: logo + tên + actions */}
               <div className="seller-shop-head">
@@ -206,6 +209,10 @@ export default function SellerDashboard() {
                   <div className="seller-info-item">
                     <span className="seller-info-label">📍 Địa chỉ</span>
                     <span className="seller-info-value">{shop.DiaChi || '—'}</span>
+                  </div>
+                  <div className="seller-info-item">
+                    <span className="seller-info-label">📞 Số điện thoại</span>
+                    <span className="seller-info-value">{shop.SoDienThoai || '—'}</span>
                   </div>
                   <div className="seller-info-item">
                     <span className="seller-info-label">🆔 CCCD</span>

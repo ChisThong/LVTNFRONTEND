@@ -431,9 +431,9 @@
    DASHBOARD PAGE
    ============================================================ */
 .seller-dashboard {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2.5rem 2rem;
+  padding: 6rem 2rem 2.5rem; /* Tăng padding-top để không bị Navbar che */
 }
 
 /* Status banner */
@@ -501,19 +501,30 @@
   margin-bottom: 1.5rem;
 }
 
-/* Banner image */
+/* Banner image wrapper and overlay */
+.seller-shop-banner-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: linear-gradient(135deg, var(--seller-brown) 0%, var(--seller-brown-mid) 100%);
+}
+
 .seller-shop-banner {
   width: 100%;
-  height: 180px;
+  height: 100%;
   object-fit: cover;
   display: block;
-  background: linear-gradient(135deg, var(--seller-brown) 0%, var(--seller-brown-mid) 100%);
+}
+
+.seller-shop-banner-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%);
 }
 
 .seller-shop-banner-placeholder {
   width: 100%;
-  height: 180px;
-  background: linear-gradient(135deg, var(--seller-brown) 0%, var(--seller-brown-mid) 100%);
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -524,59 +535,64 @@
   padding: 0 2rem 1.5rem;
   display: flex;
   align-items: flex-end;
-  gap: 1.25rem;
-  margin-top: -40px;
+  gap: 1.5rem;
+  margin-top: -45px; /* Logo 90px -> 45px đè banner, 45px nằm trên nền trắng */
+  position: relative;
+  z-index: 2;
   flex-wrap: wrap;
 }
 
 .seller-shop-logo {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%; /* Bo góc tròn đẹp */
   border: 4px solid #fff;
   object-fit: cover;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
   background: #fff;
   flex-shrink: 0;
 }
 
 .seller-shop-logo-placeholder {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
   border: 4px solid #fff;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
   background: linear-gradient(135deg, var(--seller-gold) 0%, var(--seller-gold-dark) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 2.2rem;
   flex-shrink: 0;
 }
 
 .seller-shop-name-block {
   flex: 1;
-  padding-top: 0.5rem;
+  padding-top: 0;
+  margin-top: 5px; 
+  padding-bottom: 5px; /* Nâng nhẹ chữ lên để ngang với tâm logo phần nền trắng */
 }
 
 .seller-shop-name {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: var(--seller-brown);
   line-height: 1.2;
 }
 
 .seller-shop-tagline {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--seller-muted);
-  margin-top: 0.2rem;
+  margin-top: 0.25rem;
 }
 
 .seller-shop-actions {
   display: flex;
   gap: 0.6rem;
   flex-wrap: wrap;
-  padding-top: 0.5rem;
+  margin-left: auto; /* Đẩy nút qua phải */
+  padding-bottom: 8px; /* Căn ngang với chữ */
 }
 
 /* Shop detail table */

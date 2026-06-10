@@ -65,8 +65,8 @@ function AdminNavbar() {
                 <NavLink to="/admin/dashboard" className="menu-item">
                     <LayoutDashboard size={20} /> Dashboard hệ thống
                 </NavLink>
-                <NavLink to="/admin/stores" className="menu-item">
-                    <Store size={20} /> Kiểm duyệt gian hàng
+                <NavLink to="/admin/shops" className="menu-item">
+                    <Store size={20} /> Duyệt gian hàng
                 </NavLink>
                 <NavLink to="/admin/orders" className="menu-item">
                     <ShoppingBag size={20} /> Quản lý đơn hàng

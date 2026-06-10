@@ -16,6 +16,7 @@ const IconBack  = () => <svg viewBox="0 0 24 24" width="15" height="15" fill="no
 const IconSave  = () => <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>;
 const IconAlert = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
 const IconCheck = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>;
+const IconPhone = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>;
 
 export default function SellerShopEdit() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function SellerShopEdit() {
 
   const [form, setForm] = useState({
     TenShop: '',
+    SoDienThoai: '',
     DiaChi: '',
     TenNganHang: '',
     SoTaiKhoang: '',
@@ -50,6 +52,7 @@ export default function SellerShopEdit() {
           setShop(s);
           setForm({
             TenShop:     s.TenShop     || '',
+            SoDienThoai: s.SoDienThoai || '',
             DiaChi:      s.DiaChi      || '',
             TenNganHang: s.TenNganHang || '',
             SoTaiKhoang: s.SoTaiKhoang || '',
@@ -85,6 +88,7 @@ export default function SellerShopEdit() {
   const validate = () => {
     const errs = {};
     if (!form.TenShop.trim())     errs.TenShop     = 'Vui lòng nhập tên gian hàng';
+    if (!form.SoDienThoai.trim()) errs.SoDienThoai = 'Vui lòng nhập số điện thoại';
     if (!form.DiaChi.trim())      errs.DiaChi      = 'Vui lòng nhập địa chỉ';
     if (!form.TenNganHang.trim()) errs.TenNganHang = 'Vui lòng nhập tên ngân hàng';
     if (!form.SoTaiKhoang.trim()) errs.SoTaiKhoang = 'Vui lòng nhập số tài khoản';
@@ -199,6 +203,21 @@ export default function SellerShopEdit() {
                   />
                 </div>
                 {errors.TenShop && <span className="seller-field-error">{errors.TenShop}</span>}
+              </div>
+
+              <div className="seller-field span-2">
+                <label>Số điện thoại <span className="req">*</span></label>
+                <div className={`seller-input-wrap ${errors.SoDienThoai ? 'is-invalid' : ''}`}>
+                  <span className="seller-input-icon"><IconPhone /></span>
+                  <input
+                    id="edit-SoDienThoai"
+                    name="SoDienThoai"
+                    value={form.SoDienThoai}
+                    onChange={handleChange}
+                    placeholder="Số điện thoại liên hệ"
+                  />
+                </div>
+                {errors.SoDienThoai && <span className="seller-field-error">{errors.SoDienThoai}</span>}
               </div>
 
               <div className="seller-field span-2">

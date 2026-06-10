@@ -7,6 +7,7 @@ import Dashboard from './pages/Admin/Dashboard';
 import Home from './pages/Home';
 import BanDoControl from './pages/Admin/BanDoControl';
 import BaiVietControler from './pages/Admin/BaiVietControl';
+import AdminShopControl from './pages/Admin/AdminShopControl';
 
 // Seller Pages
 import SellerRegister from './pages/seller/SellerRegister';
@@ -31,6 +32,7 @@ function App() {
         {/* Admin layout route */}
         <Route path="/admin" element={<Admin />}>
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="shops" element={<AdminShopControl />} />
           <Route path="posts" element={<BaiVietControler />} />
           <Route path="regions" element={<BanDoControl />} />
         </Route>
