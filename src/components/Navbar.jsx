@@ -62,21 +62,27 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Fetch user info
-      axiosClient.get('/me')
-        .then(res => {
-          if (res.data && res.data.data) {
-            setUser(res.data.data);
-          }
-        })
-        .catch(err => {
-          console.error("Lỗi lấy thông tin user:", err);
-          // Token hỏng hoặc hết hạn
-          localStorage.removeItem('token');
-        });
-    }
+    const fetchUser = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        axiosClient.get('/me')
+          .then(res => {
+            if (res.data && res.data.data) {
+              setUser(res.data.data);
+            }
+          })
+          .catch(err => {
+            console.error("Lỗi lấy thông tin user:", err);
+            localStorage.removeItem('token');
+          });
+      }
+    };
+
+    fetchUser();
+
+    // Lắng nghe event thay đổi auth từ các component khác
+    window.addEventListener('auth-change', fetchUser);
+    return () => window.removeEventListener('auth-change', fetchUser);
   }, []);
 
   const handleLogout = async () => {
@@ -144,10 +150,18 @@ export default function Navbar() {
             <Link to="/login" className="login-btn">Đăng nhập</Link>
           )}
 
-          <Link to="/seller/register" className="seller-btn">
-            <span>Đăng ký</span>
-            <span>gian hàng</span>
-          </Link>
+          {/* Logic Seller Button */}
+          {user && user.shop ? (
+            <Link to="/seller/dashboard" className="seller-btn">
+              <span>Quản lý</span>
+              <span>gian hàng</span>
+            </Link>
+          ) : (
+            <Link to="/seller/register" className="seller-btn">
+              <span>Đăng ký</span>
+              <span>gian hàng</span>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

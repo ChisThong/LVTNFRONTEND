@@ -1,0 +1,838 @@
+/* ============================================================
+   SELLER.CSS – Gian hàng / Dashboard / Edit Shop
+   NamBộ Specialties Marketplace
+   Tone: Nâu đất · Vàng mật · Xanh rừng
+   ============================================================ */
+
+/* ── Design tokens kế thừa từ auth.css ── */
+:root {
+  --seller-brown:        #3E2205;
+  --seller-brown-mid:    #6B3A1F;
+  --seller-gold:         #D4A373;
+  --seller-gold-dark:    #B87333;
+  --seller-gold-bright:  #c07a1a;
+  --seller-green:        #4A6741;
+  --seller-green-dark:   #2D3E27;
+  --seller-bg:           #F9F5EF;
+  --seller-white:        #FFFFFF;
+  --seller-border:       #E8DFD0;
+  --seller-text:         #1A130F;
+  --seller-muted:        #7A6652;
+  --seller-input-bg:     #F7F4F0;
+  --seller-shadow:       0 4px 24px rgba(62,34,5,0.10);
+  --seller-radius:       16px;
+  --seller-transition:   all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   SELLER PAGE WRAPPER
+   ============================================================ */
+.seller-page {
+  min-height: 100vh;
+  background: var(--seller-bg);
+  font-family: 'Outfit', 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* ============================================================
+   REGISTER PAGE – 2 cột
+   ============================================================ */
+.seller-register-layout {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+/* Cột trái – decorative panel */
+.seller-register-panel {
+  flex: 0 0 38%;
+  background: linear-gradient(160deg, var(--seller-brown) 0%, var(--seller-brown-mid) 45%, #8B5E3C 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.seller-register-panel::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: rgba(212, 163, 115, 0.12);
+  pointer-events: none;
+}
+
+.seller-register-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  left: -60px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  pointer-events: none;
+}
+
+.seller-panel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 1rem;
+  background: rgba(212,163,115,0.25);
+  border: 1px solid rgba(212,163,115,0.5);
+  border-radius: 100px;
+  color: var(--seller-gold);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.75rem;
+}
+
+.seller-panel-title {
+  font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.seller-panel-title span {
+  color: var(--seller-gold);
+}
+
+.seller-panel-desc {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.seller-panel-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.seller-panel-step {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: rgba(255,255,255,0.9);
+  font-size: 0.85rem;
+}
+
+.seller-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--seller-gold);
+  color: var(--seller-brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* Cột phải – form */
+.seller-register-form-col {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2.5rem 3rem;
+  max-width: 700px;
+}
+
+.seller-form-header {
+  margin-bottom: 2rem;
+}
+
+.seller-form-title {
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--seller-brown);
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
+}
+
+.seller-form-subtitle {
+  font-size: 0.85rem;
+  color: var(--seller-muted);
+}
+
+/* ============================================================
+   FORM SECTIONS
+   ============================================================ */
+.seller-form-section {
+  background: var(--seller-white);
+  border-radius: var(--seller-radius);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--seller-shadow);
+  border: 1px solid var(--seller-border);
+}
+
+.seller-section-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--seller-brown-mid);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.seller-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--seller-border);
+}
+
+.seller-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+}
+
+.seller-form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+/* ── Field ── */
+.seller-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.seller-field label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--seller-text);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.seller-field label .req {
+  color: #c62828;
+  margin-left: 2px;
+}
+
+.seller-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--seller-input-bg);
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  transition: var(--seller-transition);
+}
+
+.seller-input-wrap:focus-within {
+  background: #fff;
+  border-color: var(--seller-gold);
+  box-shadow: 0 0 0 4px rgba(212,163,115,0.14);
+}
+
+.seller-input-wrap.is-invalid {
+  border-color: #e57373;
+  background: #fff8f8;
+}
+
+.seller-input-icon {
+  position: absolute;
+  left: 0.9rem;
+  display: flex;
+  align-items: center;
+  color: var(--seller-muted);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.seller-input-wrap:focus-within .seller-input-icon {
+  color: var(--seller-gold-bright);
+}
+
+.seller-input-wrap input,
+.seller-input-wrap textarea,
+.seller-input-wrap select {
+  width: 100%;
+  padding: 0.82rem 1rem 0.82rem 2.7rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  color: var(--seller-text);
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+}
+
+.seller-input-wrap textarea {
+  min-height: 100px;
+  resize: vertical;
+  padding-top: 0.85rem;
+}
+
+.seller-input-wrap input::placeholder,
+.seller-input-wrap textarea::placeholder {
+  color: #c4b9ae;
+}
+
+.seller-field-error {
+  font-size: 0.76rem;
+  color: #d32f2f;
+  padding-left: 0.2rem;
+}
+
+/* ── Upload field ── */
+.seller-upload-area {
+  border: 2px dashed var(--seller-border);
+  border-radius: 12px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--seller-transition);
+  background: var(--seller-input-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.seller-upload-area:hover {
+  border-color: var(--seller-gold);
+  background: #fdf7ef;
+}
+
+.seller-upload-area input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.seller-upload-icon {
+  font-size: 1.75rem;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.seller-upload-label {
+  font-size: 0.82rem;
+  color: var(--seller-muted);
+  font-weight: 500;
+}
+
+.seller-upload-label strong {
+  color: var(--seller-gold-bright);
+  font-weight: 700;
+}
+
+.seller-upload-hint {
+  font-size: 0.74rem;
+  color: #bbb;
+  margin-top: 0.25rem;
+}
+
+.seller-upload-preview {
+  margin-top: 0.75rem;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.seller-upload-preview img {
+  max-width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* ── Submit button ── */
+.seller-submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--seller-brown) 0%, var(--seller-brown-mid) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--seller-transition);
+  box-shadow: 0 4px 18px rgba(62,34,5,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.seller-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--seller-brown-mid) 0%, #9b6030 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(62,34,5,0.38);
+}
+
+.seller-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.seller-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Alert banners ── */
+.seller-alert {
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 500;
+}
+
+.seller-alert-error {
+  background: #fff2f2;
+  border: 1.5px solid #ffc8c8;
+  color: #c62828;
+}
+
+.seller-alert-success {
+  background: #eef7ee;
+  border: 1.5px solid #a5d6a7;
+  color: #2e7d32;
+}
+
+.seller-alert-warning {
+  background: #fff8e1;
+  border: 1.5px solid #ffe082;
+  color: #f57f17;
+}
+
+/* ============================================================
+   DASHBOARD PAGE
+   ============================================================ */
+.seller-dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 2rem 2.5rem; /* Tăng padding-top để không bị Navbar che */
+}
+
+/* Status banner */
+.seller-status-banner {
+  border-radius: var(--seller-radius);
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.seller-status-banner::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+
+.seller-status-banner.cho_duyet {
+  background: linear-gradient(135deg, #8B6914 0%, #b8882a 100%);
+  color: #fff;
+}
+
+.seller-status-banner.da_duyet {
+  background: linear-gradient(135deg, var(--seller-green-dark) 0%, var(--seller-green) 100%);
+  color: #fff;
+}
+
+.seller-status-banner.tu_choi {
+  background: linear-gradient(135deg, #7f1d1d 0%, #c62828 100%);
+  color: #fff;
+}
+
+.seller-status-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.seller-status-text h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+
+.seller-status-text p {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* Shop info card */
+.seller-shop-card {
+  background: var(--seller-white);
+  border-radius: var(--seller-radius);
+  box-shadow: var(--seller-shadow);
+  border: 1px solid var(--seller-border);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+/* Banner image wrapper and overlay */
+.seller-shop-banner-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: linear-gradient(135deg, var(--seller-brown) 0%, var(--seller-brown-mid) 100%);
+}
+
+.seller-shop-banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.seller-shop-banner-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%);
+}
+
+.seller-shop-banner-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+.seller-shop-head {
+  padding: 0 2rem 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-top: -45px; /* Logo 90px -> 45px đè banner, 45px nằm trên nền trắng */
+  position: relative;
+  z-index: 2;
+  flex-wrap: wrap;
+}
+
+.seller-shop-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%; /* Bo góc tròn đẹp */
+  border: 4px solid #fff;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.seller-shop-logo-placeholder {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  background: linear-gradient(135deg, var(--seller-gold) 0%, var(--seller-gold-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+
+.seller-shop-name-block {
+  flex: 1;
+  padding-top: 0;
+  margin-top: 5px; 
+  padding-bottom: 5px; /* Nâng nhẹ chữ lên để ngang với tâm logo phần nền trắng */
+}
+
+.seller-shop-name {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--seller-brown);
+  line-height: 1.2;
+}
+
+.seller-shop-tagline {
+  font-size: 0.9rem;
+  color: var(--seller-muted);
+  margin-top: 0.25rem;
+}
+
+.seller-shop-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-left: auto; /* Đẩy nút qua phải */
+  padding-bottom: 8px; /* Căn ngang với chữ */
+}
+
+/* Shop detail table */
+.seller-shop-body {
+  padding: 0 2rem 2rem;
+}
+
+.seller-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.seller-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.seller-info-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--seller-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.seller-info-value {
+  font-size: 0.95rem;
+  color: var(--seller-text);
+  font-weight: 500;
+}
+
+.seller-info-desc {
+  grid-column: 1 / -1;
+  background: var(--seller-input-bg);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-size: 0.88rem;
+  color: var(--seller-text);
+  line-height: 1.65;
+}
+
+/* ── Status badge pill ── */
+.seller-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.seller-status-pill.cho_duyet {
+  background: #fff8e1;
+  color: #b8882a;
+  border: 1px solid #ffe082;
+}
+
+.seller-status-pill.da_duyet {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.seller-status-pill.tu_choi {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+/* ── Action buttons ── */
+.seller-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--seller-transition);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.seller-btn-primary {
+  background: linear-gradient(135deg, var(--seller-brown) 0%, var(--seller-brown-mid) 100%);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(62,34,5,0.22);
+}
+
+.seller-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(62,34,5,0.3);
+  text-decoration: none;
+  color: #fff;
+}
+
+.seller-btn-outline {
+  background: transparent;
+  border-color: var(--seller-gold);
+  color: var(--seller-gold-bright);
+}
+
+.seller-btn-outline:hover {
+  background: #fdf7ef;
+  border-color: var(--seller-gold-bright);
+  text-decoration: none;
+}
+
+/* Stats mini-cards */
+.seller-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.seller-stat-card {
+  background: var(--seller-white);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--seller-shadow);
+  border: 1px solid var(--seller-border);
+  text-align: center;
+}
+
+.seller-stat-icon { font-size: 1.75rem; display: block; margin-bottom: 0.4rem; }
+.seller-stat-value {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--seller-brown);
+}
+
+.seller-stat-label {
+  font-size: 0.78rem;
+  color: var(--seller-muted);
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+
+/* ============================================================
+   EDIT PAGE
+   ============================================================ */
+.seller-edit-layout {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+}
+
+.seller-edit-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.seller-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--seller-muted);
+  text-decoration: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--seller-border);
+  transition: var(--seller-transition);
+  background: var(--seller-white);
+}
+
+.seller-back-btn:hover {
+  color: var(--seller-brown);
+  border-color: var(--seller-gold);
+  background: #fdf7ef;
+  text-decoration: none;
+}
+
+/* Loading skeleton */
+.seller-skeleton {
+  background: linear-gradient(90deg, #f0e8df 25%, #f9f5ef 50%, #f0e8df 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .seller-register-layout {
+    flex-direction: column;
+  }
+  .seller-register-panel {
+    flex: none;
+    padding: 2rem 1.75rem;
+    min-height: auto;
+  }
+  .seller-register-form-col {
+    padding: 1.75rem 1.5rem;
+    max-width: 100%;
+  }
+  .seller-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .seller-form-grid .span-2 {
+    grid-column: auto;
+  }
+  .seller-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .seller-dashboard,
+  .seller-edit-layout {
+    padding: 1.5rem 1rem;
+  }
+  .seller-stats-row {
+    grid-template-columns: 1fr;
+  }
+  .seller-shop-head {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: -24px;
+  }
+  .seller-register-form-col {
+    padding: 1.25rem 1rem;
+  }
+}
