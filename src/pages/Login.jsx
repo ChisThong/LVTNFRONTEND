@@ -55,25 +55,31 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Submit clicked. Form data:", form);
     setLoading(true);
     setErrors({});
     setGeneralError('');
     setIsUnverified(false);
 
     try {
+      console.log("Sending API request to /auth/login...");
       const res = await axiosClient.post('/auth/login', {
         email: form.email,
         matkhau: form.password,  // field backend là matkhau
       });
+      console.log("API response success:", res.data);
 
       const { access_token, user } = res.data.data ?? res.data;
       localStorage.setItem('token', access_token ?? res.data.token);
+      localStorage.setItem('user', JSON.stringify(user))
 
       // Điều hướng theo role
-      if (user.role?.ID_role === 1 || user.ID_role === 1) navigate('/admin');
+      console.log("Redirecting user role ID:", user.role?.ID_role ?? user.ID_role);
+      if (user.role?.ID_role === 1 || user.ID_role === 1) navigate('/admin/dashboard');
       else if (user.role?.ID_role === 3 || user.ID_role === 3) navigate('/seller/products');
       else navigate('/');
     } catch (err) {
+      console.error("API error caught:", err);
       if (err.response?.status === 403) {
         // Chưa xác thực email
         const emailFromApi = err.response.data?.data?.email ?? form.email;
