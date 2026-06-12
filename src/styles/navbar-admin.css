@@ -50,7 +50,7 @@ body {
     top: 0;
     display: flex;
     flex-direction: column;
-    z-index: 1000;
+    z-index: 90;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
 }
@@ -214,6 +214,8 @@ body {
     padding: 2.5rem;
     max-width: calc(100% - 280px);
     transition: var(--transition);
+    position: relative;
+    z-index: 100;
 }
 
 .admin-title {
@@ -241,8 +243,8 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* --- STAT CARDS --- */
@@ -703,6 +705,74 @@ body {
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
 }
+
+/* --- POPUP MODAL (CLASS NAM) --- */
+.nam-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+.nam-modal-content {
+    background: #FFFFFF;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    position: relative;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nam-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.nam-modal-header h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.nam-modal-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.nam-modal-close:hover {
+    color: #EF4444;
+}
+
+.nam-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.25rem;
+    margin-top: 1.5rem;
+}
+
 
 /* --- POST DETAIL VIEW --- */
 .post-detail-layout {

@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import BanDoControl from './pages/Admin/BanDoControl';
 import BaiVietControler from './pages/Admin/BaiVietControl';
 import AdminShopControl from './pages/Admin/AdminShopControl';
+import NguoiDungControl from './pages/Admin/NguoiDungControl';
 
 // Seller Pages
 import SellerRegister from './pages/seller/SellerRegister';
@@ -35,6 +36,7 @@ function App() {
           <Route path="shops" element={<AdminShopControl />} />
           <Route path="posts" element={<BaiVietControler />} />
           <Route path="regions" element={<BanDoControl />} />
+          <Route path="users" element={<NguoiDungControl />} />
         </Route>
 
         {/* Fallback: mặc định vào login */}
