@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import AdminNavbar from '../../components/AdminNavbar';
+import Sidebar from '../../components/Sidebar';
 import '../../styles/navbar-admin.css';
 
 function Admin() {
     return (
         <div className="admin-wrapper">
-            <AdminNavbar />
+            <Sidebar role="admin" />
             <main className="admin-main">
                 <Outlet />
             </main>

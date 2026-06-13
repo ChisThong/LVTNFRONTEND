@@ -1,15 +1,38 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
 import { getMyShop } from '../../api/shopApi';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Package, ShoppingBag, DollarSign, TrendingUp, Users, Star, ArrowRight } from 'lucide-react';
 import '../../styles/seller.css';
 
 const BASE_URL = 'http://127.0.0.1:8000/storage/';
 
-const IconEdit    = () => <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
-const IconShop    = () => <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
-const IconBox     = () => <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>;
-const IconStar    = () => <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
+/* ── MOCK DATA CHO BIỂU ĐỒ VÀ BẢNG THỐNG KÊ ── */
+const mockRevenue7Days = [
+  { name: 'T2', doanhThu: 1200000 },
+  { name: 'T3', doanhThu: 1500000 },
+  { name: 'T4', doanhThu: 800000 },
+  { name: 'T5', doanhThu: 2200000 },
+  { name: 'T6', doanhThu: 1800000 },
+  { name: 'T7', doanhThu: 2500000 },
+  { name: 'CN', doanhThu: 3100000 },
+];
+
+const mockTopProducts = [
+  { name: 'Dừa Sáp Trà Vinh', daBan: 145 },
+  { name: 'Mật Ong Rừng U Minh', daBan: 112 },
+  { name: 'Kẹo Dừa Bến Tre', daBan: 89 },
+  { name: 'Khô Cá Lóc Đồng', daBan: 76 },
+  { name: 'Mắm Trí Tôn', daBan: 54 },
+];
+
+const mockRecentOrders = [
+  { id: 'DH-001', customer: 'Nguyễn Văn A', product: 'Dừa Sáp Trà Vinh (x2)', total: '300.000₫', status: 'Chờ xác nhận' },
+  { id: 'DH-002', customer: 'Lê Thị B', product: 'Mật Ong Rừng U Minh (x1)', total: '450.000₫', status: 'Đang giao' },
+  { id: 'DH-003', customer: 'Trần Văn C', product: 'Kẹo Dừa Bến Tre (x5)', total: '150.000₫', status: 'Chờ lấy hàng' },
+  { id: 'DH-004', customer: 'Phạm Thị D', product: 'Khô Cá Lóc Đồng (x1)', total: '200.000₫', status: 'Hoàn thành' },
+  { id: 'DH-005', customer: 'Hoàng Văn E', product: 'Mắm Trí Tôn (x2)', total: '180.000₫', status: 'Chờ xác nhận' },
+];
 
 /* ── Trạng thái duyệt config ── */
 const STATUS_CONFIG = {
@@ -27,10 +50,17 @@ const STATUS_CONFIG = {
   },
   tu_choi: {
     label:  'Gian hàng bị từ chối',
-    desc:   'Gian hàng của bạn đã bị từ chối. Vui lòng liên hệ Admin để biết thêm chi tiết.',
+    desc:   'Gian hàng của bạn đã bị từ chối. Vui lòng kiểm tra lại thông tin.',
     icon:   '❌',
     cls:    'tu_choi',
   },
+};
+
+// Formatter cho tiền tệ VNĐ
+const formatCurrency = (value) => {
+  if (value >= 1000000) return (value / 1000000).toFixed(1) + 'Tr';
+  if (value >= 1000) return (value / 1000).toFixed(0) + 'k';
+  return value;
 };
 
 export default function SellerDashboard() {
@@ -55,234 +85,243 @@ export default function SellerDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  /* ── Auto polling (Cách 2) ── */
-  useEffect(() => {
-    let intervalId;
-
-    // Chỉ bật polling nếu trạng thái đang là 'cho_duyet'
-    if (shop && shop.TrangThaiDuyet === 'cho_duyet') {
-      intervalId = setInterval(() => {
-        getMyShop().then(res => {
-          if (res.data?.success) {
-            const newShop = res.data.data;
-            
-            // Nếu có sự thay đổi trạng thái
-            if (newShop.TrangThaiDuyet === 'da_duyet') {
-              alert('🎉 Gian hàng của bạn đã được duyệt!');
-              setShop(newShop);
-              window.dispatchEvent(new Event('auth-change')); // Gọi lại /api/me ở Navbar
-            } else if (newShop.TrangThaiDuyet === 'tu_choi') {
-              alert('❌ Gian hàng của bạn đã bị từ chối!');
-              setShop(newShop);
-            } else {
-              // Vẫn đang chờ duyệt, update ngầm data lỡ có đổi tên/logo
-              setShop(newShop);
-            }
-          }
-        }).catch(err => console.error("Lỗi khi polling shop:", err));
-      }, 30000); // Mỗi 30 giây
-    }
-
-    // Cleanup interval khi unmount hoặc khi trạng thái thay đổi
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [shop?.TrangThaiDuyet]);
-
   const status = shop ? (STATUS_CONFIG[shop.TrangThaiDuyet] || STATUS_CONFIG.cho_duyet) : null;
 
   return (
-    <div className="seller-page">
-      <Navbar />
-      <div className="seller-dashboard">
+    <div style={{ padding: '1.5rem 2rem', fontFamily: 'Inter, sans-serif' }}>
+      
+      {/* ── Loading ── */}
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#8C7B6D' }}>
+          Đang tải thông tin gian hàng...
+        </div>
+      )}
 
-        {/* ── Loading ── */}
-        {loading && (
-          <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--seller-muted)' }}>
-            <div style={{
-              width: 44, height: 44,
-              border: '4px solid #e8dfd0',
-              borderTopColor: 'var(--seller-gold)',
-              borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite',
-              margin: '0 auto 1rem',
-            }} />
-            Đang tải thông tin gian hàng...
-          </div>
-        )}
-
-        {/* ── Error / no shop ── */}
-        {!loading && error && (
-          <div style={{
-            textAlign: 'center', padding: '4rem 2rem',
-            background: 'var(--seller-white)',
-            borderRadius: 'var(--seller-radius)',
-            boxShadow: 'var(--seller-shadow)',
+      {/* ── Lỗi / Chưa có Shop (Dành cho Role 2) ── */}
+      {!loading && error && (
+        <div style={{
+          textAlign: 'center', padding: '4rem 2rem',
+          background: '#fff', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🏪</div>
+          <h2 style={{ color: '#2D241E', marginBottom: '0.5rem' }}>{error}</h2>
+          <p style={{ color: '#8C7B6D', marginBottom: '1.5rem' }}>Mở gian hàng ngay để bắt đầu bán đặc sản Miền Nam!</p>
+          <Link to="/seller/register" style={{
+            background: '#2C3A29', color: '#fff', padding: '0.75rem 1.5rem',
+            borderRadius: '8px', textDecoration: 'none', fontWeight: 600
           }}>
-            <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🏪</div>
-            <h2 style={{ color: 'var(--seller-brown)', marginBottom: '0.5rem' }}>
-              {error}
-            </h2>
-            <p style={{ color: 'var(--seller-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-              Mở gian hàng ngay để bắt đầu bán đặc sản Miền Nam!
-            </p>
-            <Link to="/seller/register" className="seller-btn seller-btn-primary">
-              Đăng ký gian hàng
-            </Link>
-          </div>
-        )}
+            Đăng ký gian hàng ngay
+          </Link>
+        </div>
+      )}
 
-        {/* ── Shop loaded ── */}
-        {!loading && shop && (
-          <>
-            {/* Status banner */}
-            <div className={`seller-status-banner ${status.cls}`}>
-              <span className="seller-status-icon">{status.icon}</span>
-              <div className="seller-status-text">
-                <h2>{status.label}</h2>
-                <p>{status.desc}</p>
+      {/* ── Khi đã có Shop ── */}
+      {!loading && shop && (
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#2C3A29', margin: '0 0 0.5rem 0' }}>Tổng quan gian hàng</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#8C7B6D', fontSize: '0.9rem' }}>
+                <span style={{ fontWeight: 600, color: '#4A5B45' }}>{shop.TenShop}</span>
+                <span>•</span>
+                <span>Loại hình kinh doanh: <strong style={{ color: '#D97706' }}>{shop.LoaiHinhKinhDoanh === 'doanh_nghiep' ? 'Doanh nghiệp' : 'Hộ kinh doanh cá thể'}</strong></span>
               </div>
             </div>
-
-            {/* Mini stats */}
-            <div className="seller-stats-row">
-              {[
-                { icon: '📦', value: '0', label: 'Sản phẩm' },
-                { icon: '🛒', value: '0', label: 'Đơn hàng' },
-                { icon: '⭐', value: '0', label: 'Đánh giá' },
-              ].map((s, i) => (
-                <div key={i} className="seller-stat-card">
-                  <span className="seller-stat-icon">{s.icon}</span>
-                  <div className="seller-stat-value">{s.value}</div>
-                  <div className="seller-stat-label">{s.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Shop card */}
-            <div className="seller-shop-card">
-
-              {/* Banner */}
-              <div className="seller-shop-banner-container">
-                {shop.baner ? (
-                  <img
-                    src={`${BASE_URL}${shop.baner}`}
-                    alt="Banner gian hàng"
-                    className="seller-shop-banner"
-                  />
-                ) : (
-                  <div className="seller-shop-banner-placeholder">🌴</div>
-                )}
-                <div className="seller-shop-banner-overlay"></div>
+            
+            {shop.TrangThaiDuyet === 'da_duyet' ? (
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <Link to="/seller/products" style={{
+                  background: '#fff', color: '#4A5B45', padding: '0.6rem 1.2rem',
+                  borderRadius: '6px', textDecoration: 'none', fontWeight: 600,
+                  display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem',
+                  border: '1.5px solid #4A5B45'
+                }}>
+                  <Package size={16} /> Quản lý sản phẩm
+                </Link>
+                <Link to="/seller/products/create" style={{
+                  background: '#2C3A29', color: '#fff', padding: '0.6rem 1.2rem',
+                  borderRadius: '6px', textDecoration: 'none', fontWeight: 600,
+                  display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem'
+                }}>
+                  <Package size={16} /> Thêm sản phẩm
+                </Link>
               </div>
-
-              {/* Head: logo + tên + actions */}
-              <div className="seller-shop-head">
-                {shop.logo ? (
-                  <img
-                    src={`${BASE_URL}${shop.logo}`}
-                    alt="Logo gian hàng"
-                    className="seller-shop-logo"
-                  />
-                ) : (
-                  <div className="seller-shop-logo-placeholder">🏪</div>
-                )}
-
-                <div className="seller-shop-name-block">
-                  <div className="seller-shop-name">{shop.TenShop}</div>
-                  {shop.Tittle && <div className="seller-shop-tagline">{shop.Tittle}</div>}
-                  <span className={`seller-status-pill ${shop.TrangThaiDuyet}`} style={{ marginTop: '0.5rem', display: 'inline-flex' }}>
-                    {status.icon} {status.label}
-                  </span>
-                </div>
-
-                <div className="seller-shop-actions">
-                  <Link to="/seller/shop/edit" className="seller-btn seller-btn-primary">
-                    <IconEdit /> Chỉnh sửa
-                  </Link>
-                </div>
-              </div>
-
-              {/* Detail info */}
-              <div className="seller-shop-body">
-                <div className="seller-info-grid">
-                  <div className="seller-info-item">
-                    <span className="seller-info-label">📍 Địa chỉ</span>
-                    <span className="seller-info-value">{shop.DiaChi || '—'}</span>
-                  </div>
-                  <div className="seller-info-item">
-                    <span className="seller-info-label">📞 Số điện thoại</span>
-                    <span className="seller-info-value">{shop.SoDienThoai || '—'}</span>
-                  </div>
-                  <div className="seller-info-item">
-                    <span className="seller-info-label">🆔 CCCD</span>
-                    <span className="seller-info-value">{shop.SCCD || '—'}</span>
-                  </div>
-                  <div className="seller-info-item">
-                    <span className="seller-info-label">🏦 Ngân hàng</span>
-                    <span className="seller-info-value">{shop.TenNganHang || '—'}</span>
-                  </div>
-                  <div className="seller-info-item">
-                    <span className="seller-info-label">💳 Số tài khoản</span>
-                    <span className="seller-info-value">{shop.SoTaiKhoang || '—'}</span>
-                  </div>
-                  <div className="seller-info-item">
-                    <span className="seller-info-label">📅 Ngày đăng ký</span>
-                    <span className="seller-info-value">
-                      {shop.NgayDangKy
-                        ? new Date(shop.NgayDangKy).toLocaleDateString('vi-VN')
-                        : '—'}
-                    </span>
-                  </div>
-                  {shop.NgayDuyet && (
-                    <div className="seller-info-item">
-                      <span className="seller-info-label">✅ Ngày duyệt</span>
-                      <span className="seller-info-value">
-                        {new Date(shop.NgayDuyet).toLocaleDateString('vi-VN')}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {shop.GioiThieu && (
-                  <div className="seller-info-desc">
-                    <div style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--seller-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.5rem' }}>
-                      📝 Giới thiệu
-                    </div>
-                    {shop.GioiThieu}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Quick actions */}
-            {shop.TrangThaiDuyet === 'da_duyet' && (
-              <div style={{
-                background: 'var(--seller-white)',
-                borderRadius: 'var(--seller-radius)',
-                padding: '1.5rem',
-                boxShadow: 'var(--seller-shadow)',
-                border: '1px solid var(--seller-border)',
+            ) : (
+              <span style={{ 
+                background: shop.TrangThaiDuyet === 'cho_duyet' ? '#FEF3C7' : '#FEE2E2', 
+                color: shop.TrangThaiDuyet === 'cho_duyet' ? '#B45309' : '#DC2626', 
+                padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: 700, fontSize: '0.9rem',
+                alignSelf: 'center'
               }}>
-                <div className="seller-section-title" style={{ marginBottom: '1rem' }}>
-                  ⚡ Thao tác nhanh
+                {status.icon} {status.label}
+              </span>
+            )}
+          </div>
+
+          {/* Cảnh báo shop chưa duyệt */}
+          {shop.TrangThaiDuyet !== 'da_duyet' && (
+            <div style={{ 
+              background: shop.TrangThaiDuyet === 'cho_duyet' ? '#FFFBEB' : '#FEF2F2', 
+              borderLeft: `4px solid ${shop.TrangThaiDuyet === 'cho_duyet' ? '#F59E0B' : '#EF4444'}`,
+              padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+            }}>
+              <h3 style={{ margin: '0 0 0.5rem 0', color: shop.TrangThaiDuyet === 'cho_duyet' ? '#B45309' : '#991B1B' }}>{status.label}</h3>
+              <p style={{ margin: 0, color: '#4A3B32' }}>{status.desc}</p>
+              {shop.TrangThaiDuyet === 'tu_choi' && shop.LyDoTuChoi && (
+                <div style={{ marginTop: '1rem', background: '#fff', padding: '1rem', borderRadius: '6px', border: '1px solid #FECACA' }}>
+                  <strong style={{ color: '#DC2626' }}>Lý do từ chối:</strong> {shop.LyDoTuChoi}
                 </div>
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  <Link to="/seller/products" className="seller-btn seller-btn-primary">
-                    📦 Quản lý sản phẩm
-                  </Link>
-                  <Link to="/seller/orders" className="seller-btn seller-btn-outline">
-                    🛒 Đơn hàng
-                  </Link>
-                  <Link to="/seller/shop/edit" className="seller-btn seller-btn-outline">
-                    ✏️ Sửa gian hàng
-                  </Link>
+              )}
+            </div>
+          )}
+
+          {/* NẾU ĐÃ DUYỆT THÌ HIỂN THỊ DASHBOARD FULL */}
+          {shop.TrangThaiDuyet === 'da_duyet' && (
+            <>
+              {/* 1. Kpi Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                
+                <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 600 }}>TỔNG SẢN PHẨM</div>
+                    <div style={{ background: '#F4EFEA', padding: '6px', borderRadius: '8px', color: '#4A5B45' }}><Package size={18} /></div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#2D241E' }}>45</div>
+                </div>
+
+                <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 600 }}>CHỜ XỬ LÝ</div>
+                    <div style={{ background: '#FEF3C7', padding: '6px', borderRadius: '8px', color: '#D97706' }}><ShoppingBag size={18} /></div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#2D241E' }}>12</div>
+                </div>
+
+                <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 600 }}>DOANH THU HÔM NAY</div>
+                    <div style={{ background: '#D1FAE5', padding: '6px', borderRadius: '8px', color: '#059669' }}><DollarSign size={18} /></div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#059669' }}>3.2M</div>
+                </div>
+
+                <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 600 }}>DOANH THU THÁNG</div>
+                    <div style={{ background: '#E0F2FE', padding: '6px', borderRadius: '8px', color: '#0284C7' }}><TrendingUp size={18} /></div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#2D241E' }}>45.5M</div>
+                </div>
+
+                <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 600 }}>LƯỢT TRUY CẬP</div>
+                    <div style={{ background: '#F3E8FF', padding: '6px', borderRadius: '8px', color: '#7E22CE' }}><Users size={18} /></div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#2D241E' }}>1,204</div>
+                </div>
+
+                <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 600 }}>ĐÁNH GIÁ</div>
+                    <div style={{ background: '#FEF08A', padding: '6px', borderRadius: '8px', color: '#CA8A04' }}><Star size={18} /></div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#2D241E' }}>4.8/5</div>
+                </div>
+
+              </div>
+
+              {/* 2. Charts Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                {/* Line Chart */}
+                <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: '#2D241E' }}>Doanh thu 7 ngày gần nhất</h3>
+                  <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={mockRevenue7Days}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EAE3DA" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#8C7B6D', fontSize: 12 }} dy={10} />
+                        <YAxis tickFormatter={formatCurrency} axisLine={false} tickLine={false} tick={{ fill: '#8C7B6D', fontSize: 12 }} dx={-10} />
+                        <Tooltip 
+                          formatter={(value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)}
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                        />
+                        <Line type="monotone" dataKey="doanhThu" stroke="#4A5B45" strokeWidth={3} dot={{ r: 4, fill: '#4A5B45', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} name="Doanh thu" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Bar Chart */}
+                <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: '#2D241E' }}>Top 5 sản phẩm bán chạy</h3>
+                  <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={mockTopProducts} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#EAE3DA" />
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#4A3B32', fontSize: 12 }} width={120} />
+                        <Tooltip 
+                          cursor={{ fill: '#F8F5F1' }}
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                        />
+                        <Bar dataKey="daBan" fill="#D2B48C" radius={[0, 4, 4, 0]} barSize={20} name="Đã bán" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </div>
+
+              {/* 3. Tables Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+                <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #EAE3DA', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#2D241E' }}>Đơn hàng mới nhất</h3>
+                    <Link to="/seller/orders" style={{ color: '#4A5B45', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                      Xem tất cả <ArrowRight size={14} />
+                    </Link>
+                  </div>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ padding: '1rem', borderBottom: '2px solid #F4EFEA', color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 700 }}>MÃ ĐƠN</th>
+                          <th style={{ padding: '1rem', borderBottom: '2px solid #F4EFEA', color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 700 }}>KHÁCH HÀNG</th>
+                          <th style={{ padding: '1rem', borderBottom: '2px solid #F4EFEA', color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 700 }}>SẢN PHẨM</th>
+                          <th style={{ padding: '1rem', borderBottom: '2px solid #F4EFEA', color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 700 }}>TỔNG TIỀN</th>
+                          <th style={{ padding: '1rem', borderBottom: '2px solid #F4EFEA', color: '#8C7B6D', fontSize: '0.85rem', fontWeight: 700 }}>TRẠNG THÁI</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {mockRecentOrders.map((order, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid #F4EFEA' }}>
+                            <td style={{ padding: '1rem', fontWeight: 600, color: '#4A5B45' }}>{order.id}</td>
+                            <td style={{ padding: '1rem', color: '#2D241E' }}>{order.customer}</td>
+                            <td style={{ padding: '1rem', color: '#4A3B32', fontSize: '0.9rem' }}>{order.product}</td>
+                            <td style={{ padding: '1rem', fontWeight: 700, color: '#2D241E' }}>{order.total}</td>
+                            <td style={{ padding: '1rem' }}>
+                              <span style={{ 
+                                background: order.status === 'Chờ xác nhận' ? '#FEF3C7' : order.status === 'Hoàn thành' ? '#D1FAE5' : '#E0F2FE',
+                                color: order.status === 'Chờ xác nhận' ? '#D97706' : order.status === 'Hoàn thành' ? '#059669' : '#0284C7',
+                                padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600
+                              }}>
+                                {order.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+        </div>
+      )}
     </div>
   );
 }
