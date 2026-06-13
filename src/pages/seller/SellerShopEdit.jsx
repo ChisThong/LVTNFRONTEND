@@ -36,6 +36,7 @@ export default function SellerShopEdit() {
     SoTaiKhoang: '',
     Tittle: '',
     GioiThieu: '',
+    LoaiHinhKinhDoanh: 'ho_kinh_doanh',
   });
 
   const [logoFile,      setLogoFile]      = useState(null);
@@ -58,6 +59,7 @@ export default function SellerShopEdit() {
             SoTaiKhoang: s.SoTaiKhoang || '',
             Tittle:      s.Tittle      || '',
             GioiThieu:   s.GioiThieu   || '',
+            LoaiHinhKinhDoanh: s.LoaiHinhKinhDoanh || 'ho_kinh_doanh',
           });
           if (s.logo)  setLogoPreview(`${BASE_URL}${s.logo}`);
           if (s.baner) setBanerPreview(`${BASE_URL}${s.baner}`);
@@ -127,49 +129,79 @@ export default function SellerShopEdit() {
     }
   };
 
-  /* ── Loading skeleton ── */
   if (loading) {
     return (
-      <div className="seller-page">
-        <Navbar />
-        <div className="seller-edit-layout">
-          <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--seller-muted)' }}>
-            <div style={{
-              width: 44, height: 44,
-              border: '4px solid #e8dfd0',
-              borderTopColor: 'var(--seller-gold)',
-              borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite',
-              margin: '0 auto 1rem',
-            }} />
-            Đang tải thông tin...
-          </div>
-        </div>
+      <div style={{ padding: '2rem', textAlign: 'center', color: '#8C7B6D' }}>
+        <div style={{
+          width: 44, height: 44,
+          border: '4px solid #e8dfd0',
+          borderTopColor: '#2C3A29',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+          margin: '0 auto 1rem',
+        }} />
+        Đang tải thông tin...
       </div>
     );
   }
 
   return (
-    <div className="seller-page">
-      <Navbar />
-      <div className="seller-edit-layout">
+    <div style={{ padding: '1.5rem 2rem', fontFamily: 'Inter, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
+      
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.55rem', fontWeight: 800, color: '#2C3A29', margin: 0 }}>
+            Thông tin cửa hàng
+          </h1>
+          <p style={{ fontSize: '0.9rem', color: '#8C7B6D', margin: '0.2rem 0 0 0' }}>
+            Quản lý thông tin hồ sơ để bảo vệ tài khoản của bạn
+          </p>
+        </div>
+        <Link to="/seller/dashboard" style={{
+          display: 'flex', alignItems: 'center', gap: '6px', color: '#4A5B45', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem'
+        }}>
+          <IconBack /> Quay lại
+        </Link>
+      </div>
 
-        {/* ── Header ── */}
-        <div className="seller-edit-header">
-          <Link to="/seller/dashboard" className="seller-back-btn">
-            <IconBack /> Quay lại Dashboard
-          </Link>
-          <div>
-            <h1 style={{ fontSize: '1.55rem', fontWeight: 900, color: 'var(--seller-brown)', marginBottom: '0.1rem' }}>
-              Chỉnh sửa Gian hàng
-            </h1>
-            {shop?.TenShop && (
-              <p style={{ fontSize: '0.85rem', color: 'var(--seller-muted)' }}>
-                {shop.TenShop}
-              </p>
-            )}
+      {/* ── Shop Info Card (Top) ── */}
+      <div style={{
+        background: '#fff', borderRadius: '12px', overflow: 'hidden',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)', marginBottom: '2rem', border: '1px solid #EAE3DA'
+      }}>
+        {/* Banner */}
+        <div style={{
+          height: '160px', width: '100%',
+          background: banerPreview ? `url(${banerPreview}) center/cover no-repeat` : '#EAE3DA',
+          position: 'relative'
+        }}>
+          {!banerPreview && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#8C7B6D' }}>Chưa có ảnh bìa</div>}
+        </div>
+        
+        {/* Logo & Info */}
+        <div style={{ padding: '0 2rem 1.5rem 2rem', display: 'flex', alignItems: 'flex-end', marginTop: '-40px' }}>
+          <div style={{
+            width: '100px', height: '100px', borderRadius: '50%', background: '#fff',
+            padding: '4px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', position: 'relative', zIndex: 2
+          }}>
+            <div style={{
+              width: '100%', height: '100%', borderRadius: '50%',
+              background: logoPreview ? `url(${logoPreview}) center/cover no-repeat` : '#F4EFEA',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8C7B6D', fontSize: '2rem'
+            }}>
+              {!logoPreview && '🏪'}
+            </div>
+          </div>
+          
+          <div style={{ marginLeft: '1.5rem', paddingBottom: '0.5rem' }}>
+            <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#2D241E', fontWeight: 800 }}>{shop?.TenShop || 'Tên cửa hàng'}</h2>
+            <div style={{ color: '#8C7B6D', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+              {shop?.Tittle || 'Chưa có tiêu đề'}
+            </div>
           </div>
         </div>
+      </div>
 
         {/* ── Alerts ── */}
         {apiErr && (
@@ -185,82 +217,74 @@ export default function SellerShopEdit() {
 
         <form onSubmit={handleSubmit} noValidate>
 
-          {/* ── Thông tin gian hàng ── */}
-          <div className="seller-form-section">
-            <div className="seller-section-title">🏪 Thông tin gian hàng</div>
-            <div className="seller-form-grid">
-
-              <div className="seller-field span-2">
-                <label>Tên gian hàng <span className="req">*</span></label>
-                <div className={`seller-input-wrap ${errors.TenShop ? 'is-invalid' : ''}`}>
-                  <span className="seller-input-icon"><IconShop /></span>
-                  <input
-                    id="edit-TenShop"
-                    name="TenShop"
-                    value={form.TenShop}
-                    onChange={handleChange}
-                    placeholder="Tên gian hàng của bạn"
-                  />
+          <div style={{
+            background: '#fff', borderRadius: '12px', padding: '2rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #EAE3DA', marginBottom: '2rem'
+          }}>
+            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.2rem', color: '#2C3A29', borderBottom: '2px solid #F4EFEA', paddingBottom: '0.75rem' }}>
+              Thông tin cơ bản
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
+              
+              {/* Cột 1 */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="seller-field">
+                  <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Tên cửa hàng <span style={{color:'#DC2626'}}>*</span></label>
+                  <div className={`seller-input-wrap ${errors.TenShop ? 'is-invalid' : ''}`} style={{ background: '#F8F5F1', borderRadius: '8px' }}>
+                    <span className="seller-input-icon"><IconShop /></span>
+                    <input id="edit-TenShop" name="TenShop" value={form.TenShop} onChange={handleChange} placeholder="Tên cửa hàng của bạn" style={{ background: 'transparent' }} />
+                  </div>
+                  {errors.TenShop && <span style={{ color: '#DC2626', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.TenShop}</span>}
                 </div>
-                {errors.TenShop && <span className="seller-field-error">{errors.TenShop}</span>}
+
+                <div className="seller-field">
+                  <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Tiêu đề gian hàng <span style={{color:'#DC2626'}}>*</span></label>
+                  <div className={`seller-input-wrap ${errors.Tittle ? 'is-invalid' : ''}`} style={{ background: '#F8F5F1', borderRadius: '8px' }}>
+                    <span className="seller-input-icon"><IconText /></span>
+                    <input id="edit-Tittle" name="Tittle" value={form.Tittle} onChange={handleChange} placeholder="Slogan hoặc tiêu đề ngắn gọn" style={{ background: 'transparent' }} />
+                  </div>
+                  {errors.Tittle && <span style={{ color: '#DC2626', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.Tittle}</span>}
+                </div>
+
+                <div className="seller-field">
+                  <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Loại hình kinh doanh <span style={{color:'#DC2626'}}>*</span></label>
+                  <div className="seller-input-wrap" style={{ background: '#F8F5F1', borderRadius: '8px' }}>
+                    <span className="seller-input-icon"><IconInfo /></span>
+                    <select id="edit-LoaiHinhKinhDoanh" name="LoaiHinhKinhDoanh" value={form.LoaiHinhKinhDoanh} onChange={handleChange} style={{ width: '100%', padding: '0.8rem 1rem 0.8rem 2.8rem', border: 'none', background: 'transparent', outline: 'none', color: '#4A3B32' }}>
+                      <option value="ho_kinh_doanh">Hộ kinh doanh cá thể</option>
+                      <option value="doanh_nghiep">Doanh nghiệp</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="seller-field">
+                  <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Số điện thoại <span style={{color:'#DC2626'}}>*</span></label>
+                  <div className={`seller-input-wrap ${errors.SoDienThoai ? 'is-invalid' : ''}`} style={{ background: '#F8F5F1', borderRadius: '8px' }}>
+                    <span className="seller-input-icon"><IconPhone /></span>
+                    <input id="edit-SoDienThoai" name="SoDienThoai" value={form.SoDienThoai} onChange={handleChange} placeholder="Số điện thoại liên hệ" style={{ background: 'transparent' }} />
+                  </div>
+                  {errors.SoDienThoai && <span style={{ color: '#DC2626', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.SoDienThoai}</span>}
+                </div>
               </div>
 
-              <div className="seller-field span-2">
-                <label>Số điện thoại <span className="req">*</span></label>
-                <div className={`seller-input-wrap ${errors.SoDienThoai ? 'is-invalid' : ''}`}>
-                  <span className="seller-input-icon"><IconPhone /></span>
-                  <input
-                    id="edit-SoDienThoai"
-                    name="SoDienThoai"
-                    value={form.SoDienThoai}
-                    onChange={handleChange}
-                    placeholder="Số điện thoại liên hệ"
-                  />
+              {/* Cột 2 */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="seller-field">
+                  <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Địa chỉ <span style={{color:'#DC2626'}}>*</span></label>
+                  <div className={`seller-input-wrap ${errors.DiaChi ? 'is-invalid' : ''}`} style={{ background: '#F8F5F1', borderRadius: '8px' }}>
+                    <span className="seller-input-icon"><IconMap /></span>
+                    <input id="edit-DiaChi" name="DiaChi" value={form.DiaChi} onChange={handleChange} placeholder="Địa chỉ kinh doanh" style={{ background: 'transparent' }} />
+                  </div>
+                  {errors.DiaChi && <span style={{ color: '#DC2626', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.DiaChi}</span>}
                 </div>
-                {errors.SoDienThoai && <span className="seller-field-error">{errors.SoDienThoai}</span>}
-              </div>
 
-              <div className="seller-field span-2">
-                <label>Địa chỉ <span className="req">*</span></label>
-                <div className={`seller-input-wrap ${errors.DiaChi ? 'is-invalid' : ''}`}>
-                  <span className="seller-input-icon"><IconMap /></span>
-                  <input
-                    id="edit-DiaChi"
-                    name="DiaChi"
-                    value={form.DiaChi}
-                    onChange={handleChange}
-                    placeholder="Địa chỉ kinh doanh"
-                  />
-                </div>
-                {errors.DiaChi && <span className="seller-field-error">{errors.DiaChi}</span>}
-              </div>
-
-              <div className="seller-field span-2">
-                <label>Tiêu đề gian hàng <span className="req">*</span></label>
-                <div className={`seller-input-wrap ${errors.Tittle ? 'is-invalid' : ''}`}>
-                  <span className="seller-input-icon"><IconText /></span>
-                  <input
-                    id="edit-Tittle"
-                    name="Tittle"
-                    value={form.Tittle}
-                    onChange={handleChange}
-                    placeholder="Slogan hoặc tiêu đề ngắn gọn"
-                  />
-                </div>
-                {errors.Tittle && <span className="seller-field-error">{errors.Tittle}</span>}
-              </div>
-
-              <div className="seller-field span-2">
-                <label>Giới thiệu</label>
-                <div className="seller-input-wrap">
-                  <span className="seller-input-icon" style={{ top: '1rem', transform: 'none' }}><IconInfo /></span>
-                  <textarea
-                    id="edit-GioiThieu"
-                    name="GioiThieu"
-                    value={form.GioiThieu}
-                    onChange={handleChange}
-                    placeholder="Mô tả về gian hàng, sản phẩm bạn cung cấp..."
-                  />
+                <div className="seller-field" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Giới thiệu</label>
+                  <div className="seller-input-wrap" style={{ background: '#F8F5F1', borderRadius: '8px', flex: 1 }}>
+                    <span className="seller-input-icon" style={{ top: '1rem', transform: 'none' }}><IconInfo /></span>
+                    <textarea id="edit-GioiThieu" name="GioiThieu" value={form.GioiThieu} onChange={handleChange} placeholder="Mô tả về gian hàng, sản phẩm bạn cung cấp..." style={{ background: 'transparent', height: '100%', minHeight: '100px' }} />
+                  </div>
                 </div>
               </div>
 
@@ -268,113 +292,85 @@ export default function SellerShopEdit() {
           </div>
 
           {/* ── Tài khoản ngân hàng ── */}
-          <div className="seller-form-section">
-            <div className="seller-section-title">🏦 Tài khoản ngân hàng</div>
-            <div className="seller-form-grid">
+          <div style={{
+            background: '#fff', borderRadius: '12px', padding: '2rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #EAE3DA', marginBottom: '2rem'
+          }}>
+            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.2rem', color: '#2C3A29', borderBottom: '2px solid #F4EFEA', paddingBottom: '0.75rem' }}>
+              Tài khoản ngân hàng
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
 
               <div className="seller-field">
-                <label>Tên ngân hàng <span className="req">*</span></label>
-                <div className={`seller-input-wrap ${errors.TenNganHang ? 'is-invalid' : ''}`}>
+                <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Tên ngân hàng <span style={{color:'#DC2626'}}>*</span></label>
+                <div className={`seller-input-wrap ${errors.TenNganHang ? 'is-invalid' : ''}`} style={{ background: '#F8F5F1', borderRadius: '8px' }}>
                   <span className="seller-input-icon"><IconBank /></span>
-                  <input
-                    id="edit-TenNganHang"
-                    name="TenNganHang"
-                    value={form.TenNganHang}
-                    onChange={handleChange}
-                    placeholder="Vietcombank, Techcombank..."
-                  />
+                  <input id="edit-TenNganHang" name="TenNganHang" value={form.TenNganHang} onChange={handleChange} placeholder="Vietcombank, Techcombank..." style={{ background: 'transparent' }} />
                 </div>
-                {errors.TenNganHang && <span className="seller-field-error">{errors.TenNganHang}</span>}
+                {errors.TenNganHang && <span style={{ color: '#DC2626', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.TenNganHang}</span>}
               </div>
 
               <div className="seller-field">
-                <label>Số tài khoản <span className="req">*</span></label>
-                <div className={`seller-input-wrap ${errors.SoTaiKhoang ? 'is-invalid' : ''}`}>
+                <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Số tài khoản <span style={{color:'#DC2626'}}>*</span></label>
+                <div className={`seller-input-wrap ${errors.SoTaiKhoang ? 'is-invalid' : ''}`} style={{ background: '#F8F5F1', borderRadius: '8px' }}>
                   <span className="seller-input-icon"><IconCard /></span>
-                  <input
-                    id="edit-SoTaiKhoang"
-                    name="SoTaiKhoang"
-                    value={form.SoTaiKhoang}
-                    onChange={handleChange}
-                    placeholder="Số tài khoản thụ hưởng"
-                  />
+                  <input id="edit-SoTaiKhoang" name="SoTaiKhoang" value={form.SoTaiKhoang} onChange={handleChange} placeholder="Số tài khoản thụ hưởng" style={{ background: 'transparent' }} />
                 </div>
-                {errors.SoTaiKhoang && <span className="seller-field-error">{errors.SoTaiKhoang}</span>}
+                {errors.SoTaiKhoang && <span style={{ color: '#DC2626', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.SoTaiKhoang}</span>}
               </div>
 
             </div>
           </div>
 
           {/* ── Hình ảnh ── */}
-          <div className="seller-form-section">
-            <div className="seller-section-title">🖼️ Hình ảnh gian hàng</div>
-            <div className="seller-form-grid">
+          <div style={{
+            background: '#fff', borderRadius: '12px', padding: '2rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: '1px solid #EAE3DA', marginBottom: '2rem'
+          }}>
+            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.2rem', color: '#2C3A29', borderBottom: '2px solid #F4EFEA', paddingBottom: '0.75rem' }}>
+              Tải lên hình ảnh
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
 
               <div className="seller-field">
-                <label>Logo gian hàng</label>
-                <div className="seller-upload-area">
-                  <input
-                    id="edit-logo"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                  />
+                <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Logo gian hàng</label>
+                <div className="seller-upload-area" style={{ background: '#F8F5F1', borderRadius: '8px', border: '2px dashed #D2B48C', padding: '1.5rem' }}>
+                  <input id="edit-logo" type="file" accept="image/*" onChange={handleLogoChange} />
                   {logoPreview ? (
-                    <div className="seller-upload-preview">
-                      <img src={logoPreview} alt="Logo" />
+                    <div className="seller-upload-preview" style={{ height: '120px' }}>
+                      <img src={logoPreview} alt="Logo" style={{ height: '100%', objectFit: 'contain' }} />
                     </div>
                   ) : (
                     <>
-                      <span className="seller-upload-icon">🏪</span>
-                      <div className="seller-upload-label">
-                        <strong>Chọn ảnh mới</strong> hoặc kéo thả
-                      </div>
-                      <div className="seller-upload-hint">Giữ nguyên nếu không muốn thay đổi</div>
+                      <span className="seller-upload-icon" style={{ fontSize: '2rem', color: '#D2B48C' }}>🏪</span>
+                      <div className="seller-upload-label" style={{ color: '#4A3B32' }}><strong>Chọn ảnh mới</strong></div>
+                      <div className="seller-upload-hint">Tỉ lệ 1:1, tối đa 2MB</div>
                     </>
                   )}
                 </div>
                 {logoPreview && (
-                  <button
-                    type="button"
-                    onClick={() => { setLogoFile(null); setLogoPreview(null); }}
-                    style={{ fontSize: '0.75rem', color: '#c62828', background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem 0', marginTop: '0.25rem' }}
-                  >
-                    ✕ Xóa ảnh
-                  </button>
+                  <button type="button" onClick={() => { setLogoFile(null); setLogoPreview(null); }} style={{ fontSize: '0.85rem', color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem 0' }}>✕ Xóa ảnh chọn</button>
                 )}
               </div>
 
               <div className="seller-field">
-                <label>Banner gian hàng</label>
-                <div className="seller-upload-area">
-                  <input
-                    id="edit-baner"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleBanerChange}
-                  />
+                <label style={{ color: '#4A3B32', fontWeight: 600, marginBottom: '0.5rem', display: 'block', fontSize: '0.9rem' }}>Ảnh bìa (Banner)</label>
+                <div className="seller-upload-area" style={{ background: '#F8F5F1', borderRadius: '8px', border: '2px dashed #D2B48C', padding: '1.5rem' }}>
+                  <input id="edit-baner" type="file" accept="image/*" onChange={handleBanerChange} />
                   {banerPreview ? (
-                    <div className="seller-upload-preview">
-                      <img src={banerPreview} alt="Banner" />
+                    <div className="seller-upload-preview" style={{ height: '120px' }}>
+                      <img src={banerPreview} alt="Banner" style={{ height: '100%', objectFit: 'cover' }} />
                     </div>
                   ) : (
                     <>
-                      <span className="seller-upload-icon">🎨</span>
-                      <div className="seller-upload-label">
-                        <strong>Chọn ảnh mới</strong> hoặc kéo thả
-                      </div>
-                      <div className="seller-upload-hint">Giữ nguyên nếu không muốn thay đổi</div>
+                      <span className="seller-upload-icon" style={{ fontSize: '2rem', color: '#D2B48C' }}>🖼️</span>
+                      <div className="seller-upload-label" style={{ color: '#4A3B32' }}><strong>Chọn ảnh mới</strong></div>
+                      <div className="seller-upload-hint">Tỉ lệ 16:9, tối đa 5MB</div>
                     </>
                   )}
                 </div>
                 {banerPreview && (
-                  <button
-                    type="button"
-                    onClick={() => { setBanerFile(null); setBanerPreview(null); }}
-                    style={{ fontSize: '0.75rem', color: '#c62828', background: 'none', border: 'none', cursor: 'pointer', padding: '0.2rem 0', marginTop: '0.25rem' }}
-                  >
-                    ✕ Xóa ảnh
-                  </button>
+                  <button type="button" onClick={() => { setBanerFile(null); setBanerPreview(null); }} style={{ fontSize: '0.85rem', color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem 0' }}>✕ Xóa ảnh chọn</button>
                 )}
               </div>
 
@@ -382,37 +378,38 @@ export default function SellerShopEdit() {
           </div>
 
           {/* ── Actions ── */}
-          <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+            <Link to="/seller/dashboard" style={{
+              padding: '0.85rem 2rem', background: '#F4EFEA', color: '#4A3B32', borderRadius: '8px',
+              textDecoration: 'none', fontWeight: 600, fontSize: '0.95rem'
+            }}>
+              Hủy
+            </Link>
             <button
               id="edit-submit"
               type="submit"
-              className="seller-submit-btn"
               disabled={saving}
-              style={{ flex: 1 }}
+              style={{
+                padding: '0.85rem 2.5rem', background: '#2C3A29', color: '#fff', borderRadius: '8px',
+                border: 'none', fontWeight: 600, fontSize: '0.95rem', cursor: saving ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px', opacity: saving ? 0.8 : 1
+              }}
             >
               {saving ? (
                 <>
                   <span style={{
-                    width: 16, height: 16,
-                    border: '2.5px solid rgba(255,255,255,0.4)',
-                    borderTopColor: '#fff',
-                    borderRadius: '50%',
-                    animation: 'spin 0.7s linear infinite',
-                    display: 'inline-block'
+                    width: 16, height: 16, border: '2.5px solid rgba(255,255,255,0.4)',
+                    borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block'
                   }} />
                   Đang lưu...
                 </>
               ) : (
-                <><IconSave /> Lưu thay đổi</>
+                <><IconSave /> Lưu Thông Tin</>
               )}
             </button>
-            <Link to="/seller/dashboard" className="seller-btn seller-btn-outline" style={{ padding: '0.9rem 1.5rem' }}>
-              Hủy
-            </Link>
           </div>
 
         </form>
       </div>
-    </div>
   );
 }

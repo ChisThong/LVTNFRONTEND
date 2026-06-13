@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
-import { Search, Eye, Trash2, Check, X } from 'lucide-react';
+import { Search, Eye, Trash2, Check, X, Package, ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react';
 import '../../styles/navbar-admin.css';
+
+const BASE_URL = 'http://127.0.0.1:8000/storage/';
+
+const formatPrice = (price) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 function AdminShopControl() {
     const [shops, setShops] = useState([]);
@@ -17,6 +22,14 @@ function AdminShopControl() {
 
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [viewShopData, setViewShopData] = useState(null);
+
+    // ── Modal xem sản phẩm ──
+    const [productsModalOpen, setProductsModalOpen] = useState(false);
+    const [productsShop, setProductsShop] = useState(null);      // {ID_Shop, TenShop}
+    const [products, setProducts] = useState([]);
+    const [productsMeta, setProductsMeta] = useState(null);      // pagination meta
+    const [productsPage, setProductsPage] = useState(1);
+    const [productsLoading, setProductsLoading] = useState(false);
 
     const fetchShops = async () => {
         setLoading(true);
@@ -64,6 +77,21 @@ function AdminShopControl() {
         }
     };
 
+    const handleToggleStatus = async (id, currentStatus) => {
+        const actionText = currentStatus === 1 ? 'KHÓA' : 'MỞ LẠI';
+        if (!window.confirm(`Bạn có chắc muốn ${actionText} gian hàng này không?`)) return;
+        try {
+            const res = await axiosClient.patch(`/admin/shops/${id}/toggle-status`);
+            if (res.data && res.data.success) {
+                fetchShops();
+                // Optionally show a toast or alert
+                // alert(res.data.message);
+            }
+        } catch (error) {
+            alert(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
+        }
+    };
+
     const openRejectModal = (id) => {
         setSelectedShopId(id);
         setLyDoTuChoi('');
@@ -84,6 +112,47 @@ function AdminShopControl() {
     const closeViewModal = () => {
         setViewModalOpen(false);
         setViewShopData(null);
+    };
+
+    // ── Mở modal sản phẩm ──
+    const openProductsModal = async (shop, page = 1) => {
+        setProductsShop({ ID_Shop: shop.ID_Shop, TenShop: shop.TenShop });
+        setProductsPage(page);
+        setProductsModalOpen(true);
+        setProductsLoading(true);
+        setProducts([]);
+        setProductsMeta(null);
+        try {
+            const res = await axiosClient.get(`/admin/shops/${shop.ID_Shop}/products?per_page=12&page=${page}`);
+            if (res.data?.success) {
+                const paginatedData = res.data.data;
+                setProducts(paginatedData.data || []);
+                setProductsMeta({
+                    current_page: paginatedData.current_page,
+                    last_page: paginatedData.last_page,
+                    total: paginatedData.total,
+                    per_page: paginatedData.per_page,
+                });
+            }
+        } catch (err) {
+            console.error('Lỗi tải sản phẩm shop:', err);
+        } finally {
+            setProductsLoading(false);
+        }
+    };
+
+    const closeProductsModal = () => {
+        setProductsModalOpen(false);
+        setProductsShop(null);
+        setProducts([]);
+        setProductsMeta(null);
+        setProductsPage(1);
+    };
+
+    const handleProductsPageChange = (newPage) => {
+        if (!productsShop) return;
+        setProductsPage(newPage);
+        openProductsModal(productsShop, newPage);
     };
 
     const handleRejectSubmit = async (e) => {
@@ -118,6 +187,29 @@ function AdminShopControl() {
         }
     };
 
+    const getProductStatusBadge = (trangThai) => {
+        if (parseInt(trangThai) === 1) {
+            return (
+                <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem',
+                    fontWeight: 700, background: '#D1FAE5', color: '#065F46'
+                }}>
+                    Đang bán
+                </span>
+            );
+        }
+        return (
+            <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem',
+                fontWeight: 700, background: '#F3F4F6', color: '#6B7280'
+            }}>
+                Ngừng bán
+            </span>
+        );
+    };
+
     return (
         <div className="view-section" style={{ position: 'relative' }}>
             <div style={{ marginBottom: '2rem' }}>
@@ -138,34 +230,24 @@ function AdminShopControl() {
                 </div>
 
                 <div className="filter-group">
-                    <button 
-                        className={`filter-btn ${filterStatus === '' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('')}
-                        style={filterStatus === '' ? { background: '#1C1917', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' } : { background: '#F4EFEA', color: '#4A3B32', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' }}
-                    >
-                        Tất cả
-                    </button>
-                    <button 
-                        className={`filter-btn ${filterStatus === 'cho_duyet' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('cho_duyet')}
-                        style={filterStatus === 'cho_duyet' ? { background: '#1C1917', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' } : { background: '#F4EFEA', color: '#4A3B32', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' }}
-                    >
-                        Chờ duyệt
-                    </button>
-                    <button 
-                        className={`filter-btn ${filterStatus === 'da_duyet' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('da_duyet')}
-                        style={filterStatus === 'da_duyet' ? { background: '#1C1917', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' } : { background: '#F4EFEA', color: '#4A3B32', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' }}
-                    >
-                        Đã duyệt
-                    </button>
-                    <button 
-                        className={`filter-btn ${filterStatus === 'tu_choi' ? 'active' : ''}`}
-                        onClick={() => setFilterStatus('tu_choi')}
-                        style={filterStatus === 'tu_choi' ? { background: '#1C1917', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' } : { background: '#F4EFEA', color: '#4A3B32', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' }}
-                    >
-                        Từ chối
-                    </button>
+                    {[
+                        { value: '', label: 'Tất cả' },
+                        { value: 'cho_duyet', label: 'Chờ duyệt' },
+                        { value: 'da_duyet', label: 'Đã duyệt' },
+                        { value: 'tu_choi', label: 'Từ chối' },
+                    ].map(btn => (
+                        <button
+                            key={btn.value}
+                            className={`filter-btn ${filterStatus === btn.value ? 'active' : ''}`}
+                            onClick={() => setFilterStatus(btn.value)}
+                            style={filterStatus === btn.value
+                                ? { background: '#1C1917', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' }
+                                : { background: '#F4EFEA', color: '#4A3B32', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px' }
+                            }
+                        >
+                            {btn.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -181,14 +263,15 @@ function AdminShopControl() {
                                     <th style={{ background: '#F8F5F1', color: '#8C7B6D', padding: '1.5rem 1rem', borderBottom: '2px solid #EAE3DA', fontSize: '0.85rem' }}>ĐẠI DIỆN</th>
                                     <th style={{ background: '#F8F5F1', color: '#8C7B6D', padding: '1.5rem 1rem', borderBottom: '2px solid #EAE3DA', fontSize: '0.85rem' }}>THÔNG TIN LIÊN HỆ</th>
                                     <th style={{ background: '#F8F5F1', color: '#8C7B6D', padding: '1.5rem 1rem', borderBottom: '2px solid #EAE3DA', fontSize: '0.85rem', textAlign: 'center' }}>SẢN PHẨM</th>
-                                    <th style={{ background: '#F8F5F1', color: '#8C7B6D', padding: '1.5rem 1rem', borderBottom: '2px solid #EAE3DA', fontSize: '0.85rem' }}>TRẠNG THÁI</th>
+                                    <th style={{ background: '#F8F5F1', color: '#8C7B6D', padding: '1.5rem 1rem', borderBottom: '2px solid #EAE3DA', fontSize: '0.85rem' }}>TRẠNG THÁI DUYỆT</th>
+                                    <th style={{ background: '#F8F5F1', color: '#8C7B6D', padding: '1.5rem 1rem', borderBottom: '2px solid #EAE3DA', fontSize: '0.85rem' }}>HOẠT ĐỘNG</th>
                                     <th style={{ background: '#F8F5F1', color: '#8C7B6D', padding: '1.5rem 1rem', borderBottom: '2px solid #EAE3DA', fontSize: '0.85rem', textAlign: 'center' }}>THAO TÁC</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {shops.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', borderBottom: '1px solid #EAE3DA', color: '#8C7B6D' }}>Không tìm thấy gian hàng nào.</td>
+                                        <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', borderBottom: '1px solid #EAE3DA', color: '#8C7B6D' }}>Không tìm thấy gian hàng nào.</td>
                                     </tr>
                                 ) : (
                                     shops.map((shop) => (
@@ -206,11 +289,37 @@ function AdminShopControl() {
                                                 <p style={{ margin: 0, color: '#4A3B32', fontSize: '0.9rem', fontWeight: 500 }}>{shop.DiaChi || 'N/A'}</p>
                                                 <p style={{ margin: '4px 0 0 0', color: '#8C7B6D', fontSize: '0.85rem' }}>{shop.SoDienThoai || shop.user?.sdt || shop.user?.email}</p>
                                             </td>
+
+                                            {/* ── Cột Sản phẩm ── */}
                                             <td style={{ borderBottom: '1px solid #EAE3DA', padding: '1.5rem 1rem', textAlign: 'center' }}>
-                                                <p style={{ fontWeight: 700, margin: 0, color: '#2D241E', fontSize: '1.1rem' }}>{shop.products_count || 0}</p>
+                                                <button
+                                                    onClick={() => openProductsModal(shop)}
+                                                    title={`Xem ${shop.products_count || 0} sản phẩm`}
+                                                    style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                        padding: '5px 12px', borderRadius: '20px', cursor: 'pointer',
+                                                        border: 'none', fontWeight: 700, fontSize: '0.85rem',
+                                                        background: (shop.products_count || 0) > 0 ? '#EDF7ED' : '#F4EFEA',
+                                                        color: (shop.products_count || 0) > 0 ? '#2E7D32' : '#8C7B6D',
+                                                        transition: 'all 0.2s',
+                                                    }}
+                                                    onMouseOver={e => e.currentTarget.style.opacity = '0.8'}
+                                                    onMouseOut={e => e.currentTarget.style.opacity = '1'}
+                                                >
+                                                    <Package size={13} />
+                                                    {shop.products_count || 0} SP
+                                                </button>
                                             </td>
+
                                             <td style={{ borderBottom: '1px solid #EAE3DA', padding: '1.5rem 1rem' }}>
                                                 {getStatusBadge(shop.TrangThaiDuyet)}
+                                            </td>
+                                            <td style={{ borderBottom: '1px solid #EAE3DA', padding: '1.5rem 1rem' }}>
+                                                {shop.TrangThai === 1 ? (
+                                                    <span className="badge badge-success">HOẠT ĐỘNG</span>
+                                                ) : (
+                                                    <span className="badge" style={{ background: '#FEE2E2', color: '#DC2626' }}>ĐANG KHÓA</span>
+                                                )}
                                             </td>
                                             <td style={{ borderBottom: '1px solid #EAE3DA', padding: '1.5rem 1rem', textAlign: 'center' }}>
                                                 <div className="action-btns" style={{ justifyItems: 'center', gap: '16px', display: 'flex', justifyContent: 'center' }}>
@@ -236,22 +345,26 @@ function AdminShopControl() {
                                                             </button>
                                                         </>
                                                     )}
+                                                    {/* Nút mắt: xem chi tiết shop */}
                                                     <button 
                                                         onClick={() => openViewModal(shop)}
-                                                        title="Xem chi tiết"
+                                                        title="Xem chi tiết gian hàng"
                                                         style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4A3B32', padding: '4px', transition: 'all 0.2s' }}
                                                         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                                         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                     >
                                                         <Eye size={20} strokeWidth={2.5} />
                                                     </button>
+                                                    
+                                                    {/* Nút Khóa / Mở Khóa */}
                                                     <button 
-                                                        title="Xóa (Chưa hỗ trợ)"
-                                                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#EF4444', padding: '4px', transition: 'all 0.2s' }}
+                                                        onClick={() => handleToggleStatus(shop.ID_Shop, shop.TrangThai)}
+                                                        title={shop.TrangThai === 1 ? "Khóa gian hàng" : "Mở lại gian hàng"}
+                                                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: shop.TrangThai === 1 ? '#F59E0B' : '#10B981', padding: '4px', transition: 'all 0.2s' }}
                                                         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                                         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                     >
-                                                        <Trash2 size={20} strokeWidth={2} />
+                                                        {shop.TrangThai === 1 ? <Lock size={20} strokeWidth={2} /> : <Unlock size={20} strokeWidth={2} />}
                                                     </button>
                                                 </div>
                                             </td>
@@ -264,7 +377,9 @@ function AdminShopControl() {
                 </div>
             </div>
 
-            {/* Modal Từ chối */}
+            {/* ─────────────────────────────────────────────────────────────────
+                MODAL: Từ chối
+            ───────────────────────────────────────────────────────────────── */}
             {rejectModalOpen && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -325,7 +440,9 @@ function AdminShopControl() {
                 </div>
             )}
 
-            {/* Modal Xem chi tiết */}
+            {/* ─────────────────────────────────────────────────────────────────
+                MODAL: Chi tiết gian hàng
+            ───────────────────────────────────────────────────────────────── */}
             {viewModalOpen && viewShopData && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -378,6 +495,11 @@ function AdminShopControl() {
                             </div>
 
                             <div style={{ gridColumn: '1 / -1' }}>
+                                <p style={{ fontSize: '0.85rem', color: '#8C7B6D', margin: '0 0 4px 0', fontWeight: 600 }}>Loại hình kinh doanh</p>
+                                <p style={{ margin: 0, color: '#4A3B32', fontWeight: 500 }}>{viewShopData.LoaiHinhKinhDoanh === 'doanh_nghiep' ? 'Doanh nghiệp' : 'Hộ kinh doanh cá thể'}</p>
+                            </div>
+
+                            <div style={{ gridColumn: '1 / -1' }}>
                                 <p style={{ fontSize: '0.85rem', color: '#8C7B6D', margin: '0 0 4px 0', fontWeight: 600 }}>Mô tả gian hàng</p>
                                 <div style={{ 
                                     background: '#F8F5F1', padding: '1rem', borderRadius: '8px', 
@@ -402,7 +524,18 @@ function AdminShopControl() {
                             )}
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid #EAE3DA' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid #EAE3DA' }}>
+                            <button
+                                onClick={() => { closeViewModal(); openProductsModal(viewShopData); }}
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                    padding: '0.65rem 1.25rem', borderRadius: '8px',
+                                    background: '#2C3A29', color: '#fff', border: 'none',
+                                    fontWeight: 600, cursor: 'pointer', fontSize: '0.88rem'
+                                }}
+                            >
+                                <Package size={15} /> Xem sản phẩm ({viewShopData.products_count || 0})
+                            </button>
                             <button 
                                 onClick={closeViewModal}
                                 style={{
@@ -414,6 +547,187 @@ function AdminShopControl() {
                                 Đóng
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ─────────────────────────────────────────────────────────────────
+                MODAL: Danh sách sản phẩm của shop
+            ───────────────────────────────────────────────────────────────── */}
+            {productsModalOpen && (
+                <div
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.55)', zIndex: 9999,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: '1rem',
+                    }}
+                    onClick={closeProductsModal}
+                >
+                    <div
+                        style={{
+                            background: '#fff', borderRadius: '18px',
+                            width: '100%', maxWidth: '860px', maxHeight: '90vh',
+                            overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.18)',
+                            display: 'flex', flexDirection: 'column',
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div style={{
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            padding: '1.5rem 2rem', borderBottom: '1px solid #EAE3DA',
+                            background: 'linear-gradient(135deg, #2C3A29 0%, #4A5B45 100%)',
+                            borderRadius: '18px 18px 0 0', flexShrink: 0,
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <Package size={22} color="#D4A373" />
+                                <div>
+                                    <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>
+                                        Sản phẩm của: {productsShop?.TenShop}
+                                    </h3>
+                                    {productsMeta && (
+                                        <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem', marginTop: '2px' }}>
+                                            {productsMeta.total} sản phẩm · Trang {productsMeta.current_page}/{productsMeta.last_page}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                            <button
+                                onClick={closeProductsModal}
+                                style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: '#fff', borderRadius: '8px', padding: '6px', display: 'flex', alignItems: 'center' }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div style={{ padding: '1.5rem 2rem', flex: 1 }}>
+                            {productsLoading ? (
+                                <div style={{ textAlign: 'center', padding: '3rem', color: '#8C7B6D' }}>
+                                    <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+                                    Đang tải sản phẩm...
+                                </div>
+                            ) : products.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
+                                    <p style={{ color: '#8C7B6D', fontWeight: 600, fontSize: '1rem' }}>
+                                        Shop này chưa có sản phẩm nào
+                                    </p>
+                                </div>
+                            ) : (
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '2px solid #EAE3DA' }}>
+                                            <th style={{ padding: '0.75rem 0.6rem', textAlign: 'left', color: '#8C7B6D', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>Sản phẩm</th>
+                                            <th style={{ padding: '0.75rem 0.6rem', textAlign: 'right', color: '#8C7B6D', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>Giá</th>
+                                            <th style={{ padding: '0.75rem 0.6rem', textAlign: 'center', color: '#8C7B6D', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>Tồn kho</th>
+                                            <th style={{ padding: '0.75rem 0.6rem', textAlign: 'left', color: '#8C7B6D', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>Phân loại</th>
+                                            <th style={{ padding: '0.75rem 0.6rem', textAlign: 'left', color: '#8C7B6D', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>Tỉnh/Thành</th>
+                                            <th style={{ padding: '0.75rem 0.6rem', textAlign: 'center', color: '#8C7B6D', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>TT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {products.map(p => {
+                                            const firstImg = p.hinh_anh?.[0]?.HinhAnh;
+                                            return (
+                                                <tr key={p.ID_SanPham} style={{ borderBottom: '1px solid #F5F0EA' }}>
+                                                    {/* Ảnh + tên */}
+                                                    <td style={{ padding: '0.9rem 0.6rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                                                            {firstImg ? (
+                                                                <img
+                                                                    src={BASE_URL + firstImg}
+                                                                    alt={p.TenSanPham}
+                                                                    style={{ width: 46, height: 46, borderRadius: 8, objectFit: 'cover', border: '1px solid #EAE3DA', flexShrink: 0 }}
+                                                                />
+                                                            ) : (
+                                                                <div style={{
+                                                                    width: 46, height: 46, borderRadius: 8, flexShrink: 0,
+                                                                    background: 'linear-gradient(135deg, #f4eedf, #e8dcc8)',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    fontSize: '1.3rem', border: '1px solid #EAE3DA'
+                                                                }}>🌾</div>
+                                                            )}
+                                                            <div>
+                                                                <p style={{ margin: 0, fontWeight: 700, color: '#2D241E', fontSize: '0.88rem', lineHeight: 1.3 }}>{p.TenSanPham}</p>
+                                                                {p.NguonGoc && (
+                                                                    <p style={{ margin: '2px 0 0 0', color: '#8C7B6D', fontSize: '0.75rem' }}>📍 {p.NguonGoc}</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    {/* Giá */}
+                                                    <td style={{ padding: '0.9rem 0.6rem', textAlign: 'right', fontWeight: 700, color: '#2E7D32', whiteSpace: 'nowrap' }}>
+                                                        {formatPrice(p.Gia)}
+                                                    </td>
+                                                    {/* Tồn kho */}
+                                                    <td style={{ padding: '0.9rem 0.6rem', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            display: 'inline-block', padding: '3px 10px', borderRadius: '20px',
+                                                            fontSize: '0.8rem', fontWeight: 700,
+                                                            background: p.SoLuongTon === 0 ? '#FEE2E2' : p.SoLuongTon <= 10 ? '#FEF3C7' : '#D1FAE5',
+                                                            color: p.SoLuongTon === 0 ? '#DC2626' : p.SoLuongTon <= 10 ? '#B45309' : '#065F46',
+                                                        }}>
+                                                            {p.SoLuongTon}
+                                                        </span>
+                                                    </td>
+                                                    {/* Phân loại */}
+                                                    <td style={{ padding: '0.9rem 0.6rem', color: '#4A3B32' }}>
+                                                        {p.phan_loai?.TenLoai || '—'}
+                                                    </td>
+                                                    {/* Tỉnh/Thành */}
+                                                    <td style={{ padding: '0.9rem 0.6rem', color: '#4A3B32' }}>
+                                                        {p.tinhThanh?.TenTinhThanh || '—'}
+                                                    </td>
+                                                    {/* Trạng thái */}
+                                                    <td style={{ padding: '0.9rem 0.6rem', textAlign: 'center' }}>
+                                                        {getProductStatusBadge(p.TrangThai)}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+
+                        {/* Modal Footer: Pagination */}
+                        {productsMeta && productsMeta.last_page > 1 && (
+                            <div style={{
+                                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem',
+                                padding: '1rem 2rem', borderTop: '1px solid #EAE3DA', flexShrink: 0,
+                            }}>
+                                <button
+                                    onClick={() => handleProductsPageChange(productsPage - 1)}
+                                    disabled={productsPage <= 1 || productsLoading}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '4px',
+                                        padding: '6px 14px', borderRadius: '8px', border: '1.5px solid #EAE3DA',
+                                        background: '#fff', color: '#4A3B32', cursor: 'pointer',
+                                        fontWeight: 600, fontSize: '0.85rem', opacity: productsPage <= 1 ? 0.4 : 1
+                                    }}
+                                >
+                                    <ChevronLeft size={15} /> Trước
+                                </button>
+                                <span style={{ color: '#4A3B32', fontWeight: 600, fontSize: '0.88rem' }}>
+                                    Trang {productsMeta.current_page} / {productsMeta.last_page}
+                                </span>
+                                <button
+                                    onClick={() => handleProductsPageChange(productsPage + 1)}
+                                    disabled={productsPage >= productsMeta.last_page || productsLoading}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '4px',
+                                        padding: '6px 14px', borderRadius: '8px', border: '1.5px solid #EAE3DA',
+                                        background: '#fff', color: '#4A3B32', cursor: 'pointer',
+                                        fontWeight: 600, fontSize: '0.85rem',
+                                        opacity: productsPage >= productsMeta.last_page ? 0.4 : 1
+                                    }}
+                                >
+                                    Sau <ChevronRight size={15} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

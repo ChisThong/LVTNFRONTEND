@@ -38,6 +38,7 @@ export default function SellerRegister() {
     SoTaiKhoang: '',
     Tittle: '',
     GioiThieu: '',
+    LoaiHinhKinhDoanh: 'ho_kinh_doanh',
   });
 
   const [logoFile, setLogoFile]     = useState(null);
@@ -173,6 +174,23 @@ export default function SellerRegister() {
                     />
                   </div>
                   {errors.TenShop && <span className="seller-field-error">{errors.TenShop}</span>}
+                </div>
+
+                <div className="seller-field span-2">
+                  <label>Loại hình kinh doanh <span className="req">*</span></label>
+                  <div className="seller-input-wrap">
+                    <span className="seller-input-icon"><IconInfo /></span>
+                    <select
+                      id="reg-LoaiHinhKinhDoanh"
+                      name="LoaiHinhKinhDoanh"
+                      value={form.LoaiHinhKinhDoanh}
+                      onChange={handleChange}
+                      style={{ width: '100%', padding: '0.8rem 1rem 0.8rem 2.8rem', border: 'none', background: 'transparent', outline: 'none', color: 'var(--seller-text)' }}
+                    >
+                      <option value="ho_kinh_doanh">Hộ kinh doanh cá thể</option>
+                      <option value="doanh_nghiep">Doanh nghiệp</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="seller-field">

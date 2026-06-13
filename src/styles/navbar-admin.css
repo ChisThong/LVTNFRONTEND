@@ -1,8 +1,8 @@
 :root {
-    --admin-bg: #F9F8F6;
-    --sidebar-bg: #151B12;
-    --sidebar-active: #3B5E34;
-    --sidebar-active-hover: #486E3F;
+    --admin-bg: #FDF8F1;
+    --sidebar-bg: #1A2616;
+    --sidebar-active: #D4A373;
+    --sidebar-active-hover: #c39362;
     --card-bg: #FFFFFF;
     --card-header-bg: #FAF9F7;
     --gold: #D4A373;
@@ -53,6 +53,87 @@ body {
     z-index: 1000;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    transition: width 0.3s ease;
+}
+
+.admin-sidebar.collapsed {
+    width: 80px;
+}
+
+/* Ẩn text và các thành phần thừa khi collapsed */
+.admin-sidebar.collapsed .logo-text,
+.admin-sidebar.collapsed .admin-logo-text,
+.admin-sidebar.collapsed .brand-text,
+.admin-sidebar.collapsed .sidebar-logo-text,
+.admin-sidebar.collapsed .admin-brand-text,
+.admin-sidebar.collapsed .menu-item span,
+.admin-sidebar.collapsed .submenu-chevron,
+.admin-sidebar.collapsed .submenu-container,
+.admin-sidebar.collapsed .admin-user-info,
+.admin-sidebar.collapsed .admin-user-chevron {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Căn giữa icon khi collapsed */
+.admin-sidebar.collapsed .admin-logo {
+    justify-content: center;
+    padding: 0;
+}
+
+.admin-sidebar.collapsed .admin-logo-icon {
+    margin: 0 auto;
+}
+
+/* Căn giữa icon khi collapsed */
+.admin-sidebar.collapsed .menu-item {
+    justify-content: center;
+    padding: 0.85rem;
+    position: relative;
+}
+
+.admin-sidebar.collapsed .menu-item:hover {
+    transform: none;
+}
+
+.admin-sidebar.collapsed .menu-item svg {
+    margin: 0;
+}
+
+.admin-sidebar.collapsed .admin-user {
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
+/* Custom Tooltip khi collapsed */
+.admin-sidebar.collapsed .menu-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 80px;
+    background: #1A2616;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(-10px);
+    transition: all 0.2s ease;
+}
+
+.admin-sidebar.collapsed .menu-item:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
 }
 
 .sidebar-header {
@@ -83,6 +164,10 @@ body {
     overflow-y: auto;
 }
 
+.admin-sidebar.collapsed .sidebar-menu {
+    overflow: visible;
+}
+
 .sidebar-menu::-webkit-scrollbar {
     width: 4px;
 }
@@ -101,8 +186,8 @@ body {
     text-decoration: none;
     border-radius: var(--radius-md);
     margin-bottom: 0.4rem;
-    font-weight: 550;
-    font-size: 0.95rem;
+    font-weight: 500;
+    font-size: 16px;
     transition: var(--transition);
 }
 
@@ -117,6 +202,38 @@ body {
     color: white;
     box-shadow: 0 4px 15px rgba(59, 94, 52, 0.3);
     font-weight: 600;
+}
+
+/* --- ACCORDION SUBMENU --- */
+.submenu-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    margin-left: 2.5rem;
+    gap: 4px;
+}
+
+.submenu-container.open {
+    max-height: 300px;
+    opacity: 1;
+    margin-top: 4px;
+}
+
+.submenu-chevron {
+    transition: all 0.3s ease;
+}
+
+.submenu-chevron.open {
+    transform: rotate(180deg);
+}
+
+.submenu-container .menu-item.active {
+    background: rgba(212, 163, 115, 0.15);
+    color: #D4A373;
+    box-shadow: none;
 }
 
 .sidebar-footer {
@@ -213,7 +330,13 @@ body {
     flex-grow: 1;
     padding: 2.5rem;
     max-width: calc(100% - 280px);
-    transition: var(--transition);
+    transition: margin-left 0.3s ease, max-width 0.3s ease;
+}
+
+.admin-sidebar.collapsed + .admin-main,
+.admin-main.expanded {
+    margin-left: 80px;
+    max-width: calc(100% - 80px);
 }
 
 .admin-title {
@@ -473,12 +596,12 @@ body {
 }
 
 .badge-pending { 
-    background: #FEF3C7; 
-    color: #B45309; 
+    background: #FEF3C7 !important; 
+    color: #B45309 !important; 
 }
 .badge-success { 
-    background: #D1FAE5; 
-    color: #065F46; 
+    background: #D1FAE5 !important; 
+    color: #065F46 !important; 
 }
 
 /* --- ACTION BUTTONS GROUP --- */

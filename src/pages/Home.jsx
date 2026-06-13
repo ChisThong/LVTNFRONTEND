@@ -1,197 +1,149 @@
-import  { useEffect } from 'react';
-import Navbar from '../components/Navbar';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import ProductCard from '../components/products/ProductCard';
+import { getPublicProducts } from '../api/productPublicApi';
 import '../styles/home.css';
 import heroBg from '../assets/quadep.png';
 
 export default function Home() {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [activeTab, setActiveTab]               = useState('');
+  const [featuredLoading, setFeaturedLoading]   = useState(true);
 
-  // Logic from the original main.js for region image slider
+  // Fetch featured products
   useEffect(() => {
-    // We don't necessarily need JS for region images because the CSS keyframes 
-    // `regionGifEffect` is already doing the slider effect perfectly in the provided CSS.
-    // However, if there are other effects (like fade in), we can handle them here.
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.style.animationPlayState = 'running';
-            entry.target.style.opacity = 1; // Make sure it's visible if it has a delay
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const fadeElements = document.querySelectorAll('.fade-in, .fade-in-delay, .fade-in-delay-2');
-    fadeElements.forEach((el) => {
-      // Temporarily pause animation until scrolled into view
-      el.style.animationPlayState = 'paused';
-      observer.observe(el);
-    });
-
-    return () => {
-      fadeElements.forEach((el) => observer.unobserve(el));
-    };
-  }, []);
+    setFeaturedLoading(true);
+    const params = { per_page: 8 };
+    if (activeTab) params.ID_PhanLoai = activeTab;
+    getPublicProducts(params)
+      .then(res => {
+        const data = res.data?.data?.data || [];
+        setFeaturedProducts(data);
+      })
+      .catch(() => {})
+      .finally(() => setFeaturedLoading(false));
+  }, [activeTab]);
 
   return (
-    <>
-      <Navbar />
-
-      <main>
+    <main className="home-main-wrapper">
         {/* Hero Section */}
         <section id="hero" style={{ backgroundImage: `url(${heroBg})` }}>
           <div className="hero-content">
-            <h1 className="fade-in">Hương vị Miền Nam <br />Tinh Hoa Văn Hóa - <br />Kết Nối Phương Nam</h1>
-            <p className="fade-in-delay">
+            <h1 className="fade-in animate-slide-up">Hương vị Miền Nam <br />Tinh Hoa Văn Hóa - <br />Kết Nối Phương Nam</h1>
+            <p className="fade-in-delay animate-slide-up">
               Hỗ trợ hộ kinh doanh địa phương, quảng bá bản sắc văn hóa Việt Nam qua những
               đặc sản tinh túy nhất từ vùng đất chín rồng.
             </p>
-            <div className="hero-btns fade-in-delay-2">
-              <button className="btn-primary">Mua sắm ngay</button>
+            <div className="hero-btns fade-in-delay-2 animate-slide-up">
+              <Link to="/products" className="btn-primary-mall">
+                Khám phá ngay
+              </Link>
             </div>
           </div>
-          <div className="hero-overlay"></div>
+          <div className="hero-overlay-gradient"></div>
         </section>
 
-        {/* Region Filter */}
-        <section id="regions">
-          <div className="section-header">
+        {/* Region Filter - Premium Layout */}
+        <section id="regions-premium">
+          <div className="section-header-mall">
             <h2>Khám phá theo khu vực</h2>
             <p>Tìm kiếm đặc sản theo từng tỉnh thành Miền Nam</p>
           </div>
-          <div className="region-grid">
+          <div className="region-grid-premium">
             {/* Tiền Giang */}
-            <div className="region-card" data-region="tiengiang">
-              <div className="region-img-wrapper">
-                <div className="region-img" style={{ backgroundImage: "url('https://static.mservice.io/blogscontents/momo-upload-api-221028143745-638025646651875182.jpg')" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#e2d5c4" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#d4a373" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#4a6741" }}></div>
-              </div>
-              <div className="region-info">
+            <Link to="/products?tinh=Tiền Giang" className="region-card-premium">
+              <div className="region-img-bg" style={{ backgroundImage: "url('https://static.mservice.io/blogscontents/momo-upload-api-221028143745-638025646651875182.jpg')" }}></div>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Tiền Giang</h3>
                 <p>Vương quốc trái cây</p>
               </div>
-            </div>
+            </Link>
 
             {/* Bến Tre */}
-            <div className="region-card" data-region="bentre">
-              <div className="region-img-wrapper">
-                <div className="region-img" style={{ backgroundImage: "url('https://sinhcafe.com/images/ben-tre-night-market-2.png')" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#e2d5c4" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#d4a373" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#4a6741" }}></div>
-              </div>
-              <div className="region-info">
+            <Link to="/products?tinh=Bến Tre" className="region-card-premium">
+              <div className="region-img-bg" style={{ backgroundImage: "url('https://sinhcafe.com/images/ben-tre-night-market-2.png')" }}></div>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Bến Tre</h3>
                 <p>Xứ sở dừa xanh</p>
               </div>
-            </div>
+            </Link>
 
             {/* Cần Thơ */}
-            <div className="region-card" data-region="cantho">
-              <div className="region-img-wrapper">
-                <div className="region-img" style={{ backgroundImage: "url('https://canthoriviu.vn/wp-content/uploads/2022/07/1d-min.jpg')" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#e2d5c4" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#d4a373" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#4a6741" }}></div>
-              </div>
-              <div className="region-info">
+            <Link to="/products?tinh=Cần Thơ" className="region-card-premium">
+              <div className="region-img-bg" style={{ backgroundImage: "url('https://canthoriviu.vn/wp-content/uploads/2022/07/1d-min.jpg')" }}></div>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Cần Thơ</h3>
                 <p>Tây Đô gạo trắng nước trong</p>
               </div>
-            </div>
+            </Link>
 
             {/* Đồng Tháp */}
-            <div className="region-card" data-region="dongthap">
-              <div className="region-img-wrapper">
-                <div className="region-img" style={{ backgroundImage: "url('https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://cdn-media.sforum.vn/storage/app/media/thanhhuyen/%E1%BA%A3nh%20%C4%91%E1%BA%B9p%20%C4%91%E1%BB%93ng%20th%C3%A1p/1/anh-dep-dong-thap-9.jpg')" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#e2d5c4" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#d4a373" }}></div>
-                <div className="region-img" style={{ backgroundColor: "#4a6741" }}></div>
-              </div>
-              <div className="region-info">
+            <Link to="/products?tinh=Đồng Tháp" className="region-card-premium">
+              <div className="region-img-bg" style={{ backgroundImage: "url('https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://cdn-media.sforum.vn/storage/app/media/thanhhuyen/%E1%BA%A3nh%20%C4%91%E1%BA%B9p%20%C4%91%E1%BB%93ng%20th%C3%A1p/1/anh-dep-dong-thap-9.jpg')" }}></div>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Đồng Tháp</h3>
                 <p>Thủ phủ Đất Sen Hồng</p>
               </div>
-            </div>
+            </Link>
           </div>
         </section>
 
-        {/* Featured Products */}
-        <section id="featured">
-          <div className="section-header">
+        {/* Featured Products - Premium Layout */}
+        <section id="featured-premium">
+          <div className="section-header-mall">
             <h2>Sản phẩm nổi bật</h2>
-            <div className="filter-tabs">
-              <button className="tab active">Tất cả</button>
-              <button className="tab">Trái cây</button>
-              <button className="tab">Bánh kẹo</button>
-              <button className="tab">Thủy hải sản</button>
+            <div className="filter-tabs-pill">
+              <button
+                className={`tab-pill ${activeTab === '' ? 'active' : ''}`}
+                onClick={() => setActiveTab('')}
+              >Tất cả</button>
+              <button
+                className={`tab-pill ${activeTab === '1' ? 'active' : ''}`}
+                onClick={() => setActiveTab('1')}
+              >Trái cây</button>
+              <button
+                className={`tab-pill ${activeTab === '2' ? 'active' : ''}`}
+                onClick={() => setActiveTab('2')}
+              >Bánh kẹo</button>
+              <button
+                className={`tab-pill ${activeTab === '3' ? 'active' : ''}`}
+                onClick={() => setActiveTab('3')}
+              >Thủy hải sản</button>
             </div>
           </div>
-          <div className="product-grid" id="productGrid">
-            {/* Products will be injected by JS, but for now let's add some static placeholders based on the design */}
-            {[1, 2, 3, 4].map(item => (
-              <div key={item} className="product-card">
-                <div className="product-badge">Bán chạy</div>
-                <div className="product-img-wrapper">
-                  <div style={{ width: '100%', height: '100%', backgroundColor: '#eee' }}></div>
+
+          <div className="product-grid-mall">
+            {featuredLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="skeleton-product-mall">
+                  <div className="skeleton-img"></div>
+                  <div className="skeleton-text short"></div>
+                  <div className="skeleton-text long"></div>
                 </div>
-                <div className="product-details">
-                  <h3>Sản phẩm đặc sản {item}</h3>
-                  <div className="product-origin">
-                    📍 Miền Tây
-                  </div>
-                  <p className="product-description">
-                    Mô tả ngắn gọn về sản phẩm đặc sản thơm ngon, chất lượng cao từ địa phương.
-                  </p>
-                  <div className="product-footer">
-                    <span className="price">150.000đ</span>
-                    <button className="add-to-cart">+</button>
-                  </div>
-                </div>
+              ))
+            ) : featuredProducts.length === 0 ? (
+              <div className="empty-state-mall">
+                <p>Chưa có sản phẩm nào. Hãy quay lại sau!</p>
               </div>
-            ))}
+            ) : (
+              featuredProducts.map((product, idx) => (
+                <div key={product.ID_SanPham} className="fade-in-up" style={{ animationDelay: `${idx * 0.05}s` }}>
+                  <ProductCard product={product} index={idx} />
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="view-all-wrapper">
+            <Link to="/products" className="btn-outline-mall">
+              Xem tất cả đặc sản →
+            </Link>
           </div>
         </section>
       </main>
-
-      <footer id="footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <div className="logo">
-              <span className="logo-icon">🌴</span>
-              <span className="logo-text">NamBộ<span>Specialties</span></span>
-            </div>
-            <p>Nâng tầm giá trị đặc sản Việt, hỗ trợ chuyển đổi số cho hộ kinh doanh địa phương.</p>
-          </div>
-          <div className="footer-links">
-            <h4>Về chúng tôi</h4>
-            <a href="#">Giới thiệu</a>
-            <a href="#">Liên hệ</a>
-            <a href="#">Chính sách bảo mật</a>
-          </div>
-          <div className="footer-links">
-            <h4>Dành cho người bán</h4>
-            <a href="#">Đăng ký gian hàng</a>
-            <a href="#">Quy định bán hàng</a>
-            <a href="#">Thanh toán & Đối soát</a>
-          </div>
-          <div className="footer-newsletter">
-            <h4>Bản tin</h4>
-            <p>Nhận thông báo về các đặc sản mới nhất.</p>
-            <div className="subscribe-box">
-              <input type="email" placeholder="Email của bạn" />
-              <button>Gửi</button>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2026 NamBộ Specialties. Thiết kế bởi Antigravity.</p>
-        </div>
-      </footer>
-    </>
   );
 }
