@@ -216,15 +216,8 @@ function BanDoControl() {
         <>
             {/* THANH TIÊU ĐỀ TRÊN CÙNG */}
             <div className="admin-top-bar" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                {viewMode !== 'list' && (
-                    <button className="icon-btn" onClick={() => setViewMode('list')} style={{ borderRadius: '50%', width: '40px', height: '40px' }}>
-                        <ArrowLeft size={18} />
-                    </button>
-                )}
                 <h1 className="admin-title" style={{ marginBottom: 0 }}>
-                    {viewMode === 'list' && 'Quản Lý Danh Mục Vùng Miền & Bản Đồ'}
-                    {viewMode === 'add' && 'Thêm Điểm Ghim Mới'}
-                    {viewMode === 'edit' && 'Chỉnh Sửa Điểm Ghim'}
+                    Quản Lý Danh Mục Vùng Miền & Bản Đồ
                 </h1>
             </div>
 
@@ -351,68 +344,76 @@ function BanDoControl() {
 
             {/* 2. MÀN HÌNH FORM THÊM MỚI / CHỈNH SỬA ĐIỂM GHIM */}
             {(viewMode === 'add' || viewMode === 'edit') && (
-                <div className="admin-card view-section">
-                    <form onSubmit={handleSaveSubmit}>
-                        <div className="admin-form-group">
-                            <label>Tên đặc sản / Địa điểm ghim <span style={{ color: '#EF4444' }}>*</span></label>
-                            <input type="text" name="TenDacSan" value={formValues.TenDacSan} onChange={handleInputChange} className="admin-form-control" placeholder="Nhập tên đặc sản..." required />
+                <div className="nam-modal-overlay">
+                    <div className="nam-modal-content" style={{ maxWidth: '650px' }}>
+                        <div className="nam-modal-header">
+                            <h3>{viewMode === 'add' ? 'Thêm Điểm Ghim Mới' : 'Chỉnh Sửa Điểm Ghim'}</h3>
+                            <button className="nam-modal-close" onClick={() => setViewMode('list')}>
+                                <X size={24} />
+                            </button>
                         </div>
-
-                        <div className="admin-form-row" style={{ display: 'flex', gap: '15px', marginBottom: '1rem' }}>
-                            <div className="admin-form-group" style={{ flex: 1 }}>
-                                <label>Tọa độ Vĩ độ (Latitude) <span style={{ color: '#EF4444' }}>*</span></label>
-                                <input type="text" name="ViDo" value={formValues.ViDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 10.2435" required />
+                        <form onSubmit={handleSaveSubmit}>
+                            <div className="admin-form-group">
+                                <label>Tên đặc sản / Địa điểm ghim <span style={{ color: '#EF4444' }}>*</span></label>
+                                <input type="text" name="TenDacSan" value={formValues.TenDacSan} onChange={handleInputChange} className="admin-form-control" placeholder="Nhập tên đặc sản..." required />
                             </div>
-                            <div className="admin-form-group" style={{ flex: 1 }}>
-                                <label>Tọa độ Kinh độ (Longitude) <span style={{ color: '#EF4444' }}>*</span></label>
-                                <input type="text" name="KinhDo" value={formValues.KinhDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 106.3752" required />
+
+                            <div className="admin-form-row">
+                                <div className="admin-form-group">
+                                    <label>Tọa độ Vĩ độ (Latitude) <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <input type="text" name="ViDo" value={formValues.ViDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 10.2435" required />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label>Tọa độ Kinh độ (Longitude) <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <input type="text" name="KinhDo" value={formValues.KinhDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 106.3752" required />
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="admin-form-row" style={{ display: 'flex', gap: '15px', marginBottom: '1rem' }}>
-                            <div className="admin-form-group" style={{ flex: 1 }}>
-                                <label>Tỉnh Thành <span style={{ color: '#EF4444' }}>*</span></label>
-                                <select name="ID_TinhThanh" value={formValues.ID_TinhThanh} onChange={(e) => { handleInputChange(e); setFormValues(p => ({...p, ID_Xa: '', ID_Ap: ''})); }} className="admin-form-control" required>
-                                    <option value="">-- Chọn Tỉnh --</option>
-                                    {TinhThanh.map((t, index) => <option key={t.ID_TinhThanh || index} value={t.ID_TinhThanh}>{t.TenTinhThanh}</option>)}
-                                </select>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '1.25rem' }}>
+                                <div className="admin-form-group">
+                                    <label>Tỉnh Thành <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <select name="ID_TinhThanh" value={formValues.ID_TinhThanh} onChange={(e) => { handleInputChange(e); setFormValues(p => ({...p, ID_Xa: '', ID_Ap: ''})); }} className="admin-form-control" required>
+                                        <option value="">-- Chọn Tỉnh --</option>
+                                        {TinhThanh.map((t, index) => <option key={t.ID_TinhThanh || index} value={t.ID_TinhThanh}>{t.TenTinhThanh}</option>)}
+                                    </select>
+                                </div>
+                                <div className="admin-form-group">
+                                    <label>Xã / Phường <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <select name="ID_Xa" value={formValues.ID_Xa} onChange={(e) => { handleInputChange(e); setFormValues(p => ({...p, ID_Ap: ''})); }} className="admin-form-control" disabled={!formValues.ID_TinhThanh} required>
+                                        <option value="">-- Chọn Xã --</option>
+                                        {FormXa.map((x, index) => <option key={x.ID_Xa || index} value={x.ID_Xa}>{x.Ten_xa}</option>)}
+                                    </select>
+                                </div>
+                                <div className="admin-form-group">
+                                    <label>Ấp / Khu Phố</label>
+                                    <select name="ID_Ap" value={formValues.ID_Ap} onChange={handleInputChange} className="admin-form-control" disabled={!formValues.ID_Xa}> 
+                                        <option value="">-- Chọn Ấp (Không bắt buộc) --</option>
+                                        {FormAp.map((a, index) => <option key={a.ID_Ap || index} value={a.ID_Ap}>{a.Ten_ap}</option>)}
+                                    </select>
+                                </div>
                             </div>
-                            <div className="admin-form-group" style={{ flex: 1 }}>
-                                <label>Xã / Phường <span style={{ color: '#EF4444' }}>*</span></label>
-                                <select name="ID_Xa" value={formValues.ID_Xa} onChange={(e) => { handleInputChange(e); setFormValues(p => ({...p, ID_Ap: ''})); }} className="admin-form-control" disabled={!formValues.ID_TinhThanh} required>
-                                    <option value="">-- Chọn Xã --</option>
-                                    {FormXa.map((x, index) => <option key={x.ID_Xa || index} value={x.ID_Xa}>{x.Ten_xa}</option>)}
-                                </select>
+
+                            <div className="admin-form-group">
+                                <label>Phân loại</label>
+                                <input type="text" name="PhanLoai" value={formValues.PhanLoai} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: Đặc sản, Địa danh..." />
                             </div>
-                            <div className="admin-form-group" style={{ flex: 1 }}>
-                                <label>Ấp / Khu Phố</label>
-                                <select name="ID_Ap" value={formValues.ID_Ap} onChange={handleInputChange} className="admin-form-control" disabled={!formValues.ID_Xa}> {/* 🌟 ĐÃ SỬA: Bỏ biến lỗi ID_ID_Xa */}
-                                    <option value="">-- Chọn Ấp (Không bắt buộc) --</option>
-                                    {FormAp.map((a, index) => <option key={a.ID_Ap || index} value={a.ID_Ap}>{a.Ten_ap}</option>)}
-                                </select>
+
+                            <div className="admin-form-group">
+                                <label>Mô tả chi tiết</label>
+                                <textarea name="MoTa" value={formValues.MoTa} onChange={handleInputChange} className="admin-form-control" style={{ height: '80px', resize: 'vertical' }} placeholder="Nhập mô tả về điểm ghim này..."></textarea>
                             </div>
-                        </div>
 
-                        <div className="admin-form-group">
-                            <label>Phân loại</label>
-                            <input type="text" name="PhanLoai" value={formValues.PhanLoai} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: Đặc sản, Địa danh..." />
-                        </div>
+                            <div className="admin-form-group">
+                                <label>Hình ảnh đặc sản</label>
+                                <input type="file" accept="image/*" onChange={(e) => setHinhAnhFile(e.target.files[0])} className="admin-form-control" />
+                            </div>
 
-                        <div className="admin-form-group">
-                            <label>Mô tả chi tiết</label>
-                            <textarea name="MoTa" value={formValues.MoTa} onChange={handleInputChange} className="admin-form-control" style={{ height: '100px' }} placeholder="Nhập mô tả về điểm ghim này..."></textarea>
-                        </div>
-
-                        <div className="admin-form-group">
-                            <label>Hình ảnh đặc sản</label>
-                            <input type="file" accept="image/*" onChange={(e) => setHinhAnhFile(e.target.files[0])} className="admin-form-control" />
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-                            <button type="button" className="filter-btn" onClick={() => setViewMode('list')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><X size={16} /> Hủy bỏ</button>
-                            <button type="submit" className="btn-action btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={16} /> Lưu thông tin</button>
-                        </div>
-                    </form>
+                            <div className="nam-modal-footer">
+                                <button type="button" className="filter-btn" onClick={() => setViewMode('list')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><X size={16} /> Hủy bỏ</button>
+                                <button type="submit" className="btn-action btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={16} /> Lưu thông tin</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </>

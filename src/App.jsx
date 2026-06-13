@@ -29,6 +29,7 @@ import BanDoControl from './pages/Admin/BanDoControl';
 import BaiVietControler from './pages/Admin/BaiVietControl';
 import AdminShopControl from './pages/Admin/AdminShopControl';
 import AdminProductControl from './pages/Admin/AdminProductControl';
+import NguoiDungControl from './pages/Admin/NguoiDungControl';
 
 function App() {
   return (
@@ -93,6 +94,7 @@ function App() {
             <Route path="products"  element={<AdminProductControl />} />
             <Route path="posts"     element={<BaiVietControler />} />
             <Route path="regions"   element={<BanDoControl />} />
+            <Route path="users"     element={<NguoiDungControl />} />
           </Route>
         </Route>
 

@@ -175,7 +175,7 @@ function BaiVietControler() {
         <>
             <div className="admin-top-bar" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    {viewMode !== 'list' && (
+                    {viewMode === 'view' && (
                         <button
                             className="icon-btn"
                             onClick={() => setViewMode('list')}
@@ -185,10 +185,7 @@ function BaiVietControler() {
                         </button>
                     )}
                     <h1 className="admin-title" style={{ marginBottom: 0 }}>
-                        {viewMode === 'list' && 'Quản Lý Bài Viết'}
-                        {viewMode === 'view' && 'Chi Tiết Bài Viết'}
-                        {viewMode === 'add' && 'Tạo Bài Viết Mới'}
-                        {viewMode === 'edit' && 'Chỉnh Sửa Bài Viết'}
+                        {viewMode === 'view' ? 'Chi Tiết Bài Viết' : 'Quản Lý Bài Viết'}
                     </h1>
                 </div>
             </div>
@@ -306,29 +303,35 @@ function BaiVietControler() {
                 const formData = viewMode === 'edit' ? editFormData : addFormData;
 
                 return (
-                    <div className="admin-card view-section">
-                        <form onSubmit={handleFormSubmit}>
-
-                            {/* 1. Ô TIÊU ĐỀ */}
-                            <div className="admin-form-group">
-                                <label>Tiêu đề bài viết <span style={{ color: '#EF4444' }}>*</span></label>
-                                <input
-                                    type="text"
-                                    name='tittel'
-                                    className="admin-form-control"
-                                    value={formData.tittel}
-                                    onChange={handleInputChange}
-                                    placeholder="Nhập tiêu đề sinh động..."
-                                />
-                                {formErrors.tittel && (
-                                    <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
-                                        {formErrors.tittel[0]}
-                                    </span>
-                                )}
+                    <div className="nam-modal-overlay">
+                        <div className="nam-modal-content" style={{ maxWidth: '700px' }}>
+                            <div className="nam-modal-header">
+                                <h3>{viewMode === 'edit' ? 'Chỉnh Sửa Bài Viết' : 'Tạo Bài Viết Mới'}</h3>
+                                <button className="nam-modal-close" onClick={() => { setFormErrors({}); setViewMode('list') }}>
+                                    <X size={24} />
+                                </button>
                             </div>
+                            <form onSubmit={handleFormSubmit}>
+                                {/* 1. Ô TIÊU ĐỀ */}
+                                <div className="admin-form-group">
+                                    <label>Tiêu đề bài viết <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <input
+                                        type="text"
+                                        name='tittel'
+                                        className="admin-form-control"
+                                        value={formData.tittel}
+                                        onChange={handleInputChange}
+                                        placeholder="Nhập tiêu đề sinh động..."
+                                        required
+                                    />
+                                    {formErrors.tittel && (
+                                        <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                                            {formErrors.tittel[0]}
+                                        </span>
+                                    )}
+                                </div>
 
-                            {/* 2. Ô TÓM TẮT */}
-                            <div className="admin-form-row">
+                                {/* 2. Ô TÓM TẮT */}
                                 <div className="admin-form-group">
                                     <label>Tóm tắt</label>
                                     <input
@@ -345,100 +348,101 @@ function BaiVietControler() {
                                         </span>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* 3. Ô KHU VỰC TỈNH THÀNH */}
-                            <div className="admin-form-group">
-                                <label>Khu vực tỉnh thành <span style={{ color: '#EF4444' }}>*</span></label>
-                                <select
-                                    name="ID_TinhThanh"
-                                    value={formData.ID_TinhThanh}
-                                    onChange={handleInputChange}
-                                    className="admin-form-control"
-                                >
-                                    <option value="">-- Chọn tỉnh thành liên quan --</option>
-                                    {TinhThanh && TinhThanh.map((tinh) => (
-                                        <option key={tinh.ID_TinhThanh} value={tinh.ID_TinhThanh}>
-                                            {tinh.TenTinhThanh}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formErrors.ID_TinhThanh && (
-                                    <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
-                                        {formErrors.ID_TinhThanh[0]}
-                                    </span>
-                                )}
-                            </div>
+                                {/* 3. Ô KHU VỰC TỈNH THÀNH */}
+                                <div className="admin-form-group">
+                                    <label>Khu vực tỉnh thành <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <select
+                                        name="ID_TinhThanh"
+                                        value={formData.ID_TinhThanh}
+                                        onChange={handleInputChange}
+                                        className="admin-form-control"
+                                        required
+                                    >
+                                        <option value="">-- Chọn tỉnh thành liên quan --</option>
+                                        {TinhThanh && TinhThanh.map((tinh) => (
+                                            <option key={tinh.ID_TinhThanh} value={tinh.ID_TinhThanh}>
+                                                {tinh.TenTinhThanh}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {formErrors.ID_TinhThanh && (
+                                        <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                                            {formErrors.ID_TinhThanh[0]}
+                                        </span>
+                                    )}
+                                </div>
 
-                            {/* 4. Ô HÌNH ẢNH BÌA (CÓ CHỨC NĂNG PREVIEW ẢNH CŨ) */}
-                            <div className="admin-form-group">
-                                <label>Hình ảnh bìa {viewMode === 'edit' && '(Để trống nếu giữ nguyên ảnh cũ)'}</label>
-                                <input
-                                    type="file"
-                                    name='hinhanh'
-                                    accept='image/*'
-                                    onChange={handleFileChange}
-                                    className="admin-form-control"
-                                />
-                                {formData.hinhanh && <span style={{ fontSize: '0.85rem', color: '#2563EB', fontWeight: '500' }}>File đã chọn: {formData.hinhanh.name}</span>}
+                                {/* 4. Ô HÌNH ẢNH BÌA */}
+                                <div className="admin-form-group">
+                                    <label>Hình ảnh bìa {viewMode === 'edit' && '(Để trống nếu giữ nguyên ảnh cũ)'}</label>
+                                    <input
+                                        type="file"
+                                        name='hinhanh'
+                                        accept='image/*'
+                                        onChange={handleFileChange}
+                                        className="admin-form-control"
+                                    />
+                                    {formData.hinhanh && <span style={{ fontSize: '0.85rem', color: '#2563EB', fontWeight: '500' }}>File đã chọn: {formData.hinhanh.name}</span>}
 
-                                {/* Hiện ảnh cũ nếu đang ở chế độ EDIT */}
-                                {viewMode === 'edit' && editFormData.current_hinhanh && !editFormData.hinhanh && (
-                                    <div style={{ marginTop: '10px' }}>
-                                        <p style={{ fontSize: '0.82rem', color: '#6B7280', marginBottom: '4px' }}>Ảnh hiện tại trong database:</p>
-                                        <img
-                                            src={`http://127.0.0.1:8000/storage/${editFormData.current_hinhanh}`}
-                                            alt="Current asset"
-                                            style={{ width: '100px', height: '70px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #E5E7EB' }}
-                                        />
-                                    </div>
-                                )}
+                                    {/* Hiện ảnh cũ nếu đang ở chế độ EDIT */}
+                                    {viewMode === 'edit' && editFormData.current_hinhanh && !editFormData.hinhanh && (
+                                        <div style={{ marginTop: '10px' }}>
+                                            <p style={{ fontSize: '0.82rem', color: '#6B7280', marginBottom: '4px' }}>Ảnh hiện tại trong database:</p>
+                                            <img
+                                                src={`http://127.0.0.1:8000/storage/${editFormData.current_hinhanh}`}
+                                                alt="Current asset"
+                                                style={{ width: '100px', height: '70px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #E5E7EB' }}
+                                            />
+                                        </div>
+                                    )}
 
-                                {formErrors.hinhanh && (
-                                    <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
-                                        {formErrors.hinhanh[0]}
-                                    </span>
-                                )}
-                            </div>
+                                    {formErrors.hinhanh && (
+                                        <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                                            {formErrors.hinhanh[0]}
+                                        </span>
+                                    )}
+                                </div>
 
-                            {/* 5. Ô NỘI DUNG */}
-                            <div className="admin-form-group">
-                                <label>Nội dung bài viết <span style={{ color: '#EF4444' }}>*</span></label>
-                                <textarea
-                                    className="admin-form-control"
-                                    rows="10"
-                                    placeholder="Viết nội dung bài viết vào đây..."
-                                    style={{ resize: 'vertical', minHeight: '200px' }}
-                                    name='noidung'
-                                    value={formData.noidung}
-                                    onChange={handleInputChange}
-                                ></textarea>
-                                {formErrors.noidung && (
-                                    <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
-                                        {formErrors.noidung[0]}
-                                    </span>
-                                )}
-                            </div>
+                                {/* 5. Ô NỘI DUNG */}
+                                <div className="admin-form-group">
+                                    <label>Nội dung bài viết <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <textarea
+                                        className="admin-form-control"
+                                        rows="8"
+                                        placeholder="Viết nội dung bài viết vào đây..."
+                                        style={{ resize: 'vertical', minHeight: '150px' }}
+                                        name='noidung'
+                                        value={formData.noidung}
+                                        onChange={handleInputChange}
+                                        required
+                                    ></textarea>
+                                    {formErrors.noidung && (
+                                        <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                                            {formErrors.noidung[0]}
+                                        </span>
+                                    )}
+                                </div>
 
-                            {/* CỤM NÚT BẤM */}
-                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-                                <button
-                                    type="button"
-                                    className="filter-btn"
-                                    onClick={() => { setFormErrors({}); setViewMode('list') }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                                >
-                                    <X size={16} /> Hủy bỏ
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="btn-action btn-primary"
-                                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                                >
-                                    <Save size={16} /> {viewMode === 'edit' ? 'Cập nhật thay đổi' : 'Lưu bài viết'}
-                                </button>
-                            </div>
-                        </form>
+                                <div className="nam-modal-footer">
+                                    <button
+                                        type="button"
+                                        className="filter-btn"
+                                        onClick={() => { setFormErrors({}); setViewMode('list') }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                                    >
+                                        <X size={16} /> Hủy bỏ
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn-action btn-primary"
+                                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                                    >
+                                        <Save size={16} /> {viewMode === 'edit' ? 'Cập nhật thay đổi' : 'Lưu bài viết'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 );
             })()}
