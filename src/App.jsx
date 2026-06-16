@@ -30,6 +30,7 @@ import BaiVietControler from './pages/Admin/BaiVietControl';
 import AdminShopControl from './pages/Admin/AdminShopControl';
 import AdminProductControl from './pages/Admin/AdminProductControl';
 import NguoiDungControl from './pages/Admin/NguoiDungControl';
+import DonHangControl from './pages/Admin/DonHangControl';
 
 function App() {
   return (
@@ -92,6 +93,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="shops"     element={<AdminShopControl />} />
             <Route path="products"  element={<AdminProductControl />} />
+            <Route path="orders"    element={<DonHangControl />} />
             <Route path="posts"     element={<BaiVietControler />} />
             <Route path="regions"   element={<BanDoControl />} />
             <Route path="users"     element={<NguoiDungControl />} />
