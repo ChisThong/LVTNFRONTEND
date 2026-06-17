@@ -574,7 +574,7 @@ function DonHangControl() {
                                 </div>
 
                                 {/* Thông tin Người mua & Người bán */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                                <div className="order-info-grid">
                                     {/* Thông tin Khách hàng */}
                                     <div style={{ border: '1px solid var(--border-color)', padding: '1.25rem', borderRadius: '12px', background: 'var(--white)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>
@@ -621,7 +621,7 @@ function DonHangControl() {
                                 </div>
 
                                 {/* Chi tiết sản phẩm trong đơn */}
-                                <div style={{ border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem', background: 'var(--white)' }}>
+                                <div style={{ border: '1px solid var(--border-color)', borderRadius: '12px', overflowX: 'auto', marginBottom: '1.5rem', background: 'var(--white)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '1rem 1.25rem', background: 'var(--card-header-bg)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 'bold' }}>
                                         <Package size={18} color="var(--sidebar-active)" />
                                         <span>Danh sách sản phẩm</span>

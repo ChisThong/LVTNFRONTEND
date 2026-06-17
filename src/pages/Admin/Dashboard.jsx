@@ -70,7 +70,7 @@ function Dashboard() {
             </div>
 
             {/* Quick Link & Recent Activities */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
+            <div className="dashboard-content-grid">
                 
                 {/* Quick Actions Card */}
                 <div className="admin-card">
@@ -79,7 +79,7 @@ function Dashboard() {
                             <PlusCircle size={20} color="var(--sidebar-active)" /> Lối tắt quản trị
                         </h2>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div className="dashboard-shortcuts-grid">
                         <button className="filter-btn" onClick={() => navigate('/admin/posts')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '1rem' }}>
                             <FileText size={16} /> Viết bài mới
                         </button>

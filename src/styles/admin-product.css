@@ -599,4 +599,45 @@
     flex: 1;
     justify-content: center;
   }
+
+  /* --- Admin Product Page Responsive --- */
+  .admin-product-page {
+    padding: 12px !important;
+  }
+
+  .admin-product-page .page-header .header-content h1 {
+    font-size: 20px !important;
+  }
+
+  .admin-product-page .filter-section {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .admin-product-page .search-bar {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .admin-product-page .status-tabs {
+    width: 100% !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding-bottom: 6px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-product-page .tab-btn {
+    flex-shrink: 0 !important;
+  }
+
+  .admin-product-page .table-container {
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
 }

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Star, StarHalf, Minus, Plus, ShoppingCart, CheckCircle, MapPin, MessageCircle, Store } from 'lucide-react';
-import { getPublicProductDetail, getPublicProducts, formatPrice } from '../../api/productPublicApi';
+import { getPublicProductDetail, getPublicProducts, formatPrice, getProductReviews, createProductReview } from '../../api/productPublicApi';
+import axiosClient from '../../api/axiosClient';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -16,6 +17,61 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
+
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [eligibleItem, setEligibleItem] = useState(null);
+  const [ratingInput, setRatingInput] = useState(5);
+  const [commentInput, setCommentInput] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const fetchReviews = () => {
+    setReviewsLoading(true);
+    getProductReviews(id)
+      .then(res => {
+        setReviews(res.data?.data || []);
+      })
+      .catch(err => console.error("Lỗi tải đánh giá:", err))
+      .finally(() => setReviewsLoading(false));
+  };
+
+  const checkEligibility = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setEligibleItem(null);
+      return;
+    }
+    try {
+      const res = await axiosClient.get('/don-hang');
+      const orders = res.data?.data?.data || [];
+      const completedOrders = orders.filter(o => Number(o.TrangThai) === 3);
+      
+      let foundItem = null;
+      for (const order of completedOrders) {
+        const item = order.chi_tiet?.find(det => Number(det.ID_SanPham) === Number(id));
+        if (item) {
+          const reviewsRes = await getProductReviews(id);
+          const currentReviews = reviewsRes.data?.data || [];
+          const alreadyReviewed = currentReviews.some(rev => Number(rev.ID_ChiTiet) === Number(item.ID_ChiTiet));
+          
+          if (!alreadyReviewed) {
+            foundItem = item;
+            break;
+          }
+        }
+      }
+      setEligibleItem(foundItem);
+    } catch (e) {
+      console.error("Lỗi kiểm tra quyền đánh giá:", e);
+      setEligibleItem(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+    checkEligibility();
+  }, [id]);
 
   useEffect(() => {
     setLoading(true);
@@ -62,6 +118,42 @@ export default function ProductDetail() {
     // navigate('/checkout'); // TODO
   };
 
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!eligibleItem) {
+      alert("Bạn không có đơn hàng hoàn tất nào đủ điều kiện để đánh giá sản phẩm này.");
+      return;
+    }
+    setSubmittingReview(true);
+    
+    const formData = new FormData();
+    formData.append('ID_ChiTiet', eligibleItem.ID_ChiTiet);
+    formData.append('ID_SanPham', id);
+    formData.append('XepLoai', ratingInput);
+    formData.append('BinhLuan', commentInput);
+    if (imageFile) {
+      formData.append('HinhAnh', imageFile);
+    }
+
+    try {
+      const res = await createProductReview(formData);
+      if (res.data?.success) {
+        alert("Gửi đánh giá sản phẩm thành công!");
+        setCommentInput('');
+        setImageFile(null);
+        setRatingInput(5);
+        fetchReviews();
+        checkEligibility();
+      } else {
+        alert(res.data?.message || "Gửi đánh giá thất bại.");
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Gửi đánh giá thất bại do lỗi hệ thống.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   const moveGallery = (dir) => {
     if (!images || images.length === 0) return;
     let nextIndex = activeImg + dir;
@@ -85,6 +177,20 @@ export default function ProductDetail() {
   
   // Dummy shop info for demo mapping
   const shopAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(shopName)}&background=D44E28&color=fff`;
+
+  // Tính trung bình rating và phần trăm sao
+  const totalReviews = reviews.length;
+  const averageRating = totalReviews > 0
+    ? (reviews.reduce((acc, r) => acc + Number(r.XepLoai), 0) / totalReviews).toFixed(1)
+    : 0;
+
+  const starPercentages = [5, 4, 3, 2, 1].map(star => {
+    const count = reviews.filter(r => Number(r.XepLoai) === star).length;
+    return {
+      star,
+      pct: totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0
+    };
+  });
 
   if (loading) return (
     <div className="pd-loading">
@@ -286,7 +392,7 @@ export default function ProductDetail() {
           <div 
             className={`tab-link ${activeTab === 'reviews' ? 'active' : ''}`} 
             onClick={() => setActiveTab('reviews')}
-          >Đánh giá & Bình luận (12)</div>
+          >Đánh giá & Bình luận ({totalReviews})</div>
           <div 
             className={`tab-link ${activeTab === 'shipping' ? 'active' : ''}`} 
             onClick={() => setActiveTab('shipping')}
@@ -303,24 +409,19 @@ export default function ProductDetail() {
           <div className="reviews-grid">
             <div className="review-stats">
               <div className="big-rating">
-                <h2>4.8</h2>
+                <h2>{averageRating}</h2>
                 <div className="stars" style={{ justifyContent: 'center', margin: '0.5rem 0' }}>
-                  <Star fill="#FFB300" />
-                  <Star fill="#FFB300" />
-                  <Star fill="#FFB300" />
-                  <Star fill="#FFB300" />
-                  <StarHalf fill="#FFB300" />
+                  {[1, 2, 3, 4, 5].map((s) => {
+                    const diff = averageRating - s;
+                    if (diff >= 0) return <Star key={s} fill="#FFB300" stroke="#FFB300" size={16} />;
+                    if (diff > -1) return <StarHalf key={s} fill="#FFB300" stroke="#FFB300" size={16} />;
+                    return <Star key={s} stroke="#FFB300" size={16} />;
+                  })}
                 </div>
-                <p className="review-count">Dựa trên 12 đánh giá</p>
+                <p className="review-count">Dựa trên {totalReviews} đánh giá</p>
               </div>
               <div className="rating-bars">
-                {[
-                  { star: 5, pct: 85 },
-                  { star: 4, pct: 10 },
-                  { star: 3, pct: 5 },
-                  { star: 2, pct: 0 },
-                  { star: 1, pct: 0 },
-                ].map(b => (
+                {starPercentages.map(b => (
                   <div className="bar-item" key={b.star}>
                     <span>{b.star} sao</span>
                     <div className="bar-bg">
@@ -333,44 +434,125 @@ export default function ProductDetail() {
             </div>
 
             <div className="reviews-main">
-              <div className="comment-form-container">
-                <div className="comment-form">
-                  <h3>Viết đánh giá của bạn</h3>
-                  <div className="star-rating-input">
-                    <Star size={24} />
-                    <Star size={24} />
-                    <Star size={24} />
-                    <Star size={24} />
-                    <Star size={24} />
-                  </div>
-                  <div className="form-group">
-                    <label>Bình luận</label>
-                    <textarea rows="4" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."></textarea>
-                  </div>
-                  <button className="submit-comment" onClick={() => alert('Tính năng bình luận đang phát triển (TODO)')}>Gửi đánh giá</button>
+              {eligibleItem ? (
+                <div className="comment-form-container" style={{ marginBottom: '2rem' }}>
+                  <form className="comment-form" onSubmit={handleReviewSubmit}>
+                    <h3>Viết đánh giá của bạn</h3>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                      Đánh giá cho đơn hàng <strong>{eligibleItem.don_hang?.MaDonHangCon || `#${eligibleItem.ID_DonHang}`}</strong>
+                    </p>
+                    <div className="star-rating-input" style={{ display: 'flex', gap: '8px', marginBottom: '1rem', cursor: 'pointer' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star 
+                          key={star} 
+                          size={24} 
+                          fill={star <= ratingInput ? "#FFB300" : "none"} 
+                          stroke="#FFB300"
+                          onClick={() => setRatingInput(star)}
+                        />
+                      ))}
+                    </div>
+                    <div className="form-group" style={{ marginBottom: '1rem' }}>
+                      <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Bình luận *</label>
+                      <textarea 
+                        rows="4" 
+                        required
+                        value={commentInput}
+                        onChange={(e) => setCommentInput(e.target.value)}
+                        placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
+                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                      ></textarea>
+                    </div>
+                    
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                      <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Hình ảnh thực tế</label>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => setImageFile(e.target.files[0])}
+                        style={{ display: 'block', width: '100%' }}
+                      />
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="submit-comment"
+                      disabled={submittingReview}
+                      style={{ padding: '0.75rem 2rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                      {submittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
+                    </button>
+                  </form>
                 </div>
-              </div>
+              ) : null}
 
               <div className="review-list">
-                <div className="review-item">
-                  <div className="review-header">
-                    <div className="user-info">
-                      <img src="https://ui-avatars.com/api/?name=Nguyễn+Văn+A&background=random" className="user-avatar" alt="User" />
-                      <div>
-                        <div className="user-name">Nguyễn Văn An</div>
-                        <div className="stars">
-                          <Star fill="#FFB300" size={14} />
-                          <Star fill="#FFB300" size={14} />
-                          <Star fill="#FFB300" size={14} />
-                          <Star fill="#FFB300" size={14} />
-                          <Star fill="#FFB300" size={14} />
+                {reviewsLoading ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Đang tải đánh giá...</div>
+                ) : reviews.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Sản phẩm này chưa có đánh giá nào.</div>
+                ) : (
+                  reviews.map((rev) => (
+                    <div className="review-item" key={rev.ID_DanhGia} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                      <div className="review-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div className="user-info" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <img 
+                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(rev.user?.HoTen || 'K')}&background=random`} 
+                            className="user-avatar" 
+                            alt="User" 
+                            style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                          />
+                          <div>
+                            <div className="user-name" style={{ fontWeight: 'bold', color: 'var(--text-dark)' }}>{rev.user?.HoTen || 'Khách hàng ẩn danh'}</div>
+                            <div className="stars" style={{ display: 'flex', gap: '2px' }}>
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star} 
+                                  size={14} 
+                                  fill={star <= rev.XepLoai ? "#FFB300" : "none"} 
+                                  stroke="#FFB300"
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="review-date" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                          {rev.NgayDanhGia ? new Date(rev.NgayDanhGia).toLocaleDateString('vi-VN') : '—'}
                         </div>
                       </div>
+                      
+                      <p className="review-content" style={{ margin: '0.5rem 0', color: 'var(--text-dark)', lineHeight: 1.5 }}>
+                        {rev.BinhLuan || 'Không có bình luận.'}
+                      </p>
+
+                      {rev.HinhAnh && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <img 
+                            src={`http://127.0.0.1:8000/storage/${rev.HinhAnh}`} 
+                            alt="Hình ảnh thực tế từ khách hàng" 
+                            style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-color)' }} 
+                            onError={(e) => e.target.style.display = 'none'}
+                          />
+                        </div>
+                      )}
+
+                      {/* Phản hồi từ Shop nếu có */}
+                      {rev.phan_hoi && (
+                        <div style={{ marginTop: '1rem', background: '#F8F5F1', padding: '1rem', borderRadius: '8px', borderLeft: '3px solid var(--gold)' }}>
+                          <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '4px', color: 'var(--text-dark)' }}>
+                            🏪 Phản hồi từ người bán:
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                            {rev.phan_hoi.NoiDungPhanHoi}
+                          </p>
+                          <small style={{ display: 'block', marginTop: '6px', color: 'rgba(0,0,0,0.3)', fontSize: '0.75rem' }}>
+                            {new Date(rev.phan_hoi.NgayPhanHoi).toLocaleDateString('vi-VN')}
+                          </small>
+                        </div>
+                      )}
                     </div>
-                    <div className="review-date">2 ngày trước</div>
-                  </div>
-                  <p className="review-content">Sản phẩm rất ngon, đóng gói kỹ càng. Giao hàng nhanh hơn dự kiến. Rất hài lòng!</p>
-                </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

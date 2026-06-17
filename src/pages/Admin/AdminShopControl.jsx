@@ -602,7 +602,7 @@ function AdminShopControl() {
                         </div>
 
                         {/* Modal Body */}
-                        <div style={{ padding: '1.5rem 2rem', flex: 1 }}>
+                        <div style={{ padding: '1.5rem 2rem', flex: 1, overflowX: 'auto' }}>
                             {productsLoading ? (
                                 <div style={{ textAlign: 'center', padding: '3rem', color: '#8C7B6D' }}>
                                     <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>

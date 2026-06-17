@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../../styles/navbar-admin.css';
-import { Search, Eye, Edit, Trash2, Plus, ArrowLeft, Save, X, Calendar, User } from 'lucide-react';
+import { Search, Eye, Edit, Trash2, Plus, ArrowLeft, Save, X, Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import Swal from 'sweetalert2';
@@ -16,6 +16,7 @@ function BaiVietControler() {
     const [viewMode, setViewMode] = useState('list');
     const [selectedBlog, setSelectedBlog] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(1);
     const [addFormData, setAddFormData] = useState({
         tittel: "",
         tomtat: "",
@@ -33,18 +34,23 @@ function BaiVietControler() {
         ID_TinhThanh: ""
     });
     const [formErrors, setFormErrors] = useState({});
-    const { data: blogs = [], refetch } = useQuery({
-        queryKey: ['blogs', searchTerm],
+    const { data: blogsResponse, refetch } = useQuery({
+        queryKey: ['blogs', searchTerm, page],
         queryFn: async () => {
-            const api = searchTerm
-                ? `/admin/BlogControl?search=${encodeURIComponent(searchTerm)}`
-                : '/admin/BlogControl';
-
+            const params = new URLSearchParams();
+            if (searchTerm) params.append('search', searchTerm);
+            params.append('page', page);
+            
+            const api = `/admin/BlogControl?${params.toString()}`;
             const response = await axiosClient.get(api);
-            return response.data?.data?.data || response.data?.data || [];
+            return response.data || {};
         },
         staleTime: 100,
+        keepPreviousData: true
     });
+
+    const blogs = blogsResponse?.data?.data || [];
+    const pagination = blogsResponse?.data || {};
     const { data: TinhThanh = [] } = useQuery({
         queryKey: ['tinhthanh'],
         queryFn: async () => {
@@ -200,7 +206,7 @@ function BaiVietControler() {
                                 type="text"
                                 placeholder="Tìm tiêu đề, tác giả..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                             />
                         </div>
 
@@ -276,7 +282,7 @@ function BaiVietControler() {
                                     </p>
                                     {searchTerm && (
                                         <button
-                                            onClick={() => setSearchTerm('')}
+                                            onClick={() => { setSearchTerm(''); setPage(1); }}
                                             style={{
                                                 marginTop: '1rem',
                                                 padding: '6px 12px',
@@ -294,6 +300,41 @@ function BaiVietControler() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Pagination Controls */}
+                        {pagination.last_page > 1 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)' }}>
+                                <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>
+                                    Trang {pagination.current_page} / {pagination.last_page} (Hiển thị {pagination.from} - {pagination.to} trong tổng số {pagination.total} bài viết)
+                                </span>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button 
+                                        disabled={page === 1}
+                                        onClick={() => setPage(p => Math.max(p - 1, 1))}
+                                        style={{
+                                            background: page === 1 ? '#E5E7EB' : '#F3F4F6',
+                                            color: '#374151', border: '1px solid #D1D5DB', padding: '0.5rem 1rem',
+                                            borderRadius: '8px', cursor: page === 1 ? 'not-allowed' : 'pointer',
+                                            display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500
+                                        }}
+                                    >
+                                        <ChevronLeft size={16} /> Trước
+                                    </button>
+                                    <button 
+                                        disabled={page === pagination.last_page}
+                                        onClick={() => setPage(p => Math.min(p + 1, pagination.last_page))}
+                                        style={{
+                                            background: page === pagination.last_page ? '#E5E7EB' : '#F3F4F6',
+                                            color: '#374151', border: '1px solid #D1D5DB', padding: '0.5rem 1rem',
+                                            borderRadius: '8px', cursor: page === pagination.last_page ? 'not-allowed' : 'pointer',
+                                            display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500
+                                        }}
+                                    >
+                                        Sau <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

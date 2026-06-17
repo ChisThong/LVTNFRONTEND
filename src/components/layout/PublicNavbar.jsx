@@ -38,6 +38,16 @@ const IconBox = () => (
     <line x1="12" y1="22.08" x2="12" y2="12"/>
   </svg>
 );
+const IconMenu = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+);
+const IconClose = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
 
 /* ═══════════════════════════════════════════════════════════
    PublicNavbar — dùng cho tất cả trang Public
@@ -46,6 +56,7 @@ export default function PublicNavbar() {
   const [scrolled, setScrolled]         = useState(false);
   const [user, setUser]                 = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef                     = useRef(null);
   const navigate                        = useNavigate();
 
@@ -114,14 +125,14 @@ export default function PublicNavbar() {
         </Link>
 
         {/* Nav links — NavLink tự active theo route */}
-        <div className="nav-links">
+        <div className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           {/* "/" — end prop: chỉ active khi path === "/" */}
-          <NavLink to="/" end className={navClass}>Trang chủ</NavLink>
-          <NavLink to="/about"    className={navClass}>Giới thiệu</NavLink>
+          <NavLink to="/" end className={navClass} onClick={() => setMobileMenuOpen(false)}>Trang chủ</NavLink>
+          <NavLink to="/about"    className={navClass} onClick={() => setMobileMenuOpen(false)}>Giới thiệu</NavLink>
           {/* "/products" — active khi /products hoặc /products/:id */}
-          <NavLink to="/products" className={navClass}>Đặc sản</NavLink>
-          <NavLink to="/map"      className={navClass}>Bản đồ đặc sản</NavLink>
-          <NavLink to="/stories"  className={navClass}>Câu chuyện sản vật</NavLink>
+          <NavLink to="/products" className={navClass} onClick={() => setMobileMenuOpen(false)}>Đặc sản</NavLink>
+          <NavLink to="/map"      className={navClass} onClick={() => setMobileMenuOpen(false)}>Bản đồ đặc sản</NavLink>
+          <NavLink to="/stories"  className={navClass} onClick={() => setMobileMenuOpen(false)}>Câu chuyện sản vật</NavLink>
         </div>
 
         {/* Actions */}
@@ -176,6 +187,11 @@ export default function PublicNavbar() {
             </Link>
           )}
         </div>
+
+        {/* Hamburger Menu Toggle Button for Mobile */}
+        <button className="mobile-toggle-btn" onClick={() => setMobileMenuOpen(prev => !prev)} aria-label="Toggle navigation">
+          {mobileMenuOpen ? <IconClose /> : <IconMenu />}
+        </button>
 
       </div>
     </nav>

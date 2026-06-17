@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../../styles/navbar-admin.css';
-import { Search, ChevronRight, Edit, Trash2, Plus, ArrowLeft, Save, X } from 'lucide-react';
+import { Search, ChevronRight, ChevronLeft, Edit, Trash2, Plus, ArrowLeft, Save, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
 import axiosClient from '../../api/axiosClient'; 
@@ -15,6 +15,7 @@ function BanDoControl() {
     const [xa, setXa] = useState('');
     const [ap, setAp] = useState('');
     const [searchMap, setSearchMap] = useState('');
+    const [page, setPage] = useState(1);
 
     // 2. CÁC STATE QUẢN LÝ FORM (THÊM / SỬA)
     const [editingId, setEditingId] = useState(null); 
@@ -31,24 +32,26 @@ function BanDoControl() {
     const [hinhAnhFile, setHinhAnhFile] = useState(null); 
 
     // ==================== CÁC KHỐI HOOK GỌI API (DANH SÁCH) ====================
-    const { data: mapData = [], isLoading } = useQuery({
-        queryKey: ['maps', tinhthanh, xa, ap, searchMap],
+    const { data, isLoading } = useQuery({
+        queryKey: ['maps', tinhthanh, xa, ap, searchMap, page],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (tinhthanh) params.append('ID_TinhThanh', tinhthanh);
             if (xa) params.append('ID_Xa', xa);
             if (ap) params.append('ID_Ap', ap);
             if (searchMap) params.append('search_map', searchMap);
+            params.append('page', page);
             
-            const api = `/admin/bandoControl${params.toString() ? `?${params.toString()}` : ''}`;
+            const api = `/admin/bandoControl?${params.toString()}`;
             const response = await axiosClient.get(api);
-            return response?.data?.data?.data  
-                || response?.data?.data        
-                || response?.data              
-                || [];
+            return response?.data || {};
         },
         staleTime: 1000,
+        keepPreviousData: true
     });
+
+    const mapData = data?.data?.data || [];
+    const pagination = data?.data || {};
 
     const { data: TinhThanh = [] } = useQuery({
         queryKey: ['tinhthanh'],
@@ -231,7 +234,7 @@ function BanDoControl() {
                                 type="text"
                                 placeholder="Tìm kiếm điểm ghim (đặc sản)..."
                                 value={searchMap} 
-                                onChange={(e) => setSearchMap(e.target.value)}
+                                onChange={(e) => { setSearchMap(e.target.value); setPage(1); }}
                             />
                         </div>
                         <button className="btn-action btn-primary" onClick={handleOpenAdd} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -239,13 +242,13 @@ function BanDoControl() {
                         </button>
                     </div>
 
-                    <div className="map-config-layout" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                    <div className="map-config-layout">
                         {/* CỘT TRÁI: CÂY THƯ MỤC */}
-                        <div className="province-list" style={{ width: '300px', flexShrink: 0 }}>
+                        <div className="province-list">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                 <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: 'var(--text-main)', textTransform: 'uppercase' }}>Khu vực hành chính</h2>
                                 {(tinhthanh || xa || ap) && (
-                                    <button onClick={() => { setTinhThanh(''); setXa(''); setAp(''); setSelectedRegion('Tất cả'); }} style={{ fontSize: '0.8rem', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Xóa lọc</button>
+                                    <button onClick={() => { setTinhThanh(''); setXa(''); setAp(''); setSelectedRegion('Tất cả'); setPage(1); }} style={{ fontSize: '0.8rem', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Xóa lọc</button>
                                 )}
                             </div>
 
@@ -253,7 +256,7 @@ function BanDoControl() {
                                 const isProvinceActive = tinhthanh === String(tinh.ID_TinhThanh);
                                 return (
                                     <div className="tree-node-container" key={tinh.ID_TinhThanh} style={{ marginBottom: '0.4rem' }}>
-                                        <div className={`province-item ${isProvinceActive ? 'active' : ''}`} onClick={() => { setTinhThanh(isProvinceActive ? '' : String(tinh.ID_TinhThanh)); setSelectedRegion(tinh.TenTinhThanh); setXa(''); setAp(''); }}>
+                                        <div className={`province-item ${isProvinceActive ? 'active' : ''}`} onClick={() => { setTinhThanh(isProvinceActive ? '' : String(tinh.ID_TinhThanh)); setSelectedRegion(tinh.TenTinhThanh); setXa(''); setAp(''); setPage(1); }}>
                                             <span>{tinh.TenTinhThanh}</span>
                                             <ChevronRight size={16} style={{ transition: 'transform 0.25s', transform: isProvinceActive ? 'rotate(90deg)' : 'none' }} />
                                         </div>
@@ -265,7 +268,7 @@ function BanDoControl() {
                                                     const tenXaSach = xaxa.Ten_xa || "Chưa có tên";
                                                     return (
                                                         <div className="tree-node-container" key={xaxa.ID_Xa}>
-                                                            <div className={`tree-item ${isXaActive ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setXa(isXaActive ? '' : String(xaxa.ID_Xa)); setSelectedRegion(`${tinh.TenTinhThanh} - ${tenXaSach}`); setAp(''); }}>
+                                                            <div className={`tree-item ${isXaActive ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setXa(isXaActive ? '' : String(xaxa.ID_Xa)); setSelectedRegion(`${tinh.TenTinhThanh} - ${tenXaSach}`); setAp(''); setPage(1); }}>
                                                                 <span>{tenXaSach}</span>
                                                                 <ChevronRight size={14} style={{ transition: 'transform 0.25s', transform: isXaActive ? 'rotate(90deg)' : 'none' }} />
                                                             </div>
@@ -276,7 +279,7 @@ function BanDoControl() {
                                                                         const isApActive = ap === String(apap.ID_Ap);
                                                                         const tenApSach = apap.Ten_ap || "Chưa có tên";
                                                                         return (
-                                                                            <div key={apap.ID_Ap} className={`tree-sub-item ${isApActive ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setAp(isApActive ? '' : String(apap.ID_Ap)); setSelectedRegion(`${tinh.TenTinhThanh} - ${tenXaSach} - ${tenApSach}`); }}>
+                                                                            <div key={apap.ID_Ap} className={`tree-sub-item ${isApActive ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setAp(isApActive ? '' : String(apap.ID_Ap)); setSelectedRegion(`${tinh.TenTinhThanh} - ${tenXaSach} - ${tenApSach}`); setPage(1); }}>
                                                                                 {tenApSach}
                                                                             </div>
                                                                         );
@@ -294,11 +297,11 @@ function BanDoControl() {
                         </div>
 
                         {/* CỘT PHẢI: BẢNG DỮ LIỆU */}
-                        <div className="map-pins-area" style={{ flexGrow: 1 }}>
+                        <div className="map-pins-area">
                             <div className="admin-card" style={{ marginBottom: 0 }}>
                                 <div className="card-header" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3 style={{ fontSize: '1.1rem', fontWeight: 750, margin: 0 }}>Điểm ghim tại: <span style={{ color: 'var(--sidebar-active)' }}>{selectedRegion}</span></h3>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>{mapData.length} địa điểm</span>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>{pagination.total || mapData.length} địa điểm</span>
                                 </div>
 
                                 <div className="admin-table-wrapper">
@@ -336,6 +339,41 @@ function BanDoControl() {
                                         <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>Không có điểm ghim nào tại khu vực này.</div>
                                     )}
                                 </div>
+
+                                {/* Pagination Controls */}
+                                {pagination.last_page > 1 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                                        <span style={{ fontSize: '0.85rem', color: '#6B7280' }}>
+                                            Trang {pagination.current_page} / {pagination.last_page} (Hiển thị {pagination.from} - {pagination.to} của {pagination.total})
+                                        </span>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button 
+                                                disabled={page === 1}
+                                                onClick={() => setPage(p => Math.max(p - 1, 1))}
+                                                style={{
+                                                    background: page === 1 ? '#E5E7EB' : '#F3F4F6',
+                                                    color: '#374151', border: '1px solid #D1D5DB', padding: '0.4rem 0.8rem',
+                                                    borderRadius: '6px', cursor: page === 1 ? 'not-allowed' : 'pointer',
+                                                    display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500, fontSize: '0.85rem'
+                                                }}
+                                            >
+                                                <ChevronLeft size={14} /> Trước
+                                            </button>
+                                            <button 
+                                                disabled={page === pagination.last_page}
+                                                onClick={() => setPage(p => Math.min(p + 1, pagination.last_page))}
+                                                style={{
+                                                    background: page === pagination.last_page ? '#E5E7EB' : '#F3F4F6',
+                                                    color: '#374151', border: '1px solid #D1D5DB', padding: '0.4rem 0.8rem',
+                                                    borderRadius: '6px', cursor: page === pagination.last_page ? 'not-allowed' : 'pointer',
+                                                    display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500, fontSize: '0.85rem'
+                                                }}
+                                            >
+                                                Sau <ChevronRight size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -58,3 +58,18 @@ export const formatPrice = (price) => {
   if (isNaN(num)) return '—';
   return num.toLocaleString('vi-VN') + 'đ';
 };
+
+/**
+ * GET /api/products/{id}/reviews  — Public, lấy danh sách đánh giá
+ */
+export const getProductReviews = (id) => {
+  return axiosClient.get(`/products/${id}/reviews`);
+};
+
+/**
+ * POST /api/reviews  — Protected, gửi đánh giá mới
+ */
+export const createProductReview = (data) => {
+  return axiosClient.post('/reviews', data);
+};
+

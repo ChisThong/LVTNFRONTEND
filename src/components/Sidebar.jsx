@@ -8,7 +8,7 @@ import {
     ShoppingCart, Archive, Star, ChevronDown
 } from 'lucide-react';
 
-function Sidebar({ role }) {
+function Sidebar({ role, mobileOpen, setMobileOpen }) {
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -46,6 +46,7 @@ function Sidebar({ role }) {
     const handleMenuClick = () => {
         setCollapsed(true);
         localStorage.setItem(storageKey, "true");
+        if (setMobileOpen) setMobileOpen(false);
     };
 
     // User info & Logout logic (Unified Footer)
@@ -85,7 +86,7 @@ function Sidebar({ role }) {
     };
 
     return (
-        <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
+        <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
             <div className="sidebar-header" style={{ position: 'relative', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                 <NavLink to={dashboardLink} className="admin-logo">
                     <span className="admin-logo-icon" style={{ fontSize: '1.8rem' }}>{logoIcon}</span>

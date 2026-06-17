@@ -203,12 +203,11 @@ function NguoiDungControl() {
                         />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div className="filter-select-group">
                         <select 
                             value={filterRole} 
                             onChange={(e) => { setFilterRole(e.target.value); setPage(1); }}
                             className="admin-form-control"
-                            style={{ width: 'auto', minWidth: '150px' }}
                         >
                             <option value="">Tất cả vai trò</option>
                             <option value="1">Quản Trị Viên</option>
