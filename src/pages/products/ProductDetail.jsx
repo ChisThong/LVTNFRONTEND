@@ -104,7 +104,16 @@ export default function ProductDetail() {
     if (existing) {
       existing.qty += qty;
     } else {
-      cart.push({ id: product.ID_SanPham, name: product.TenSanPham, qty, price: product.Gia });
+      const hinhAnhUrl = product.hinh_anh && product.hinh_anh.length > 0 ? product.hinh_anh[0].HinhAnh : null;
+      cart.push({ 
+        id: product.ID_SanPham, 
+        name: product.TenSanPham, 
+        qty, 
+        price: product.Gia,
+        HinhAnh: hinhAnhUrl,
+        ID_Shop: product.shop?.ID_Shop || 'shop_0',
+        TenShop: product.shop?.TenShop || 'Gian hàng đặc sản'
+      });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new CustomEvent('cart-change'));
@@ -114,8 +123,7 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     handleAddToCart();
-    alert("Chuyển đến trang thanh toán (TODO)");
-    // navigate('/checkout'); // TODO
+    navigate('/checkout');
   };
 
   const handleReviewSubmit = async (e) => {

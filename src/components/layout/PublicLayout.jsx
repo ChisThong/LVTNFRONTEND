@@ -8,10 +8,12 @@ import PublicFooter from './PublicFooter';
    ═══════════════════════════════════════════════════════════ */
 export default function PublicLayout() {
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <PublicNavbar />
-      <Outlet />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Outlet />
+      </div>
       <PublicFooter />
-    </>
+    </div>
   );
 }

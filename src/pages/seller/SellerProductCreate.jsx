@@ -378,11 +378,11 @@ export default function SellerProductCreate() {
             </label>
 
             {imagePreviews.length > 0 && (
-              <div className="sp-image-grid">
+              <div className="current-images">
                 {imagePreviews.map((url, idx) => (
-                  <div key={idx} className="sp-image-item">
+                  <div key={idx} className="current-image-item">
                     <img src={url} alt={`Preview ${idx + 1}`} />
-                    <button type="button" className="sp-image-remove" onClick={() => removeImage(idx)}>×</button>
+                    <button type="button" className="remove-icon" onClick={() => removeImage(idx)}>×</button>
                     {idx === 0 && <span className="sp-image-main-badge">Ảnh chính</span>}
                   </div>
                 ))}

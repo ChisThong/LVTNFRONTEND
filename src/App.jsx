@@ -3,16 +3,20 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // ── Layout ──────────────────────────────────────────────────
 import PublicLayout from './components/layout/PublicLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+
 import SellerLayout from './components/SellerLayout';
 
 // ── Public Pages ────────────────────────────────────────────
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import VerifyOtp from './pages/VerifyOtp';
+import CartPage from './pages/cart/CartPage';
 import ProductList from './pages/products/ProductList';
 import ProductDetail from './pages/products/ProductDetail';
 import ShopDetail from './pages/shops/ShopDetail';
+import AccountPage from './pages/account/AccountPage';
 
 // ── Seller Pages ────────────────────────────────────────────
 import SellerRegister from './pages/seller/SellerRegister';
@@ -21,6 +25,18 @@ import SellerShopEdit from './pages/seller/SellerShopEdit';
 import SellerProducts from './pages/seller/SellerProducts';
 import SellerProductCreate from './pages/seller/SellerProductCreate';
 import SellerProductEdit from './pages/seller/SellerProductEdit';
+import SellerOrders from './pages/seller/SellerOrders';
+
+// ── Wallet Pages ────────────────────────────────────────────
+import WalletPage from './pages/wallet/WalletPage';
+import DepositPage from './pages/wallet/DepositPage';
+import WalletTransactions from './pages/wallet/WalletTransactions';
+import WithdrawPage from './pages/wallet/WithdrawPage';
+import PaymentSuccess from './pages/wallet/PaymentSuccess';
+import VNPayReturnPage from './pages/checkout/VNPayReturnPage';
+import AdminWalletDashboard from './pages/admin/AdminWalletDashboard';
+import CheckoutPage from './pages/checkout/CheckoutPage';
+import OrderHistory from './pages/orders/OrderHistory';
 
 // ── Admin Pages ─────────────────────────────────────────────
 import Admin from './pages/Admin/Admin';
@@ -34,16 +50,22 @@ import DonHangControl from './pages/Admin/DonHangControl';
 import CauChuyenSanVat from './pages/shops/CauChuyenSanVat';
 import BaiVietTinhThanh from './pages/shops/BaiVietTinhThanh';
 
+import { WalletProvider } from './context/WalletContext';
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <WalletProvider>
+      <BrowserRouter>
+        <Toaster position="top-center" reverseOrder={false} />
+        <Routes>
 
         {/* ════════════════════════════════════════════════
             PUBLIC ROUTES — dùng PublicLayout (Navbar + Footer)
             ════════════════════════════════════════════════ */}
         <Route element={<PublicLayout />}>
           <Route path="/"           element={<Home />} />
+          <Route path="/cart"       element={<CartPage />} />
           <Route path="/about"      element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Giới thiệu (Đang phát triển)</h1></div>} />
           <Route path="/products"   element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
@@ -53,6 +75,10 @@ function App() {
           <Route path="/tinh-thanh/:id/blogs" element={<BaiVietTinhThanh />} />
           <Route path="/privacy"    element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Chính sách bảo mật (Đang phát triển)</h1></div>} />
           <Route path="/terms"      element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Điều khoản sử dụng (Đang phát triển)</h1></div>} />
+          {/* VNPay redirect target */}
+          <Route path="/thanh-toan-thanh-cong" element={<VNPayReturnPage />} />
+          {/* Backward compat alias */}
+          <Route path="/payment-success" element={<VNPayReturnPage />} />
           {/* Redirect backward-compat */}
           <Route path="/specialties" element={<Navigate to="/products" replace />} />
           <Route path="/intro"       element={<Navigate to="/stories"  replace />} />
@@ -64,6 +90,22 @@ function App() {
         <Route path="/login"      element={<Login />} />
         <Route path="/register"   element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* ════════════════════════════════════════════════
+            WALLET ROUTES — ProtectedRoute
+            ════════════════════════════════════════════════ */}
+        <Route element={<ProtectedRoute allowedRoles={[1, 2, 3]} />}>
+          <Route element={<PublicLayout />}>
+            <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/wallet/deposit" element={<DepositPage />} />
+            <Route path="/wallet/transactions" element={<WalletTransactions />} />
+            <Route path="/wallet/withdraw" element={<WithdrawPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders" element={<OrderHistory />} />
+            <Route path="/account" element={<AccountPage />} />
+          </Route>
+        </Route>
 
         {/* ════════════════════════════════════════════════
             SELLER ROUTES — ProtectedRoute + SellerLayout
@@ -80,10 +122,11 @@ function App() {
             <Route path="products"          element={<SellerProducts />} />
             <Route path="products/create"   element={<SellerProductCreate />} />
             <Route path="products/edit/:id" element={<SellerProductEdit />} />
-            <Route path="orders"     element={<div style={{ padding: '2rem' }}><h2>Quản lý đơn hàng (Đang phát triển)</h2></div>} />
+            <Route path="orders"     element={<SellerOrders />} />
             <Route path="inventory"  element={<div style={{ padding: '2rem' }}><h2>Quản lý kho (Đang phát triển)</h2></div>} />
             <Route path="revenue"    element={<div style={{ padding: '2rem' }}><h2>Thống kê doanh thu (Đang phát triển)</h2></div>} />
             <Route path="reviews"    element={<div style={{ padding: '2rem' }}><h2>Đánh giá khách hàng (Đang phát triển)</h2></div>} />
+            <Route path="wallet"     element={<WalletPage />} />
           </Route>
         </Route>
 
@@ -100,6 +143,7 @@ function App() {
             <Route path="posts"     element={<BaiVietControler />} />
             <Route path="regions"   element={<BanDoControl />} />
             <Route path="users"     element={<NguoiDungControl />} />
+            <Route path="wallet"    element={<AdminWalletDashboard />} />
           </Route>
         </Route>
 
@@ -110,6 +154,7 @@ function App() {
 
       </Routes>
     </BrowserRouter>
+    </WalletProvider>
   );
 }
 

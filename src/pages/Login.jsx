@@ -209,7 +209,7 @@ export default function Login() {
                 />
                 Ghi nhớ đăng nhập
               </label>
-              <a href="#" className="auth-forgot-link">Quên mật khẩu?</a>
+              <Link to="/forgot-password" className="auth-forgot-link">Quên mật khẩu?</Link>
             </div>
 
             {/* Submit */}
