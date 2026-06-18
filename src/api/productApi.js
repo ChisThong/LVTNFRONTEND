@@ -1,15 +1,12 @@
 import axiosClient from './axiosClient';
 
 /**
- * GET /api/products?ID_Shop={shopId}
- * Lấy danh sách sản phẩm của shop seller (lọc theo ID_Shop)
- * Backend index() hỗ trợ filter ?ID_Shop=...
- * Lưu ý: backend chỉ trả về TrangThai=1, seller cần xem cả ẩn
- * nên ta fetch tất cả theo shopId (kể cả TrangThai=0 sẽ hiện trong list)
+ * GET /api/seller/products
+ * Lấy danh sách sản phẩm của shop seller (kể cả chưa duyệt, bị ẩn)
  */
 export const getSellerProducts = (shopId, params = {}) => {
-  return axiosClient.get('/products', {
-    params: { ID_Shop: shopId, per_page: 100, ...params },
+  return axiosClient.get('/seller/products', {
+    params: { per_page: 100, ...params },
   });
 };
 

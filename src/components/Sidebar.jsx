@@ -149,6 +149,9 @@ function Sidebar({ role }) {
                          <NavLink to="/admin/users" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Quản lý người dùng">
                             <User size={20} /> <span>Quản lý người dùng</span>
                         </NavLink>
+                        <NavLink to="/admin/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Quản lý Ví điện tử">
+                            <span style={{ fontSize: '1.2rem', marginRight: '6px' }}>💰</span> <span>Quản lý Ví điện tử</span>
+                        </NavLink>
                     </>
                 )}
 
@@ -156,6 +159,9 @@ function Sidebar({ role }) {
                     <>
                         <NavLink to="/seller/dashboard" end className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Tổng quan" onClick={handleMenuClick}>
                             <Store size={20} /> <span>Tổng quan</span>
+                        </NavLink>
+                        <NavLink to="/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Ví điện tử của Shop" onClick={handleMenuClick}>
+                            <span style={{ fontSize: '1.2rem', marginRight: '6px' }}>💰</span> <span>Ví điện tử</span>
                         </NavLink>
                         <NavLink to="/seller/products" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Quản lý sản phẩm" onClick={handleMenuClick}>
                             <Package size={20} /> <span>Quản lý sản phẩm</span>

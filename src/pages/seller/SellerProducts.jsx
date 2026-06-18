@@ -29,6 +29,7 @@ export default function SellerProducts() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [approvalFilter, setApprovalFilter] = useState('');
 
   // Phân trang
   const [currentPage, setCurrentPage] = useState(1);
@@ -119,7 +120,8 @@ export default function SellerProducts() {
     const matchSearch = p.TenSanPham?.toLowerCase().includes(search.toLowerCase());
     const matchCat = categoryFilter ? p.phan_loai?.TenLoai === categoryFilter : true;
     const matchStatus = statusFilter !== '' ? parseInt(p.TrangThai) === parseInt(statusFilter) : true;
-    return matchSearch && matchCat && matchStatus;
+    const matchApproval = approvalFilter !== '' ? p.TrangThaiDuyet === approvalFilter : true;
+    return matchSearch && matchCat && matchStatus && matchApproval;
   });
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
@@ -236,9 +238,18 @@ export default function SellerProducts() {
           
           <div className="sp-select-pill">
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-              <option value="">Tất cả trạng thái</option>
+              <option value="">Tất cả bán hàng</option>
               <option value="1">Đang bán</option>
               <option value="0">Ngừng bán</option>
+            </select>
+          </div>
+
+          <div className="sp-select-pill">
+            <select value={approvalFilter} onChange={e => setApprovalFilter(e.target.value)}>
+              <option value="">Tất cả kiểm duyệt</option>
+              <option value="da_duyet">Đã duyệt</option>
+              <option value="cho_duyet">Chờ duyệt</option>
+              <option value="tu_choi">Từ chối</option>
             </select>
           </div>
 
@@ -314,18 +325,23 @@ export default function SellerProducts() {
                           </span>
                         </td>
                         <td>
-                          {product.TrangThaiHienThi === 'an' ? (
-                            <span className="sp-badge-new inactive" style={{background: '#FFF3CD', color: '#856404', marginBottom: '4px', display: 'inline-block'}}>
-                              Bị Admin ẩn
-                            </span>
-                          ) : (
-                            <span className={`sp-badge-new ${isActive ? 'active' : 'inactive'}`} style={{marginBottom: '4px', display: 'inline-block'}}>
-                              {isActive ? 'Đang bán' : 'Ngừng bán'}
-                            </span>
+                          {product.TrangThaiHienThi === 'an' && (
+                            <div style={{marginBottom: '4px'}}>
+                              <span className="sp-badge-new inactive" style={{background: '#FFF3CD', color: '#856404'}}>
+                                Bị Admin ẩn
+                              </span>
+                            </div>
                           )}
-                          <br/>
+                          {product.TrangThaiDuyet === 'da_duyet' && product.TrangThaiHienThi !== 'an' && (
+                            <div style={{marginBottom: '4px'}}>
+                              <span className={`sp-badge-new ${isActive ? 'active' : 'inactive'}`}>
+                                {isActive ? 'Đang bán' : 'Ngừng bán'}
+                              </span>
+                            </div>
+                          )}
+
                           {product.TrangThaiDuyet === 'cho_duyet' && (
-                            <span className="sp-badge-new" style={{background: '#FEF08A', color: '#854D0E'}}>🟡 Chờ duyệt</span>
+                            <span className="sp-badge-new" style={{background: '#FEF08A', color: '#854D0E'}}>🟡 Tạm ẩn - Chờ duyệt</span>
                           )}
                           {product.TrangThaiDuyet === 'da_duyet' && (
                             <span className="sp-badge-new" style={{background: '#BBF7D0', color: '#166534'}}>🟢 Đã duyệt</span>
@@ -340,10 +356,12 @@ export default function SellerProducts() {
                             {shop?.TrangThai !== 0 && (
                               <>
                                 <Link to={`/seller/products/edit/${product.ID_SanPham}`} className="btn-icon edit" title="Sửa"><Edit2 size={16} /></Link>
-                                {isActive ? (
-                                  <button className="btn-icon delete" title="Ngừng bán" onClick={() => setDeleteConfirm(product)}><Trash2 size={16} /></button>
-                                ) : (
-                                  <button className="btn-icon" style={{color: '#166534'}} title="Bán lại" onClick={() => setRestoreConfirm(product)}><RotateCcw size={16} /></button>
+                                {product.TrangThaiDuyet === 'da_duyet' && product.TrangThaiHienThi !== 'an' && (
+                                  isActive ? (
+                                    <button className="btn-icon delete" title="Ngừng bán" onClick={() => setDeleteConfirm(product)}><Trash2 size={16} /></button>
+                                  ) : (
+                                    <button className="btn-icon" style={{color: '#166534'}} title="Bán lại" onClick={() => setRestoreConfirm(product)}><RotateCcw size={16} /></button>
+                                  )
                                 )}
                               </>
                             )}

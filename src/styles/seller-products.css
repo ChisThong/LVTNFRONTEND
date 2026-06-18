@@ -656,6 +656,19 @@
     background: red;
 }
 
+.sp-image-main-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(26, 38, 22, 0.8);
+    color: #D4A373;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
 /* Responsive Grid */
 @media (max-width: 1200px) {
   .sp-content-new {

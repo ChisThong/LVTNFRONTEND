@@ -58,8 +58,7 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     handleAddToCart();
-    alert("Chuyển đến trang thanh toán (TODO)");
-    // navigate('/checkout'); // TODO
+    navigate('/checkout');
   };
 
   const moveGallery = (dir) => {

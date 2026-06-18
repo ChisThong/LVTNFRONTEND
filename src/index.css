@@ -10,6 +10,10 @@
   --green-dark:    #1b5e20;
   --green-light:   #e8f5e9;
   --green-soft:    #a5d6a7;
+  --shopee-orange: #ee4d2d;
+  --shopee-hover:  #f05d40;
+  --shopee-light:  #fff0ed;
+  --shopee-border: #f9d8d1;
   --amber:         #f9a825;
   --amber-dark:    #e65100;
   --danger:        #c62828;
@@ -17,10 +21,10 @@
   --text-main:     #1a1a1a;
   --text-muted:    #555;
   --border:        #d1d5db;
-  --bg-page:       #f7f9f5;
+  --bg-page:       #f5f5f5;
   --bg-card:       #ffffff;
   --radius:        8px;
-  --shadow:        0 2px 12px rgba(0,0,0,0.09);
+  --shadow:        0 1px 4px rgba(0,0,0,0.05);
   --navbar-h:      64px;
 }
 
@@ -603,4 +607,55 @@ a:hover { text-decoration: underline; }
   .page-container { padding: 1.25rem 1rem; }
   .detail-table th { width: 110px; }
   .auth-card { padding: 1.75rem 1.25rem; }
+}
+
+/* ============================================================
+   SHOPEE THEME
+   ============================================================ */
+.shopee-btn {
+  background: var(--shopee-orange);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+.shopee-btn:hover:not(:disabled) {
+  background: var(--shopee-hover);
+  color: #fff;
+}
+.shopee-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.shopee-btn-outline {
+  background: #fff;
+  color: var(--shopee-orange);
+  border: 1px solid var(--shopee-orange);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+.shopee-btn-outline:hover:not(:disabled) {
+  background: var(--shopee-light);
+}
+.shopee-card {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05);
 }

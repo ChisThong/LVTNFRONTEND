@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
+import { useWallet } from '../../context/WalletContext';
 
 /* ── SVG Icons ──────────────────────────────────────────────── */
 const IconSearch = () => (
@@ -48,6 +49,16 @@ export default function PublicNavbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const dropdownRef                     = useRef(null);
   const navigate                        = useNavigate();
+
+  const { wallet, walletLoading, fetchWallet } = useWallet();
+
+  // ── Auto-refresh wallet when user is loaded ──────────────────
+  useEffect(() => {
+    if (user?.ID_User && fetchWallet) {
+      fetchWallet();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.ID_User]);
 
   // ── Scroll effect ────────────────────────────────────────
   useEffect(() => {
@@ -113,15 +124,25 @@ export default function PublicNavbar() {
           <span className="logo-text">NamBộ<span>Specialties</span></span>
         </Link>
 
-        {/* Nav links — NavLink tự active theo route */}
+        {/* Nav links */}
         <div className="nav-links">
-          {/* "/" — end prop: chỉ active khi path === "/" */}
-          <NavLink to="/" end className={navClass}>Trang chủ</NavLink>
-          <NavLink to="/about"    className={navClass}>Giới thiệu</NavLink>
-          {/* "/products" — active khi /products hoặc /products/:id */}
-          <NavLink to="/products" className={navClass}>Đặc sản</NavLink>
-          <NavLink to="/map"      className={navClass}>Bản đồ đặc sản</NavLink>
-          <NavLink to="/stories"  className={navClass}>Câu chuyện sản vật</NavLink>
+          <NavLink to="/" end className={navClass} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center' }}>
+            <span>Trang chủ</span>
+          </NavLink>
+          <NavLink to="/about" className={navClass} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center' }}>
+            <span>Giới thiệu</span>
+          </NavLink>
+          <NavLink to="/products" className={navClass} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center' }}>
+            <span>Đặc sản</span>
+          </NavLink>
+          <NavLink to="/map" className={navClass} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center' }}>
+            <span>Bản đồ</span>
+            <span>đặc sản</span>
+          </NavLink>
+          <NavLink to="/stories" className={navClass} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center' }}>
+            <span>Câu chuyện</span>
+            <span>sản vật</span>
+          </NavLink>
         </div>
 
         {/* Actions */}
@@ -146,10 +167,25 @@ export default function PublicNavbar() {
                 onClick={() => setUserMenuOpen(prev => !prev)}
                 aria-expanded={userMenuOpen}
               >
-                <span>Chào, {user.HoTen?.split(' ').pop() || 'Tài khoản'}</span>
+                {wallet && (
+                  <span 
+                    style={{ color: 'var(--shopee-orange)', fontWeight: 'bold', marginRight: '8px', cursor: 'pointer' }}
+                    title={`Số dư khả dụng: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.balance || 0)}\nĐóng băng: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.frozen_balance || 0)}`}
+                  >
+                    💰 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.balance || 0)}
+                  </span>
+                )}
+                <span>Chào, {user?.HoTen?.split(' ').pop() || 'Tài khoản'}</span>
                 <IconChevronDown />
               </button>
               <div className={`dropdown-menu ${userMenuOpen ? 'show' : ''}`}>
+                <Link to={(user?.shop || user?.role?.ID_role === 3) ? "/seller/wallet" : "/wallet"} onClick={() => setUserMenuOpen(false)}>
+                  💰 Ví của tôi
+                </Link>
+                <Link to="/wallet/deposit" onClick={() => setUserMenuOpen(false)}>
+                  ➕ Nạp tiền VNPay
+                </Link>
+                <div style={{ height: '1px', background: '#eee', margin: '0.5rem 0' }}></div>
                 <Link to="/profile" onClick={() => setUserMenuOpen(false)}>
                   <IconUser /> Tài khoản của tôi
                 </Link>

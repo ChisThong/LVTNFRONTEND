@@ -1,8 +1,8 @@
 :root {
     --admin-bg: #FDF8F1;
     --sidebar-bg: #1A2616;
-    --sidebar-active: #D4A373;
-    --sidebar-active-hover: #c39362;
+    --sidebar-active: #ee4d2d;
+    --sidebar-active-hover: #f05d40;
     --card-bg: #FFFFFF;
     --card-header-bg: #FAF9F7;
     --gold: #D4A373;
@@ -50,7 +50,7 @@ body {
     top: 0;
     display: flex;
     flex-direction: column;
-    z-index: 90;
+    z-index: 110;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
     transition: width 0.3s ease;

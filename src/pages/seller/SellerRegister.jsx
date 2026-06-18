@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
+import PublicNavbar from '../../components/layout/PublicNavbar';
 import { registerShop } from '../../api/shopApi';
 import '../../styles/seller.css';
 
@@ -110,7 +110,7 @@ export default function SellerRegister() {
 
   return (
     <div className="seller-page">
-      <Navbar />
+      <PublicNavbar />
       <div className="seller-register-layout">
 
         {/* ── Cột trái decorative ── */}
