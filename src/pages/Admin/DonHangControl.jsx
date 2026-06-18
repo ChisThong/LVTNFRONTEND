@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import { 
@@ -66,20 +66,43 @@ function DonHangControl() {
         staleTime: 5000,
     });
 
-    // 2. Fetch chi tiết đơn hàng
-    const { data: orderDetail, isLoading: isLoadingDetail } = useQuery({
-        queryKey: ['adminOrderDetail', selectedOrderId],
-        queryFn: async () => {
-            if (!selectedOrderId) return null;
-            const response = await axiosClient.get(`/admin/DonHang/${selectedOrderId}`);
-            return response.data?.data || null;
-        },
-        enabled: !!selectedOrderId,
-        onError: (err) => {
-            console.error('Lỗi khi lấy chi tiết đơn hàng:', err);
-            Swal.fire('Lỗi hệ thống', 'Không thể lấy thông tin chi tiết đơn hàng.', 'error');
+    // 2. Fetch chi tiết đơn hàng an toàn với useEffect
+    const [orderDetail, setOrderDetail] = useState(null);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+    useEffect(() => {
+        if (!selectedOrderId) {
+            setOrderDetail(null);
+            return;
         }
-    });
+
+        let isMounted = true; // Tránh set state khi component unmount
+
+        const fetchOrderDetail = async () => {
+            setIsLoadingDetail(true);
+            try {
+                const response = await axiosClient.get(`/admin/DonHang/${selectedOrderId}`);
+                if (isMounted) {
+                    setOrderDetail(response.data?.data || null);
+                }
+            } catch (err) {
+                console.error('Lỗi khi lấy chi tiết đơn hàng:', err);
+                if (isMounted) {
+                    Swal.fire('Lỗi hệ thống', 'Không thể lấy thông tin chi tiết đơn hàng.', 'error');
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoadingDetail(false);
+                }
+            }
+        };
+
+        fetchOrderDetail();
+
+        return () => {
+            isMounted = false; // Cleanup function
+        };
+    }, [selectedOrderId]); // Dependency mảng chỉ phụ thuộc vào chuỗi/số ID, KHÔNG phụ thuộc object
 
     // Các biến dữ liệu
     const orders = data?.data?.data || [];
@@ -641,9 +664,11 @@ function DonHangControl() {
                                             {orderDetail.chi_tiet && orderDetail.chi_tiet.length > 0 ? (
                                                 orderDetail.chi_tiet.map((item, index) => {
                                                     const sanPham = item.san_pham || {};
-                                                    const price = Number(item.Gia) || 0;
-                                                    const quantity = Number(item.SoLuong) || 0;
-                                                    const total = price * quantity;
+                                                    // DB ChiTietDonHang lưu "TongGia" (Thành tiền), không lưu Đơn Giá.
+                                                    // Nên Đơn giá = TongGia / SoLuong
+                                                    const quantity = Number(item.SoLuong) || 1;
+                                                    const total = Number(item.TongGia) || 0;
+                                                    const price = total / quantity;
                                                     
                                                     return (
                                                         <tr key={index} style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -681,13 +706,34 @@ function DonHangControl() {
                                         </tbody>
                                     </table>
 
-                                    {/* Tổng thanh toán */}
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1.25rem 1.5rem', background: 'var(--card-header-bg)', borderTop: '1px solid var(--border-color)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem' }}>
-                                            <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>Tổng tiền đơn hàng:</span>
-                                            <strong style={{ color: 'var(--gold)', fontSize: '1.4rem', fontWeight: 800 }}>
+                                    {/* Khối Tổng thanh toán (An toàn & Đầy đủ) */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', padding: '1.5rem', background: 'var(--card-header-bg)', borderTop: '1px solid var(--border-color)', gap: '10px' }}>
+                                        
+                                        {/* 1. Tổng tiền sản phẩm */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '350px', fontSize: '1.05rem' }}>
+                                            <span style={{ color: 'var(--text-muted)' }}>Tổng tiền sản phẩm:</span>
+                                            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+                                                {formatPrice(Number(orderDetail.TongGia) || 0)}
+                                            </span>
+                                        </div>
+
+                                        {/* 2. Phí vận chuyển */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '350px', fontSize: '1.05rem' }}>
+                                            <span style={{ color: 'var(--text-muted)' }}>Phí vận chuyển:</span>
+                                            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+                                                {formatPrice(Number(orderDetail.PhiVanChuyen) || 0)}
+                                            </span>
+                                        </div>
+
+                                        {/* Đường kẻ chia */}
+                                        <div style={{ width: '350px', height: '1px', background: 'var(--border-color)', margin: '4px 0' }}></div>
+
+                                        {/* 3. Tổng thanh toán cuối cùng */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '350px', alignItems: 'center', marginTop: '4px' }}>
+                                            <span style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.1rem' }}>Thành tiền:</span>
+                                            <strong style={{ color: '#ee4d2d', fontSize: '1.5rem', fontWeight: 800 }}>
                                                 {formatPrice(
-                                                    orderDetail.chi_tiet?.reduce((acc, curr) => acc + (Number(curr.Gia) * Number(curr.SoLuong)), 0) || 0
+                                                    (Number(orderDetail.TongGia) || 0) + (Number(orderDetail.PhiVanChuyen) || 0)
                                                 )}
                                             </strong>
                                         </div>

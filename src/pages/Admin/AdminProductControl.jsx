@@ -9,6 +9,10 @@ export default function AdminProductControl() {
   const [activeTab, setActiveTab] = useState('all'); // all, cho_duyet, da_duyet, tu_choi, hidden
   const [search, setSearch] = useState('');
   
+  // Filter by Shop
+  const [shops, setShops] = useState([]);
+  const [selectedShopId, setSelectedShopId] = useState('');
+  
   // States cho Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -52,6 +56,8 @@ export default function AdminProductControl() {
       if (activeTab === 'dang_hien') params.trang_thai_hien_thi = 'hien';
       if (activeTab === 'dang_an')   params.trang_thai_hien_thi = 'an';
       
+      if (selectedShopId) params.id_shop = selectedShopId;
+      
       const response = await axiosClient.get('/admin/products', { params });
       
       // Xử lý Out of stock nội bộ ở client hoặc xử lý trên server đều được. 
@@ -91,7 +97,21 @@ export default function AdminProductControl() {
 
   useEffect(() => {
     fetchProducts(1);
-  }, [activeTab]);
+  }, [activeTab, selectedShopId]);
+
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const res = await axiosClient.get('/admin/shops?per_page=100');
+        if (res.data?.data?.data) {
+          setShops(res.data.data.data);
+        }
+      } catch (err) {
+        console.error('Lỗi lấy danh sách shop:', err);
+      }
+    };
+    fetchShops();
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -217,15 +237,38 @@ export default function AdminProductControl() {
       </div>
 
       <div className="filter-section">
-        <form className="search-bar" onSubmit={handleSearch}>
-          <Search size={20} color="#7A6652" />
-          <input 
-            type="text" 
-            placeholder="Tìm kiếm theo tên sản phẩm..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </form>
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', flexWrap: 'wrap' }}>
+          <form className="search-bar" onSubmit={handleSearch} style={{ flex: 1, margin: 0, minWidth: '300px' }}>
+            <Search size={20} color="#7A6652" />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm theo tên sản phẩm..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </form>
+          <select 
+            className="admin-form-control" 
+            value={selectedShopId} 
+            onChange={(e) => setSelectedShopId(e.target.value)}
+            style={{ 
+              padding: '0 1rem', 
+              borderRadius: '8px', 
+              border: '1px solid transparent', 
+              minWidth: '220px', 
+              background: '#F8F5F1', 
+              color: '#4A3B32', 
+              fontWeight: 600, 
+              outline: 'none',
+              height: '46px'
+            }}
+          >
+            <option value="">-- Tất cả gian hàng --</option>
+            {shops.map(shop => (
+              <option key={shop.ID_Shop} value={shop.ID_Shop}>{shop.TenShop}</option>
+            ))}
+          </select>
+        </div>
 
         <div className="status-tabs">
           <button className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>

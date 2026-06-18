@@ -187,8 +187,30 @@ function AdminShopControl() {
         }
     };
 
-    const getProductStatusBadge = (trangThai) => {
-        if (parseInt(trangThai) === 1) {
+    const getProductStatusBadge = (p) => {
+        if (p.TrangThaiDuyet === 'cho_duyet') {
+            return (
+                <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem',
+                    fontWeight: 700, background: '#FEF3C7', color: '#D97706'
+                }}>
+                    Chờ duyệt
+                </span>
+            );
+        }
+        if (p.TrangThaiDuyet === 'tu_choi') {
+            return (
+                <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem',
+                    fontWeight: 700, background: '#FEE2E2', color: '#DC2626'
+                }}>
+                    Từ chối
+                </span>
+            );
+        }
+        if (parseInt(p.TrangThai) === 1) {
             return (
                 <span style={{
                     display: 'inline-flex', alignItems: 'center', gap: '4px',
@@ -205,7 +227,7 @@ function AdminShopControl() {
                 padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem',
                 fontWeight: 700, background: '#F3F4F6', color: '#6B7280'
             }}>
-                Ngừng bán
+                Đã ẩn
             </span>
         );
     };
@@ -678,11 +700,11 @@ function AdminShopControl() {
                                                     </td>
                                                     {/* Tỉnh/Thành */}
                                                     <td style={{ padding: '0.9rem 0.6rem', color: '#4A3B32' }}>
-                                                        {p.tinhThanh?.TenTinhThanh || '—'}
+                                                        {p.tinh_thanh?.TenTinhThanh || p.tinhThanh?.TenTinhThanh || '—'}
                                                     </td>
-                                                    {/* Trạng thái */}
+                                                    {/* Trạng thái (TT) */}
                                                     <td style={{ padding: '0.9rem 0.6rem', textAlign: 'center' }}>
-                                                        {getProductStatusBadge(p.TrangThai)}
+                                                        {getProductStatusBadge(p)}
                                                     </td>
                                                 </tr>
                                             );

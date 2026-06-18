@@ -41,8 +41,21 @@ export default function ShopDetail() {
     e.stopPropagation();
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existing = cart.find(i => i.id === product.ID_SanPham);
-    if (existing) existing.qty += 1;
-    else cart.push({ id: product.ID_SanPham, name: product.TenSanPham, qty: 1, price: product.Gia });
+    
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      const hinhAnhUrl = product.hinh_anh && product.hinh_anh.length > 0 ? product.hinh_anh[0].HinhAnh : null;
+      cart.push({ 
+        id: product.ID_SanPham, 
+        name: product.TenSanPham, 
+        qty: 1, 
+        price: product.Gia,
+        HinhAnh: hinhAnhUrl,
+        ID_Shop: shop?.ID_Shop || product.ID_Shop || 'shop_0',
+        TenShop: shop?.TenShop || 'Gian hàng đặc sản'
+      });
+    }
     
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new CustomEvent('cart-change'));

@@ -5,7 +5,7 @@ import '../styles/navbar-admin.css';
 import { 
     LayoutDashboard, Store, ShoppingBag, Package, Map, FileText, BarChart3, 
     ChevronUp, LogOut, Settings, Home, User, Menu,
-    ShoppingCart, Archive, Star, ChevronDown
+    ShoppingCart, Archive, Star, ChevronDown, Wallet
 } from 'lucide-react';
 
 function Sidebar({ role, mobileOpen, setMobileOpen }) {
@@ -15,8 +15,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
     // Dropdown state for Seller settings menu
     const isShopSettingRoute =
         location.pathname.startsWith("/seller/settings") ||
-        location.pathname.startsWith("/seller/shop/edit") ||
-        location.pathname.startsWith("/seller/payment");
+        location.pathname.startsWith("/seller/shop/edit");
 
     const [shopMenuOpen, setShopMenuOpen] = useState(isShopSettingRoute);
 
@@ -151,7 +150,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                             <User size={20} /> <span>Quản lý người dùng</span>
                         </NavLink>
                         <NavLink to="/admin/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Quản lý Ví điện tử">
-                            <span style={{ fontSize: '1.2rem', marginRight: '6px' }}>💰</span> <span>Quản lý Ví điện tử</span>
+                            <Wallet size={20} /> <span>Quản lý Ví điện tử</span>
                         </NavLink>
                     </>
                 )}
@@ -162,7 +161,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                             <Store size={20} /> <span>Tổng quan</span>
                         </NavLink>
                         <NavLink to="/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Ví điện tử của Shop" onClick={handleMenuClick}>
-                            <span style={{ fontSize: '1.2rem', marginRight: '6px' }}>💰</span> <span>Ví điện tử</span>
+                            <Wallet size={20} /> <span>Ví điện tử</span>
                         </NavLink>
                         <NavLink to="/seller/products" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Quản lý sản phẩm" onClick={handleMenuClick}>
                             <Package size={20} /> <span>Quản lý sản phẩm</span>
@@ -201,9 +200,6 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                             <div className={`submenu-container ${shopMenuOpen ? 'open' : ''}`}>
                                 <NavLink to="/seller/settings/profile" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} style={{ padding: '0.6rem 1rem', fontSize: '0.85rem' }} data-tooltip="Thông tin cửa hàng" onClick={handleMenuClick}>
                                     <User size={16} /> <span>Thông tin cửa hàng</span>
-                                </NavLink>
-                                <NavLink to="/seller/settings/payment" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} style={{ padding: '0.6rem 1rem', fontSize: '0.85rem' }} data-tooltip="Thanh toán" onClick={handleMenuClick}>
-                                    <Store size={16} /> <span>Thanh toán</span>
                                 </NavLink>
                                 <NavLink to="/seller/settings/shipping" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} style={{ padding: '0.6rem 1rem', fontSize: '0.85rem' }} data-tooltip="Vận chuyển" onClick={handleMenuClick}>
                                     <Package size={16} /> <span>Vận chuyển</span>

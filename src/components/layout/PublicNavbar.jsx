@@ -59,6 +59,7 @@ export default function PublicNavbar() {
   const [user, setUser] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -77,6 +78,23 @@ export default function PublicNavbar() {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // ── Sync Cart Count ──────────────────────────────────────
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const total = cart.reduce((sum, item) => sum + (item.SoLuong || item.qty || 1), 0);
+        setCartCount(total);
+      } catch (e) {
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+    window.addEventListener('cart-change', updateCartCount);
+    return () => window.removeEventListener('cart-change', updateCartCount);
   }, []);
 
   // ── Fetch current user ───────────────────────────────────
@@ -168,7 +186,7 @@ export default function PublicNavbar() {
             aria-label="Giỏ hàng"
           >
             <IconCart />
-            <span className="cart-count">0</span>
+            <span className="cart-count">{cartCount}</span>
           </Link>
 
           {/* User dropdown */}
@@ -198,7 +216,7 @@ export default function PublicNavbar() {
                   ➕ Nạp tiền VNPay
                 </Link>
                 <div style={{ height: '1px', background: '#eee', margin: '0.5rem 0' }}></div>
-                <Link to="/profile" onClick={() => setUserMenuOpen(false)}>
+                <Link to="/account" onClick={() => setUserMenuOpen(false)}>
                   <IconUser /> Tài khoản của tôi
                 </Link>
                 <Link to="/orders" onClick={() => setUserMenuOpen(false)}>
