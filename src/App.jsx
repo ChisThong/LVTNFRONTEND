@@ -31,6 +31,8 @@ import AdminShopControl from './pages/Admin/AdminShopControl';
 import AdminProductControl from './pages/Admin/AdminProductControl';
 import NguoiDungControl from './pages/Admin/NguoiDungControl';
 import DonHangControl from './pages/Admin/DonHangControl';
+import CauChuyenSanVat from './pages/shops/CauChuyenSanVat';
+import BaiVietTinhThanh from './pages/shops/BaiVietTinhThanh';
 
 function App() {
   return (
@@ -47,7 +49,8 @@ function App() {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/shops/:id"  element={<ShopDetail />} />
           <Route path="/map"        element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Bản đồ đặc sản (Đang phát triển)</h1></div>} />
-          <Route path="/stories"    element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Câu chuyện sản vật (Đang phát triển)</h1></div>} />
+          <Route path="/stories"    element={<CauChuyenSanVat/>} />
+          <Route path="/tinh-thanh/:id/blogs" element={<BaiVietTinhThanh />} />
           <Route path="/privacy"    element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Chính sách bảo mật (Đang phát triển)</h1></div>} />
           <Route path="/terms"      element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Điều khoản sử dụng (Đang phát triển)</h1></div>} />
           {/* Redirect backward-compat */}
