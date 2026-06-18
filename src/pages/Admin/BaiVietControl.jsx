@@ -1,27 +1,47 @@
 import { useState } from 'react';
 import '../../styles/navbar-admin.css';
-import { Search, Eye, Edit, Trash2, Plus, ArrowLeft, Save, X, Calendar, User } from 'lucide-react';
+import { Search, Eye, Edit, Trash2, Plus, ArrowLeft, Save, X, Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import Swal from 'sweetalert2';
+
+const getYouTubeEmbedUrl = (url) => {
+    if (!url) return null;
+    if (url.includes('youtube.com/embed/') || url.includes('youtube-nocookie.com/embed/')) {
+        return url;
+    }
+    let videoId = '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+        videoId = match[2];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    return null;
+};
 
 const initialFormState = {
     tittel: "",
     tomtat: "",
     noidung: "",
     hinhanh: null,
-    ID_TinhThanh: ""
+    ID_TinhThanh: "",
+    LoaiTin: 0,
+    video_url: ""
 };
 function BaiVietControler() {
     const [viewMode, setViewMode] = useState('list');
     const [selectedBlog, setSelectedBlog] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(1);
     const [addFormData, setAddFormData] = useState({
         tittel: "",
         tomtat: "",
         noidung: "",
         hinhanh: null,
         ID_TinhThanh: "",
+        LoaiTin: 0,
+        video_url: ""
     });
     const [editFormData, setEditFormData] = useState({
         ID_Blog: "",
@@ -30,21 +50,28 @@ function BaiVietControler() {
         noidung: "",
         hinhanh: null,
         current_hinhanh: "",
-        ID_TinhThanh: ""
+        ID_TinhThanh: "",
+        LoaiTin: 0,
+        video_url: ""
     });
     const [formErrors, setFormErrors] = useState({});
-    const { data: blogs = [], refetch } = useQuery({
-        queryKey: ['blogs', searchTerm],
+    const { data: blogsResponse, refetch } = useQuery({
+        queryKey: ['blogs', searchTerm, page],
         queryFn: async () => {
-            const api = searchTerm
-                ? `/admin/BlogControl?search=${encodeURIComponent(searchTerm)}`
-                : '/admin/BlogControl';
-
+            const params = new URLSearchParams();
+            if (searchTerm) params.append('search', searchTerm);
+            params.append('page', page);
+            
+            const api = `/admin/BlogControl?${params.toString()}`;
             const response = await axiosClient.get(api);
-            return response.data?.data?.data || response.data?.data || [];
+            return response.data || {};
         },
         staleTime: 100,
+        keepPreviousData: true
     });
+
+    const blogs = blogsResponse?.data?.data || [];
+    const pagination = blogsResponse?.data || {};
     const { data: TinhThanh = [] } = useQuery({
         queryKey: ['tinhthanh'],
         queryFn: async () => {
@@ -81,7 +108,9 @@ function BaiVietControler() {
             noidung: blog.noidung || "",
             hinhanh: null,
             current_hinhanh: blog.hinhanh || "", 
-            ID_TinhThanh: blog.ID_TinhThanh || ""
+            ID_TinhThanh: blog.ID_TinhThanh || "",
+            LoaiTin: blog.LoaiTin !== undefined ? Number(blog.LoaiTin) : 0,
+            video_url: blog.video_url || ""
         });
         setViewMode('edit');
     };
@@ -97,6 +126,8 @@ function BaiVietControler() {
         dataPayload.append('tomtat', currentData.tomtat || '');
         dataPayload.append('noidung', currentData.noidung);
         dataPayload.append('ID_TinhThanh', currentData.ID_TinhThanh ? Number(currentData.ID_TinhThanh) : '');
+        dataPayload.append('LoaiTin', currentData.LoaiTin !== undefined ? Number(currentData.LoaiTin) : 0);
+        dataPayload.append('video_url', currentData.video_url || '');
 
         if (currentData.hinhanh) {
             dataPayload.append('hinhanh', currentData.hinhanh);
@@ -115,7 +146,7 @@ function BaiVietControler() {
             if (response.data.status === 'success' || response.data.success) {
                 Swal.fire('Thành công', isEdit ? 'Cập nhật bài viết thành công!' : 'Thêm mới bài viết thành công!', 'success');
                 if (isEdit) {
-                    setEditFormData({ ID_Blog: "", tittel: "", tomtat: "", noidung: "", hinhanh: null, current_hinhanh: "", ID_TinhThanh: "" });
+                    setEditFormData({ ID_Blog: "", tittel: "", tomtat: "", noidung: "", hinhanh: null, current_hinhanh: "", ID_TinhThanh: "", LoaiTin: 0, video_url: "" });
                 } else {
                     setAddFormData(initialFormState);
                 }
@@ -200,7 +231,7 @@ function BaiVietControler() {
                                 type="text"
                                 placeholder="Tìm tiêu đề, tác giả..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                             />
                         </div>
 
@@ -219,6 +250,7 @@ function BaiVietControler() {
                                         <tr>
                                             <th>Ảnh</th>
                                             <th>Tiêu đề</th>
+                                            <th>Phân loại</th>
                                             <th>Tác giả</th>
                                             <th>Ngày đăng</th>
                                             <th style={{ textAlign: 'right' }}>Thao tác</th>
@@ -229,13 +261,26 @@ function BaiVietControler() {
                                             <tr key={blog.ID_Blog}>
                                                 <td>
                                                     <img
-                                                        src={blog.hinhanh ? `http://127.0.0.1:8000/storage/${blog.hinhanh}` : "https://via.placeholder.com/80x60?text=No+Image"}
+                                                        src={blog.hinhanh ? `http://127.0.0.1:8000/storage/${blog.hinhanh}` : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='60' viewBox='0 0 80 60'><rect width='100%25' height='100%25' fill='%23f3f4f6'/><text x='50%25' y='50%25' fill='%239ca3af' font-size='10' font-family='sans-serif' dominant-baseline='middle' text-anchor='middle'>No Image</text></svg>"}
                                                         alt={blog.title || blog.tittel}
                                                         style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
-                                                        onError={(e) => { e.target.src = "https://via.placeholder.com/80x60?text=Error+Image"; }}
+                                                        onError={(e) => { e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='60' viewBox='0 0 80 60'><rect width='100%25' height='100%25' fill='%23fee2e2'/><text x='50%25' y='50%25' fill='%23ef4444' font-size='10' font-family='sans-serif' dominant-baseline='middle' text-anchor='middle'>Error</text></svg>"; }}
                                                     />
                                                 </td>
                                                 <td>{blog.tittel}</td>
+                                                <td>
+                                                    <span style={{
+                                                        padding: '4px 8px',
+                                                        borderRadius: '4px',
+                                                        fontSize: '0.8rem',
+                                                        backgroundColor: Number(blog.LoaiTin) === 1 ? '#DEF7EC' : '#E1EFFE',
+                                                        color: Number(blog.LoaiTin) === 1 ? '#03543F' : '#1E429F',
+                                                        fontWeight: '600',
+                                                        display: 'inline-block'
+                                                    }}>
+                                                        {Number(blog.LoaiTin) === 1 ? 'Tin tức & Sự kiện' : 'Bài viết'}
+                                                    </span>
+                                                </td>
                                                 <td>{blog.user?.HoTen}</td>
                                                 <td>{blog.ngaydang}</td>
                                                 <td style={{ textAlign: 'right', display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
@@ -276,7 +321,7 @@ function BaiVietControler() {
                                     </p>
                                     {searchTerm && (
                                         <button
-                                            onClick={() => setSearchTerm('')}
+                                            onClick={() => { setSearchTerm(''); setPage(1); }}
                                             style={{
                                                 marginTop: '1rem',
                                                 padding: '6px 12px',
@@ -294,6 +339,41 @@ function BaiVietControler() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Pagination Controls */}
+                        {pagination.last_page > 1 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)' }}>
+                                <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>
+                                    Trang {pagination.current_page} / {pagination.last_page} (Hiển thị {pagination.from} - {pagination.to} trong tổng số {pagination.total} bài viết)
+                                </span>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button 
+                                        disabled={page === 1}
+                                        onClick={() => setPage(p => Math.max(p - 1, 1))}
+                                        style={{
+                                            background: page === 1 ? '#E5E7EB' : '#F3F4F6',
+                                            color: '#374151', border: '1px solid #D1D5DB', padding: '0.5rem 1rem',
+                                            borderRadius: '8px', cursor: page === 1 ? 'not-allowed' : 'pointer',
+                                            display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500
+                                        }}
+                                    >
+                                        <ChevronLeft size={16} /> Trước
+                                    </button>
+                                    <button 
+                                        disabled={page === pagination.last_page}
+                                        onClick={() => setPage(p => Math.min(p + 1, pagination.last_page))}
+                                        style={{
+                                            background: page === pagination.last_page ? '#E5E7EB' : '#F3F4F6',
+                                            color: '#374151', border: '1px solid #D1D5DB', padding: '0.5rem 1rem',
+                                            borderRadius: '8px', cursor: page === pagination.last_page ? 'not-allowed' : 'pointer',
+                                            display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500
+                                        }}
+                                    >
+                                        Sau <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -369,6 +449,44 @@ function BaiVietControler() {
                                     {formErrors.ID_TinhThanh && (
                                         <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
                                             {formErrors.ID_TinhThanh[0]}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Ô LOẠI TIN */}
+                                <div className="admin-form-group">
+                                    <label>Loại tin <span style={{ color: '#EF4444' }}>*</span></label>
+                                    <select
+                                        name="LoaiTin"
+                                        value={formData.LoaiTin}
+                                        onChange={handleInputChange}
+                                        className="admin-form-control"
+                                        required
+                                    >
+                                        <option value={0}>Bài viết</option>
+                                        <option value={1}>Tin tức & Sự kiện</option>
+                                    </select>
+                                    {formErrors.LoaiTin && (
+                                        <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                                            {formErrors.LoaiTin[0]}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Ô VIDEO URL */}
+                                <div className="admin-form-group">
+                                    <label>Video URL (nếu có)</label>
+                                    <input
+                                        type="url"
+                                        name='video_url'
+                                        value={formData.video_url}
+                                        onChange={handleInputChange}
+                                        className="admin-form-control"
+                                        placeholder="Ví dụ: https://www.youtube.com/watch?v=..."
+                                    />
+                                    {formErrors.video_url && (
+                                        <span style={{ color: '#EF4444', fontSize: '0.85rem', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                                            {formErrors.video_url[0]}
                                         </span>
                                     )}
                                 </div>
@@ -461,11 +579,60 @@ function BaiVietControler() {
                             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <Calendar size={16} /> Đăng ngày: {selectedBlog.ngaydang || '--'}
                             </span>
-                            <span>
-                                Trạng thái: &nbsp;
-                                <span className="badge badge-pending">Chưa phát hành</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                Phân loại: &nbsp;
+                                <span style={{
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontSize: '0.8rem',
+                                    backgroundColor: Number(selectedBlog.LoaiTin) === 1 ? '#DEF7EC' : '#E1EFFE',
+                                    color: Number(selectedBlog.LoaiTin) === 1 ? '#03543F' : '#1E429F',
+                                    fontWeight: '600'
+                                }}>
+                                    {Number(selectedBlog.LoaiTin) === 1 ? 'Tin tức & Sự kiện' : 'Bài viết'}
+                                </span>
                             </span>
                         </div>
+
+                        {selectedBlog.video_url && (() => {
+                            const embedUrl = getYouTubeEmbedUrl(selectedBlog.video_url);
+                            if (embedUrl) {
+                                const videoId = embedUrl.split('/').pop();
+                                const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                                return (
+                                    <div className="blog-video-wrapper" style={{ margin: '1.5rem 0', maxWidth: '600px' }}>
+                                        <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                            <iframe
+                                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                                                src={embedUrl}
+                                                title="Video player"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        </div>
+                                        <div style={{ marginTop: '0.75rem', textAlign: 'right' }}>
+                                            <a 
+                                                href={watchUrl} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#dc2626', textDecoration: 'none', fontWeight: '600', border: '1px solid #fca5a5', padding: '0.35rem 0.85rem', borderRadius: '8px' }}
+                                            >
+                                                🔴 Xem trực tiếp trên YouTube
+                                            </a>
+                                        </div>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <div style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
+                                        <b>Video URL: </b>
+                                        <a href={selectedBlog.video_url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB', textDecoration: 'underline' }}>
+                                            {selectedBlog.video_url}
+                                        </a>
+                                    </div>
+                                );
+                            }
+                        })()}
 
                         {selectedBlog.hinhanh && (
                             <div style={{ margin: '1.5rem 0' }}>
@@ -476,13 +643,13 @@ function BaiVietControler() {
                                 />
                             </div>
                         )}
-                        <div className="post-body-content" style={{ marginTop: '1.5rem', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                        <div className="post-body-content" style={{ marginTop: '1.5rem', lineHeight: '1.6' }}>
                             <b>Tóm tắt :</b>
-                            {selectedBlog.tomtat || 'Không có nội dung cho bài viết này.'}
+                            <div style={{ marginTop: '0.5rem' }} dangerouslySetInnerHTML={{ __html: selectedBlog.tomtat || 'Không có tóm tắt cho bài viết này.' }} />
                         </div>
-                        <div className="post-body-content" style={{ marginTop: '1.5rem', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                        <div className="post-body-content" style={{ marginTop: '1.5rem', lineHeight: '1.6' }}>
                             <b>Nội dung :</b>
-                            {selectedBlog.noidung || 'Không có nội dung cho bài viết này.'}
+                            <div style={{ marginTop: '0.5rem' }} dangerouslySetInnerHTML={{ __html: selectedBlog.noidung || 'Không có nội dung cho bài viết này.' }} />
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '2.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>

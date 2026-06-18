@@ -79,21 +79,40 @@ body {
     overflow: hidden !important;
 }
 
-/* Căn giữa icon khi collapsed */
+/* Sidebar Header and Logo when collapsed */
+.admin-sidebar.collapsed .sidebar-header {
+    padding: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 75px;
+}
+
 .admin-sidebar.collapsed .admin-logo {
-    justify-content: center;
-    padding: 0;
+    display: none !important;
 }
 
-.admin-sidebar.collapsed .admin-logo-icon {
-    margin: 0 auto;
+.admin-sidebar.collapsed .sidebar-header button {
+    position: static !important;
+    margin: 0 auto !important;
+    transform: none !important;
+    padding: 8px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
-/* Căn giữa icon khi collapsed */
+/* Centered Menu Items when collapsed */
 .admin-sidebar.collapsed .menu-item {
-    justify-content: center;
-    padding: 0.85rem;
+    width: 50px;
+    height: 50px;
+    padding: 0 !important;
+    margin: 0 auto 0.5rem auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
     position: relative;
+    gap: 0 !important;
 }
 
 .admin-sidebar.collapsed .menu-item:hover {
@@ -101,12 +120,19 @@ body {
 }
 
 .admin-sidebar.collapsed .menu-item svg {
-    margin: 0;
+    margin: 0 !important;
 }
 
 .admin-sidebar.collapsed .admin-user {
+    display: flex;
     justify-content: center;
+    align-items: center;
     padding: 0.5rem 0;
+    margin: 0 auto;
+}
+
+.admin-sidebar.collapsed .admin-user img {
+    margin: 0 auto;
 }
 
 /* Custom Tooltip khi collapsed */
@@ -923,5 +949,302 @@ body {
     font-size: 1.05rem;
     line-height: 1.8;
     color: var(--text-main);
+}
+
+/* --- MOBILE HEADER TOP BAR --- */
+.admin-mobile-header {
+    display: none;
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1.25rem;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 105;
+    box-shadow: var(--shadow-sm);
+}
+
+.mobile-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mobile-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mobile-menu-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.mobile-header-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.mobile-nav-link {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.2;
+}
+
+.mobile-bell-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-main);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-bell-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #EF4444;
+    border-radius: 50%;
+    border: 1px solid #FFFFFF;
+}
+
+/* --- SIDEBAR BACKDROP --- */
+.admin-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 109;
+    backdrop-filter: blur(2px);
+}
+
+/* --- LAYOUTS & CONTAINERS FOR PAGES --- */
+.dashboard-content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.dashboard-shortcuts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.map-config-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.province-list {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.map-pins-area {
+    flex-grow: 1;
+}
+
+.order-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.filter-select-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* --- MOBILE & TABLET RESPONSIVE OPTIMIZATIONS --- */
+@media (max-width: 768px) {
+    .admin-mobile-header {
+        display: flex !important;
+    }
+    
+    .admin-layout-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    /* Form row collapse to single column */
+    .admin-form-row {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    
+    /* Filters section layout adjust */
+    .admin-filters {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1rem !important;
+    }
+    
+    .search-box {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    .filter-group {
+        width: 100% !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        padding-bottom: 6px !important;
+        display: flex !important;
+        gap: 8px !important;
+    }
+
+    .filter-btn {
+        flex-shrink: 0 !important;
+    }
+    
+    /* Padding of main content */
+    .admin-main {
+        margin-left: 0 !important;
+        max-width: 100% !important;
+        padding: 1.25rem !important;
+    }
+    
+    .admin-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    
+    /* Sidebar responsive drawer */
+    .admin-sidebar {
+        left: -280px !important;
+        width: 280px !important;
+        z-index: 115 !important;
+        transition: left 0.3s ease !important;
+        height: 100vh !important;
+        position: fixed !important;
+    }
+    
+    .admin-sidebar.mobile-open {
+        left: 0 !important;
+    }
+    
+    .admin-sidebar-backdrop.show {
+        display: block !important;
+    }
+
+    /* Show text correctly when drawer is open on mobile */
+    .admin-sidebar.collapsed .logo-text,
+    .admin-sidebar.collapsed .admin-logo-text,
+    .admin-sidebar.collapsed .brand-text,
+    .admin-sidebar.collapsed .sidebar-logo-text,
+    .admin-sidebar.collapsed .admin-brand-text,
+    .admin-sidebar.collapsed .menu-item span,
+    .admin-sidebar.collapsed .submenu-chevron,
+    .admin-sidebar.collapsed .submenu-container,
+    .admin-sidebar.collapsed .admin-user-info,
+    .admin-sidebar.collapsed .admin-user-chevron {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+    
+    .admin-sidebar.collapsed .admin-logo {
+        justify-content: flex-start !important;
+        padding: 0 1.8rem !important;
+    }
+    
+    .admin-sidebar.collapsed .menu-item {
+        justify-content: flex-start !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 0.85rem 1.25rem !important;
+        margin: 0 0 0.4rem 0 !important;
+        gap: 12px !important;
+    }
+
+    .admin-sidebar.collapsed .menu-item svg {
+        margin-right: 0 !important;
+    }
+
+    /* Modal popup adjustment on mobile */
+    .nam-modal-content {
+        padding: 1.25rem !important;
+        margin: 10px !important;
+        max-height: 95vh !important;
+        width: calc(100% - 20px) !important;
+    }
+
+    .nam-modal-footer {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .nam-modal-footer button {
+        flex: 1 1 calc(50% - 8px) !important;
+        min-width: 100px !important;
+    }
+
+    .dashboard-content-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .dashboard-shortcuts-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .map-config-layout {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .province-list {
+        width: 100% !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .order-info-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .filter-select-group {
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+
+    .filter-select-group select {
+        width: 100% !important;
+    }
 }
 
