@@ -49,6 +49,7 @@ import NguoiDungControl from './pages/Admin/NguoiDungControl';
 import DonHangControl from './pages/Admin/DonHangControl';
 import CauChuyenSanVat from './pages/shops/CauChuyenSanVat';
 import BaiVietTinhThanh from './pages/shops/BaiVietTinhThanh';
+import BanDoDacSan from './pages/BanDoDacSan';
 
 import { WalletProvider } from './context/WalletContext';
 import { Toaster } from 'react-hot-toast';
@@ -70,7 +71,7 @@ function App() {
           <Route path="/products"   element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/shops/:id"  element={<ShopDetail />} />
-          <Route path="/map"        element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Bản đồ đặc sản (Đang phát triển)</h1></div>} />
+          <Route path="/map"        element={<BanDoDacSan />} />
           <Route path="/stories"    element={<CauChuyenSanVat/>} />
           <Route path="/tinh-thanh/:id/blogs" element={<BaiVietTinhThanh />} />
           <Route path="/privacy"    element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Chính sách bảo mật (Đang phát triển)</h1></div>} />

@@ -236,10 +236,6 @@ export default function Login() {
             Chưa có tài khoản?{' '}
             <Link to="/register">Đăng ký ngay</Link>
           </p>
-          <p className="auth-admin-link">
-            Bạn là quản trị viên?{' '}
-            <Link to="/login?role=admin">Đăng nhập Admin</Link>
-          </p>
         </div>
       </div>
     </div>

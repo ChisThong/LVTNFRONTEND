@@ -62,6 +62,15 @@ function BanDoControl() {
         staleTime: 30000,
     });
 
+    const { data: listPhanLoai = [] } = useQuery({
+        queryKey: ['phanloai'],
+        queryFn: async () => {
+            const response = await axiosClient.get('/phan-loai');
+            return response.data?.data || response.data || [];
+        },
+        staleTime: 30000,
+    });
+
     const { data: Xa = [] } = useQuery({
         queryKey: ['Xa', tinhthanh], 
         queryFn: async () => {
@@ -432,8 +441,21 @@ function BanDoControl() {
                             </div>
 
                             <div className="admin-form-group">
-                                <label>Phân loại</label>
-                                <input type="text" name="PhanLoai" value={formValues.PhanLoai} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: Đặc sản, Địa danh..." />
+                                <label>Phân loại <span style={{ color: '#EF4444' }}>*</span></label>
+                                <select 
+                                    name="PhanLoai" 
+                                    value={formValues.PhanLoai} 
+                                    onChange={handleInputChange} 
+                                    className="admin-form-control"
+                                    required
+                                >
+                                    <option value="">-- Chọn Phân loại --</option>
+                                    {listPhanLoai.map((pl, index) => (
+                                        <option key={pl.ID_PhanLoai || index} value={pl.TenLoai}>
+                                            {pl.TenLoai}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="admin-form-group">

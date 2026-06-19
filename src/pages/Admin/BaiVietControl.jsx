@@ -34,6 +34,7 @@ function BaiVietControler() {
     const [selectedBlog, setSelectedBlog] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
+    const [selectedLoaiTin, setSelectedLoaiTin] = useState(''); // '' for all, '0' for post, '1' for news
     const [addFormData, setAddFormData] = useState({
         tittel: "",
         tomtat: "",
@@ -56,10 +57,14 @@ function BaiVietControler() {
     });
     const [formErrors, setFormErrors] = useState({});
     const { data: blogsResponse, refetch } = useQuery({
-        queryKey: ['blogs', searchTerm, page],
+        queryKey: ['blogs', searchTerm, page, selectedLoaiTin],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (searchTerm) params.append('search', searchTerm);
+            if (selectedLoaiTin !== '') {
+                params.append('LoaiTin', selectedLoaiTin);
+                params.append('loai_tin', selectedLoaiTin);
+            }
             params.append('page', page);
             
             const api = `/admin/BlogControl?${params.toString()}`;
@@ -224,15 +229,72 @@ function BaiVietControler() {
             {/* 1. MÀN HÌNH DANH SÁCH BÀI VIẾT */}
             {viewMode === 'list' && (
                 <div id="posts" className="view-section">
-                    <div className="admin-filters">
-                        <div className="search-box">
-                            <Search size={18} color="#6B7280" />
-                            <input
-                                type="text"
-                                placeholder="Tìm tiêu đề, tác giả..."
-                                value={searchTerm}
-                                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                            />
+                    <div className="admin-filters" style={{ display: 'flex', gap: '20px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+                            <div className="search-box" style={{ margin: 0 }}>
+                                <Search size={18} color="#6B7280" />
+                                <input
+                                    type="text"
+                                    placeholder="Tìm tiêu đề, tác giả..."
+                                    value={searchTerm}
+                                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                                />
+                            </div>
+
+                            {/* Bộ lọc loại bài viết */}
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button 
+                                    onClick={() => { setSelectedLoaiTin(''); setPage(1); }} 
+                                    style={{
+                                        padding: '6px 16px',
+                                        borderRadius: '8px',
+                                        fontWeight: '600',
+                                        fontSize: '0.85rem',
+                                        border: '1px solid #D1D5DB',
+                                        cursor: 'pointer',
+                                        backgroundColor: selectedLoaiTin === '' ? '#10B981' : '#FFFFFF',
+                                        color: selectedLoaiTin === '' ? '#FFFFFF' : '#374151',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                    }}
+                                >
+                                    Tất cả
+                                </button>
+                                <button 
+                                    onClick={() => { setSelectedLoaiTin('0'); setPage(1); }} 
+                                    style={{
+                                        padding: '6px 16px',
+                                        borderRadius: '8px',
+                                        fontWeight: '600',
+                                        fontSize: '0.85rem',
+                                        border: '1px solid #D1D5DB',
+                                        cursor: 'pointer',
+                                        backgroundColor: selectedLoaiTin === '0' ? '#10B981' : '#FFFFFF',
+                                        color: selectedLoaiTin === '0' ? '#FFFFFF' : '#374151',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                    }}
+                                >
+                                    Bài viết
+                                </button>
+                                <button 
+                                    onClick={() => { setSelectedLoaiTin('1'); setPage(1); }} 
+                                    style={{
+                                        padding: '6px 16px',
+                                        borderRadius: '8px',
+                                        fontWeight: '600',
+                                        fontSize: '0.85rem',
+                                        border: '1px solid #D1D5DB',
+                                        cursor: 'pointer',
+                                        backgroundColor: selectedLoaiTin === '1' ? '#10B981' : '#FFFFFF',
+                                        color: selectedLoaiTin === '1' ? '#FFFFFF' : '#374151',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                    }}
+                                >
+                                    Tin tức & Sự kiện
+                                </button>
+                            </div>
                         </div>
 
                         <div>
