@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import logoImg from '../assets/logo.png';
 
 /* SVG Icons */
 const IconSearch = () => (
@@ -118,7 +119,12 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link to="/" className="logo">
-          <span className="logo-icon">🌴</span>
+          <img
+            src={logoImg}
+            alt="NamBộ Specialties Logo"
+            className="logo-img"
+            style={{ height: '42px', objectFit: 'contain' }}
+          />
           <span className="logo-text">NamBộ<span>Specialties</span></span>
         </Link>
 

@@ -1,6 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useState, useEffect } from 'react';
+import logoImg from '../assets/logo.png';
 import '../styles/navbar-admin.css';
 import { 
     LayoutDashboard, Store, ShoppingBag, Package, Map, FileText, BarChart3, 
@@ -28,7 +29,6 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
     // Role-based variables
     const storageKey = role === 'admin' ? "adminSidebarCollapsed" : "sellerSidebarCollapsed";
     const dashboardLink = role === 'admin' ? "/admin/dashboard" : "/seller/dashboard";
-    const logoIcon = role === 'admin' ? "🌴" : "🌾";
     const logoText = role === 'admin' ? "NamBộ CENTRAL" : "Kênh Người Bán";
 
     // Sidebar collapse state
@@ -88,7 +88,11 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
         <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
             <div className="sidebar-header" style={{ position: 'relative', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                 <NavLink to={dashboardLink} className="admin-logo">
-                    <span className="admin-logo-icon" style={{ fontSize: '1.8rem' }}>{logoIcon}</span>
+                    <img
+                        src={logoImg}
+                        alt="NamBộ Specialties Logo"
+                        style={{ height: '36px', objectFit: 'contain', flexShrink: 0 }}
+                    />
                     {role === 'admin' ? (
                         <div className="admin-logo-text" style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{ fontSize: '1.2rem', fontWeight: 900, lineHeight: 1 }}>NamBộ</span>

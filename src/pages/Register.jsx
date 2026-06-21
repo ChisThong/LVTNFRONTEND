@@ -51,7 +51,7 @@ export default function Register() {
     matkhau: '',
     matkhau_confirmation: '',
   });
-  const [agreed, setAgreed] = useState(false);
+  const [isAgreed, setIsAgreed] = useState(false);
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -89,7 +89,7 @@ export default function Register() {
       return; // Không gọi API
     }
 
-    if (!agreed) {
+    if (!isAgreed) {
       setGeneralError('Bạn cần đồng ý với Điều khoản & Chính sách để tiếp tục.');
       return;
     }
@@ -258,19 +258,24 @@ export default function Register() {
             <label className="auth-terms">
               <input
                 type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
+                checked={isAgreed}
+                onChange={(e) => setIsAgreed(e.target.checked)}
               />
               <span>
                 Tôi đồng ý với{' '}
-                <a href="#">Điều khoản</a>
+                <Link to="/terms" target="_blank" rel="noopener noreferrer">Điều khoản</Link>
                 {' & '}
-                <a href="#">Chính sách</a>
+                <Link to="/privacy" target="_blank" rel="noopener noreferrer">Chính sách</Link>
               </span>
             </label>
 
             {/* Submit */}
-            <button type="submit" className="auth-submit-btn" disabled={loading}>
+            <button 
+              type="submit" 
+              className="auth-submit-btn" 
+              disabled={loading || !isAgreed}
+              style={!isAgreed ? { opacity: 0.5, cursor: 'not-allowed', backgroundColor: '#9ca3af', color: '#fff' } : {}}
+            >
               {loading ? 'Đang đăng ký...' : 'ĐĂNG KÝ TÀI KHOẢN'}
             </button>
           </form>

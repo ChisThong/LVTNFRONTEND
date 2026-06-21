@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
 import { useWallet } from '../../context/WalletContext';
+import logoImg from '../../assets/logo.png';
 import '../../styles/home.css';
 
 /* ── SVG Icons ──────────────────────────────────────────────── */
@@ -63,15 +64,7 @@ export default function PublicNavbar() {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  const { wallet, walletLoading, fetchWallet } = useWallet();
-
-  // ── Auto-refresh wallet when user is loaded ──────────────────
-  useEffect(() => {
-    if (user?.ID_User && fetchWallet) {
-      fetchWallet();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.ID_User]);
+  const { wallet, setWallet, walletLoading, fetchWallet } = useWallet();
 
   // ── Scroll effect ────────────────────────────────────────
   useEffect(() => {
@@ -97,26 +90,39 @@ export default function PublicNavbar() {
     return () => window.removeEventListener('cart-change', updateCartCount);
   }, []);
 
-  // ── Fetch current user ───────────────────────────────────
+  // ── Fetch current user + seed wallet từ /me (1 request duy nhất) ──────
   useEffect(() => {
     const fetchUser = () => {
       const token = localStorage.getItem('token');
-      if (token) {
-        axiosClient.get('/me')
-          .then(res => {
-            if (res.data?.data) setUser(res.data.data);
-          })
-          .catch(() => {
-            localStorage.removeItem('token');
-            setUser(null);
-          });
-      } else {
+      if (!token) {
         setUser(null);
+        return;
       }
+
+      axiosClient.get('/me')
+        .then(res => {
+          const data = res.data?.data;
+          if (data) {
+            setUser(data);
+            // ✅ Seed wallet từ dữ liệu đã gộp trong /me — không cần request /wallet riêng
+            if (data.wallet) {
+              setWallet(data.wallet);
+            } else {
+              // Fallback: nếu backend chưa gộp wallet thì vẫn fetch song song
+              fetchWallet();
+            }
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          setUser(null);
+        });
     };
+
     fetchUser();
     window.addEventListener('auth-change', fetchUser);
     return () => window.removeEventListener('auth-change', fetchUser);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Close dropdown khi click ngoài ──────────────────────
@@ -150,7 +156,12 @@ export default function PublicNavbar() {
 
         {/* Logo */}
         <Link to="/" className="logo">
-          <span className="logo-icon">🌴</span>
+          <img
+            src={logoImg}
+            alt="NamBộ Specialties Logo"
+            className="logo-img"
+            style={{ height: '42px', objectFit: 'contain' }}
+          />
           <span className="logo-text">NamBộ<span>Specialties</span></span>
         </Link>
 
