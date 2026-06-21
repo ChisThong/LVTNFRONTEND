@@ -17,6 +17,8 @@ import ProductList from './pages/products/ProductList';
 import ProductDetail from './pages/products/ProductDetail';
 import ShopDetail from './pages/shops/ShopDetail';
 import AccountPage from './pages/account/AccountPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 // ── Seller Pages ────────────────────────────────────────────
 import SellerRegister from './pages/seller/SellerRegister';
@@ -74,8 +76,8 @@ function App() {
           <Route path="/map"        element={<BanDoDacSan />} />
           <Route path="/stories"    element={<CauChuyenSanVat/>} />
           <Route path="/tinh-thanh/:id/blogs" element={<BaiVietTinhThanh />} />
-          <Route path="/privacy"    element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Chính sách bảo mật (Đang phát triển)</h1></div>} />
-          <Route path="/terms"      element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Điều khoản sử dụng (Đang phát triển)</h1></div>} />
+          <Route path="/privacy"    element={<PrivacyPage />} />
+          <Route path="/terms"      element={<TermsPage />} />
           {/* VNPay redirect target */}
           <Route path="/thanh-toan-thanh-cong" element={<VNPayReturnPage />} />
           {/* Backward compat alias */}

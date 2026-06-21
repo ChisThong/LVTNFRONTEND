@@ -43,7 +43,7 @@ export function WalletProvider({ children }) {
   }, []);
 
   return (
-    <WalletContext.Provider value={{ wallet, walletLoading, fetchWallet }}>
+    <WalletContext.Provider value={{ wallet, setWallet, walletLoading, fetchWallet }}>
       {children}
     </WalletContext.Provider>
   );

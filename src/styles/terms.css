@@ -1,0 +1,168 @@
+/* ==========================
+   TERMS & PRIVACY PAGES
+========================== */
+
+.terms-container {
+    max-width: 1000px;
+    margin: 120px auto 60px;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.terms-header {
+    text-align: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+}
+
+.terms-header h1 {
+    font-size: 38px;
+    font-weight: 700;
+    color: #b45309;
+    margin-bottom: 10px;
+}
+
+.terms-header p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.back-to-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #b45309;
+    font-weight: 600;
+    margin-bottom: 30px;
+    transition: 0.3s;
+}
+
+.back-to-home:hover {
+    transform: translateX(-5px);
+}
+
+.terms-section {
+    margin-bottom: 35px;
+}
+
+.terms-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    color: #1f2937;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.terms-section h3 svg {
+    color: #d97706;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.terms-section p {
+    font-size: 16px;
+    line-height: 1.9;
+    color: #4b5563;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.terms-section ul {
+    padding-left: 25px;
+}
+
+.terms-section li {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #4b5563;
+    margin-bottom: 10px;
+}
+
+.terms-accent-box {
+    background: #fff7ed;
+    border-left: 5px solid #ea580c;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.terms-accent-box p {
+    margin-bottom: 12px;
+}
+
+.terms-accent-box p:last-child {
+    margin-bottom: 0;
+}
+
+.terms-accent-box strong {
+    color: #c2410c;
+}
+
+.terms-section code {
+    background: #f3f4f6;
+    padding: 3px 8px;
+    border-radius: 5px;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* ==========================
+   RESPONSIVE
+========================== */
+
+@media (max-width: 992px) {
+    .terms-container {
+        margin: 100px 20px 50px;
+        padding: 30px;
+    }
+
+    .terms-header h1 {
+        font-size: 30px;
+    }
+
+    .terms-section h3 {
+        font-size: 21px;
+    }
+}
+
+@media (max-width: 768px) {
+    .terms-container {
+        margin: 90px 15px 40px;
+        padding: 25px;
+    }
+
+    .terms-header h1 {
+        font-size: 26px;
+    }
+
+    .terms-section h3 {
+        font-size: 19px;
+    }
+
+    .terms-section p,
+    .terms-section li {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .terms-container {
+        padding: 20px;
+    }
+
+    .terms-header h1 {
+        font-size: 22px;
+    }
+
+    .terms-section h3 {
+        font-size: 17px;
+    }
+}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import logoImg from '../../assets/logo.png';
 
 /* ═══════════════════════════════════════════════════════════
    PublicFooter — dùng cho tất cả trang Public
@@ -11,7 +12,12 @@ export default function PublicFooter() {
         {/* Brand */}
         <div className="footer-brand">
           <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
-            <span className="logo-icon">🌴</span>
+            <img
+              src={logoImg}
+              alt="NamBộ Specialties Logo"
+              className="logo-img"
+              style={{ height: '42px', objectFit: 'contain' }}
+            />
             <span className="logo-text">NamBộ<span>Specialties</span></span>
           </Link>
           <p>Nâng tầm giá trị đặc sản Việt, hỗ trợ chuyển đổi số cho hộ kinh doanh địa phương.</p>
