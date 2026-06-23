@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { getMyShop, updateShop } from '../../api/shopApi';
+import { updateShop } from '../../api/shopApi';
 import '../../styles/seller.css';
 
 const BASE_URL = 'http://127.0.0.1:8000/storage/';
@@ -20,9 +20,8 @@ const IconPhone = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="no
 
 export default function SellerShopEdit() {
   const navigate = useNavigate();
+  const { shop, setShop, shopLoading: loading } = useOutletContext();
 
-  const [shop,    setShop]    = useState(null);
-  const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
   const [errors,  setErrors]  = useState({});
   const [apiErr,  setApiErr]  = useState('');
@@ -44,32 +43,23 @@ export default function SellerShopEdit() {
   const [logoPreview,   setLogoPreview]   = useState(null);
   const [banerPreview,  setBanerPreview]  = useState(null);
 
-  /* ── Load shop info ── */
+  /* ── Sync shop info to local form state ── */
   useEffect(() => {
-    getMyShop()
-      .then(res => {
-        if (res.data?.success) {
-          const s = res.data.data;
-          setShop(s);
-          setForm({
-            TenShop:     s.TenShop     || '',
-            SoDienThoai: s.SoDienThoai || '',
-            DiaChi:      s.DiaChi      || '',
-            TenNganHang: s.TenNganHang || '',
-            SoTaiKhoang: s.SoTaiKhoang || '',
-            Tittle:      s.Tittle      || '',
-            GioiThieu:   s.GioiThieu   || '',
-            LoaiHinhKinhDoanh: s.LoaiHinhKinhDoanh || 'ho_kinh_doanh',
-          });
-          if (s.logo)  setLogoPreview(`${BASE_URL}${s.logo}`);
-          if (s.baner) setBanerPreview(`${BASE_URL}${s.baner}`);
-        }
-      })
-      .catch(() => {
-        setApiErr('Không tải được thông tin gian hàng.');
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    if (shop) {
+      setForm({
+        TenShop:     shop.TenShop     || '',
+        SoDienThoai: shop.SoDienThoai || '',
+        DiaChi:      shop.DiaChi      || '',
+        TenNganHang: shop.TenNganHang || '',
+        SoTaiKhoang: shop.SoTaiKhoang || '',
+        Tittle:      shop.Tittle      || '',
+        GioiThieu:   shop.GioiThieu   || '',
+        LoaiHinhKinhDoanh: shop.LoaiHinhKinhDoanh || 'ho_kinh_doanh',
+      });
+      if (shop.logo)  setLogoPreview(`${BASE_URL}${shop.logo}`);
+      if (shop.baner) setBanerPreview(`${BASE_URL}${shop.baner}`);
+    }
+  }, [shop]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

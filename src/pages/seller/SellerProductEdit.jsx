@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getMyShop } from '../../api/shopApi';
+import { Link, useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { getProductDetail, updateProduct } from '../../api/productApi';
 import axiosClient from '../../api/axiosClient';
 import {
@@ -16,11 +15,9 @@ const DONVI_OPTIONS = ['kg', 'hộp', 'chai', 'gói', 'túi', 'lọ', 'cái', 'b
 export default function SellerProductEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { shop, categories, provinces } = useOutletContext();
 
-  const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState([]);
-  const [provinces, setProvinces] = useState([]);
 
   const [form, setForm] = useState({
     TenSanPham: '',
@@ -55,15 +52,8 @@ export default function SellerProductEdit() {
 
   /* ── Load data ── */
   useEffect(() => {
-    Promise.all([
-      getMyShop(),
-      getProductDetail(id),
-      axiosClient.get('/phan-loai'),
-      axiosClient.get('/tinh-thanh'),
-    ])
-      .then(([shopRes, prodRes, catRes, provRes]) => {
-        if (shopRes.data?.success) setShop(shopRes.data.data);
-
+    getProductDetail(id)
+      .then((prodRes) => {
         const p = prodRes.data?.data;
         if (p) {
           setForm({
@@ -84,12 +74,6 @@ export default function SellerProductEdit() {
           setOriginalTrangThai(parseInt(p.TrangThai ?? 1));
           setOriginalTrangThaiDuyet(p.TrangThaiDuyet ?? 'cho_duyet');
         }
-
-        const catList = catRes.data?.data ?? [];
-        setCategories(Array.isArray(catList) ? catList : []);
-
-        const provList = provRes.data?.data ?? provRes.data ?? [];
-        setProvinces(Array.isArray(provList) ? provList : []);
       })
       .catch((err) => {
         setApiError(err?.response?.data?.message || 'Không tải được dữ liệu sản phẩm.');

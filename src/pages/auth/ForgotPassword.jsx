@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import loginBg from '../../assets/login-bg.png';
+import loginBg from '../../assets/login-bg.webp';
 import axiosClient from '../../api/axiosClient';
 import '../../styles/auth.css';
 
@@ -127,7 +127,7 @@ export default function ForgotPassword() {
           )}
 
           {successMessage && (
-            <div className="auth-error-banner" style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', borderLeftColor: '#4caf50' }}>
+            <div className="auth-success-banner">
               <span>{successMessage}</span>
             </div>
           )}

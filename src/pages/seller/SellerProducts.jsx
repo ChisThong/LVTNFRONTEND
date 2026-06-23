@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getMyShop } from '../../api/shopApi';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { getSellerProducts, deleteProduct, updateProduct } from '../../api/productApi';
 import { Plus, Edit2, AlertCircle, Trash2, Search, RotateCcw, Eye, EyeOff, Bell, Home } from 'lucide-react';
 import '../../styles/seller.css';
@@ -13,13 +12,10 @@ const formatPrice = (price) =>
 
 export default function SellerProducts() {
   const navigate = useNavigate();
+  const { shop, shopLoading, shopError } = useOutletContext();
 
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
-
-  const [shop, setShop] = useState(null);
-  const [shopLoading, setShopLoading] = useState(true);
-  const [shopError, setShopError] = useState('');
 
   const [products, setProducts] = useState([]);
   const [prodLoading, setProdLoading] = useState(false);
@@ -39,20 +35,6 @@ export default function SellerProducts() {
   const [deletingId, setDeletingId] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [viewProduct, setViewProduct] = useState(null);
-
-  /* ── 1. Load shop ── */
-  useEffect(() => {
-    getMyShop()
-      .then((res) => {
-        if (res.data?.success) setShop(res.data.data);
-        else setShopError(res.data?.message || 'Không lấy được thông tin gian hàng.');
-      })
-      .catch((err) => {
-        if (err?.response?.status === 404) setShopError('Bạn chưa đăng ký gian hàng.');
-        else setShopError(err?.response?.data?.message || 'Lỗi kết nối.');
-      })
-      .finally(() => setShopLoading(false));
-  }, []);
 
   /* ── 2. Load products ── */
   const fetchProducts = useCallback(() => {

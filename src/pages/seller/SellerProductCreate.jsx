@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getMyShop } from '../../api/shopApi';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { createProduct } from '../../api/productApi';
 import axiosClient from '../../api/axiosClient';
 import {
@@ -14,11 +13,7 @@ const DONVI_OPTIONS = ['kg', 'hộp', 'chai', 'gói', 'túi', 'lọ', 'cái', 'b
 
 export default function SellerProductCreate() {
   const navigate = useNavigate();
-
-  const [shop, setShop] = useState(null);
-  const [shopLoading, setShopLoading] = useState(true);
-  const [categories, setCategories] = useState([]);
-  const [provinces, setProvinces] = useState([]);
+  const { shop, shopLoading, categories, provinces } = useOutletContext();
 
   const [form, setForm] = useState({
     TenSanPham: '',
@@ -39,26 +34,6 @@ export default function SellerProductCreate() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState('');
-
-  /* ── Load shop + categories + provinces ── */
-  useEffect(() => {
-    getMyShop()
-      .then((res) => {
-        if (res.data?.success) setShop(res.data.data);
-      })
-      .catch(() => {})
-      .finally(() => setShopLoading(false));
-
-    axiosClient.get('/phan-loai').then((res) => {
-      const list = res.data?.data ?? [];
-      setCategories(Array.isArray(list) ? list : []);
-    }).catch(() => {});
-
-    axiosClient.get('/tinh-thanh').then((res) => {
-      const list = res.data?.data ?? res.data ?? [];
-      setProvinces(Array.isArray(list) ? list : []);
-    }).catch(() => {});
-  }, []);
 
   /* ── Handle image select ── */
   const handleImages = (e) => {

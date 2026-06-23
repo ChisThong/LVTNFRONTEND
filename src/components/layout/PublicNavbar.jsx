@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
 import { useWallet } from '../../context/WalletContext';
-import logoImg from '../../assets/logo.png';
+import logoImg from '../../assets/logo.webp';
 import '../../styles/home.css';
 
 /* ── SVG Icons ──────────────────────────────────────────────── */

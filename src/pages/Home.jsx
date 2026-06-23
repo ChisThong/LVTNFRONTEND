@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ProductCard from '../components/products/ProductCard';
 import { getPublicProducts } from '../api/productPublicApi';
 import '../styles/home.css';
-import heroBg from '../assets/quadep.png';
+import heroBg from '../assets/quadep.webp';
 
 /* ══════════════════════════════════════════════════════════
    Component con: Slideshow thuần CSS @keyframes
@@ -26,32 +26,21 @@ if (typeof document !== 'undefined' && !document.getElementById(KEYFRAME_ID)) {
   document.head.appendChild(style);
 }
 
-// delay tăng đều theo số lượng ảnh, tổng chu kỳ = 10s
-const DELAYS = ['0s', '2.5s', '5s', '7.5s'];
+// delay tăng đều theo số lượng ảnh, tổng chu kỳ = 20s (4 ảnh x 5s mỗi ảnh)
+const DELAYS = ['0s', '5s', '10s', '15s'];
 
 function RegionImageSlideshow({ images }) {
   if (!images || images.length === 0) return null;
-
-  // Style nền dùng chung cho mỗi lớp ảnh
-  const layerBase = {
-    position: 'absolute',
-    inset: 0,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    opacity: 0,
-    animation: 'regionGifEffect 10s infinite',
-  };
 
   return (
     <>
       {images.map((src, i) => (
         <div
           key={i}
+          className="region-slideshow-layer"
           style={{
-            ...layerBase,
             backgroundImage: `url('${src}')`,
-            // Delay phân phối đều — tối đa 4 ảnh theo DELAYS
-            animationDelay: DELAYS[i] ?? `${i * 2.5}s`,
+            animationDelay: DELAYS[i] ?? `${i * 5}s`,
           }}
         />
       ))}
@@ -65,27 +54,27 @@ function RegionImageSlideshow({ images }) {
 const REGION_IMAGES = {
   tienGiang: [
     'https://static.mservice.io/blogscontents/momo-upload-api-221028143745-638025646651875182.jpg',
-    new URL('../assets/image copy 13.png', import.meta.url).href,
-    new URL('../assets/image copy 6.png',  import.meta.url).href,
-    new URL('../assets/image.png',         import.meta.url).href,
+    new URL('../assets/image copy 13.webp', import.meta.url).href,
+    new URL('../assets/image copy 6.webp',  import.meta.url).href,
+    new URL('../assets/image.webp',         import.meta.url).href,
   ],
   benTre: [
-    new URL('../assets/image copy 11.png', import.meta.url).href,
-    new URL('../assets/keodua.png',        import.meta.url).href,
-    new URL('../assets/banhtrang.jpg',     import.meta.url).href,
-    new URL('../assets/image copy 4.png',  import.meta.url).href,
+    new URL('../assets/image copy 11.webp', import.meta.url).href,
+    new URL('../assets/keodua.webp',        import.meta.url).href,
+    new URL('../assets/banhtrang.webp',     import.meta.url).href,
+    new URL('../assets/image copy 4.webp',  import.meta.url).href,
   ],
   canTho: [
     'https://canthoriviu.vn/wp-content/uploads/2022/07/1d-min.jpg',
-    new URL('../assets/image copy 7.png', import.meta.url).href,
-    new URL('../assets/image copy 8.png', import.meta.url).href,
-    new URL('../assets/quadep.png',       import.meta.url).href,
+    new URL('../assets/image copy 7.webp', import.meta.url).href,
+    new URL('../assets/image copy 8.webp', import.meta.url).href,
+    new URL('../assets/quadep.webp',       import.meta.url).href,
   ],
   dongThap: [
     'https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://cdn-media.sforum.vn/storage/app/media/thanhhuyen/%E1%BA%A3nh%20%C4%91%E1%BA%B9p%20%C4%91%E1%BB%93ng%20th%C3%A1p/1/anh-dep-dong-thap-9.jpg',
-    new URL('../assets/image copy 12.png', import.meta.url).href,
-    new URL('../assets/image copy 5.png',  import.meta.url).href,
-    new URL('../assets/image copy 2.png',  import.meta.url).href,
+    new URL('../assets/image copy 12.webp', import.meta.url).href,
+    new URL('../assets/image copy 5.webp',  import.meta.url).href,
+    new URL('../assets/image copy 2.webp',  import.meta.url).href,
   ],
 };
 
@@ -142,11 +131,10 @@ export default function Home() {
             <Link
               to="/products?tinh=Tiền Giang"
               className="region-card-premium"
-              style={{ position: 'relative', overflow: 'hidden' }}
             >
               <RegionImageSlideshow images={REGION_IMAGES.tienGiang} />
-              <div className="region-gradient-overlay" style={{ zIndex: 1 }}></div>
-              <div className="region-info-premium" style={{ zIndex: 2 }}>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Tiền Giang</h3>
                 <p>Vương quốc trái cây</p>
               </div>
@@ -156,11 +144,10 @@ export default function Home() {
             <Link
               to="/products?tinh=Bến Tre"
               className="region-card-premium"
-              style={{ position: 'relative', overflow: 'hidden' }}
             >
               <RegionImageSlideshow images={REGION_IMAGES.benTre} />
-              <div className="region-gradient-overlay" style={{ zIndex: 1 }}></div>
-              <div className="region-info-premium" style={{ zIndex: 2 }}>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Bến Tre</h3>
                 <p>Xứ sở dừa xanh</p>
               </div>
@@ -170,11 +157,10 @@ export default function Home() {
             <Link
               to="/products?tinh=Cần Thơ"
               className="region-card-premium"
-              style={{ position: 'relative', overflow: 'hidden' }}
             >
               <RegionImageSlideshow images={REGION_IMAGES.canTho} />
-              <div className="region-gradient-overlay" style={{ zIndex: 1 }}></div>
-              <div className="region-info-premium" style={{ zIndex: 2 }}>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Cần Thơ</h3>
                 <p>Tây Đô gạo trắng nước trong</p>
               </div>
@@ -184,11 +170,10 @@ export default function Home() {
             <Link
               to="/products?tinh=Đồng Tháp"
               className="region-card-premium"
-              style={{ position: 'relative', overflow: 'hidden' }}
             >
               <RegionImageSlideshow images={REGION_IMAGES.dongThap} />
-              <div className="region-gradient-overlay" style={{ zIndex: 1 }}></div>
-              <div className="region-info-premium" style={{ zIndex: 2 }}>
+              <div className="region-gradient-overlay"></div>
+              <div className="region-info-premium">
                 <h3>Đồng Tháp</h3>
                 <p>Thủ phủ Đất Sen Hồng</p>
               </div>
