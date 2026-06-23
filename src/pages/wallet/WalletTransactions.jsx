@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import walletApi from '../../api/walletApi';
 import { ChevronLeft, Filter } from 'lucide-react';
+import '../../styles/wallet.css';
 
-function WalletTransactions() {
+function WalletTransactions({ backPath = '/wallet' }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -30,11 +31,11 @@ function WalletTransactions() {
 
   const getTypeLabel = (type) => {
     switch(type) {
-      case 'deposit': return <span style={{ color: '#26aa99', fontWeight: 500 }}>Nạp tiền</span>;
-      case 'payment': return <span style={{ color: 'var(--shopee-orange)', fontWeight: 500 }}>Thanh toán đơn hàng</span>;
-      case 'release': return <span style={{ color: '#1890ff', fontWeight: 500 }}>Tiền hàng về ví</span>;
-      case 'commission': return <span style={{ color: '#f57f17', fontWeight: 500 }}>Phí hoa hồng</span>;
-      case 'withdraw': return <span style={{ color: '#6a1b9a', fontWeight: 500 }}>Rút tiền</span>;
+      case 'deposit': return <span className="wallet-type-label wallet-type-label--deposit">Nạp tiền</span>;
+      case 'payment': return <span className="wallet-type-label wallet-type-label--payment">Thanh toán đơn hàng</span>;
+      case 'release': return <span className="wallet-type-label wallet-type-label--release">Tiền hàng về ví</span>;
+      case 'commission': return <span className="wallet-type-label wallet-type-label--commission">Phí hoa hồng</span>;
+      case 'withdraw': return <span className="wallet-type-label wallet-type-label--withdraw">Rút tiền</span>;
       default: return <span>{type}</span>;
     }
   };
@@ -52,79 +53,82 @@ function WalletTransactions() {
   });
 
   return (
-    <div className="page-container" style={{ maxWidth: '1000px' }}>
-      <div className="page-header" style={{ marginBottom: '1.5rem', borderBottom: '1px solid #eaeaea', paddingBottom: '1rem' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.5rem', margin: 0 }}>
+    <div className="page-container wallet-page-container wallet-page-container--large">
+      <div className="page-header wallet-page-header">
+        <h2 className="wallet-title">
           Lịch sử giao dịch
         </h2>
-        <button onClick={() => navigate('/wallet')} className="shopee-btn-outline" style={{ padding: '0.4rem 0.8rem' }}>
+        <button onClick={() => navigate(backPath)} className="shopee-btn-outline wallet-refresh-btn">
           <ChevronLeft size={16} /> Quay lại ví
         </button>
       </div>
 
-      <div className="shopee-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="shopee-card wallet-transactions-card">
+        <div className="wallet-transactions-filter-row">
           <Filter size={18} color="#888" />
-          <span style={{ fontWeight: 500, color: '#555' }}>Lọc theo:</span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button 
+          <span className="wallet-transactions-filter-label">Lọc theo:</span>
+          <div className="wallet-transactions-filter-group">
+            <button
               onClick={() => setFilter('all')}
-              style={{ padding: '0.4rem 1rem', borderRadius: '4px', border: filter === 'all' ? '1px solid var(--shopee-orange)' : '1px solid #ddd', background: filter === 'all' ? 'var(--shopee-orange)' : '#fff', color: filter === 'all' ? '#fff' : '#555', cursor: 'pointer' }}
+              className={`wallet-transactions-filter-btn ${filter === 'all' ? 'active' : ''}`}
             >Tất cả</button>
-            <button 
+            <button
               onClick={() => setFilter('in')}
-              style={{ padding: '0.4rem 1rem', borderRadius: '4px', border: filter === 'in' ? '1px solid var(--shopee-orange)' : '1px solid #ddd', background: filter === 'in' ? 'var(--shopee-orange)' : '#fff', color: filter === 'in' ? '#fff' : '#555', cursor: 'pointer' }}
+              className={`wallet-transactions-filter-btn ${filter === 'in' ? 'active' : ''}`}
             >Tiền vào</button>
-            <button 
+            <button
               onClick={() => setFilter('out')}
-              style={{ padding: '0.4rem 1rem', borderRadius: '4px', border: filter === 'out' ? '1px solid var(--shopee-orange)' : '1px solid #ddd', background: filter === 'out' ? 'var(--shopee-orange)' : '#fff', color: filter === 'out' ? '#fff' : '#555', cursor: 'pointer' }}
+              className={`wallet-transactions-filter-btn ${filter === 'out' ? 'active' : ''}`}
             >Tiền ra</button>
           </div>
         </div>
 
         {loading ? (
-          <div className="loading-screen" style={{ minHeight: '30vh' }}>
-            <div className="spinner" style={{ borderColor: 'var(--shopee-orange)', borderTopColor: 'transparent' }}></div>
+          <div className="loading-screen wallet-transactions-loading">
+            <div className="spinner wallet-loading-spinner" />
           </div>
         ) : (
           <div className="table-container" style={{ border: 'none', boxShadow: 'none' }}>
-            <table className="data-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
-              <thead>
-                <tr style={{ background: '#f5f5f5', color: '#888', borderBottom: '1px solid #eaeaea' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 500, background: 'transparent' }}>Thời gian</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 500, background: 'transparent' }}>Loại giao dịch</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 500, background: 'transparent' }}>Mã tham chiếu</th>
-                  <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 500, background: 'transparent' }}>Số tiền</th>
-                  <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 500, background: 'transparent' }}>Số dư ví</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.length > 0 ? (
-                  filteredData.map((t) => (
-                    <tr key={t.id} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                      <td style={{ padding: '1rem', color: '#555', fontSize: '0.9rem' }}>{formatDate(t.created_at)}</td>
-                      <td style={{ padding: '1rem' }}>{getTypeLabel(t.type)}</td>
-                      <td style={{ padding: '1rem', color: '#888', fontSize: '0.9rem' }}>
-                        {t.reference_type ? `${t.reference_type}_${t.reference_id}` : `#${t.id}`}
-                      </td>
-                      <td style={{ padding: '1rem', textAlign: 'right', color: t.amount > 0 ? '#26aa99' : 'var(--shopee-orange)', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                        {t.amount > 0 ? '+' : ''}{formatCurrency(t.amount)}
-                      </td>
-                      <td style={{ padding: '1rem', textAlign: 'right', color: '#555', fontWeight: 500 }}>
-                        {formatCurrency(t.balance_after)}
+            {/* Scroll ngang trên mobile */}
+            <div className="wallet-table-wrapper">
+              <table className="data-table wallet-table">
+                <thead>
+                  <tr className="wallet-table-header-row">
+                    <th className="wallet-table-th">Thời gian</th>
+                    <th className="wallet-table-th">Loại giao dịch</th>
+                    <th className="wallet-table-th">Mã tham chiếu</th>
+                    <th className="wallet-table-th wallet-table-th--right">Số tiền</th>
+                    <th className="wallet-table-th wallet-table-th--right">Số dư ví</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.length > 0 ? (
+                    filteredData.map((t) => (
+                      <tr key={t.id} className="wallet-table-tr">
+                        <td className="wallet-table-td">{formatDate(t.created_at)}</td>
+                        <td className="wallet-table-td wallet-table-td--type">{getTypeLabel(t.type)}</td>
+                        <td className="wallet-table-td wallet-table-td--ref">
+                          {t.reference_type ? `${t.reference_type}_${t.reference_id}` : `#${t.id}`}
+                        </td>
+                        <td className={`wallet-table-td wallet-table-td--amount ${t.amount > 0 ? 'in' : 'out'}`}>
+                          {t.amount > 0 ? '+' : ''}{formatCurrency(t.amount)}
+                        </td>
+                        <td className="wallet-table-td wallet-table-td--balance">
+                          {formatCurrency(t.balance_after)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="wallet-table-empty">
+                        <div className="wallet-table-empty-icon">📄</div>
+                        Chưa có giao dịch nào.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="empty-state" style={{ padding: '4rem', color: '#aaa' }}>
-                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📄</div>
-                      Chưa có giao dịch nào.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>{/* end scroll wrapper */}
           </div>
         )}
       </div>

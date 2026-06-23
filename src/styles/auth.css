@@ -198,6 +198,31 @@
   gap: 0.5rem;
 }
 
+.auth-success-banner {
+  background: #e8f5e9;
+  border: 1.5px solid #a5d6a7;
+  color: #2e7d32;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  font-size: 0.83rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.auth-error-banner--column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.auth-error-banner-link {
+  color: #c62828;
+  font-weight: bold;
+  text-decoration: underline;
+  margin-top: 0.4rem;
+}
+
 /* ── Form field ── */
 .auth-field {
   display: flex;

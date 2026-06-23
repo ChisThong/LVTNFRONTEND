@@ -1015,3 +1015,28 @@ body {
         justify-content: center;
     }
 }
+
+/* Region Slideshow Layer */
+.region-slideshow-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  animation: regionGifEffect 20s infinite;
+  transition: background-image 1s ease-in-out, opacity 0.8s ease-in-out;
+}
+
+/* Region overlay & premium info positions */
+.region-card-premium {
+  position: relative;
+  overflow: hidden;
+}
+
+.region-gradient-overlay {
+  z-index: 1;
+}
+
+.region-info-premium {
+  z-index: 2;
+}

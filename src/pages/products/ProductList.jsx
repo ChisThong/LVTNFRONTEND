@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useOutletContext } from 'react-router-dom';
 import ProductCard from '../../components/products/ProductCard';
 import {
   getPublicProducts,
-  getPhanLoai,
-  getTinhThanh,
 } from '../../api/productPublicApi';
 import './ProductList.css';
 
@@ -58,11 +56,10 @@ function FilterGroup({ title, children, defaultOpen = true }) {
    ════════════════════════════════════════════════════════════ */
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { categories, provinces } = useOutletContext();
 
   // ── State ──────────────────────────────────────────────────
   const [products, setProducts]       = useState([]);
-  const [categories, setCategories]   = useState([]);
-  const [provinces, setProvinces]     = useState([]);
   const [pagination, setPagination]   = useState(null);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
@@ -78,23 +75,6 @@ export default function ProductList() {
 
   // Sync priceMax slider từ URL
   useEffect(() => { setPriceMax(urlPriceMax); }, [urlPriceMax]);
-
-  // ── Fetch categories & provinces ──────────────────────────
-  useEffect(() => {
-    getPhanLoai()
-      .then(res => {
-        const data = res.data?.data || res.data || [];
-        setCategories(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {});
-
-    getTinhThanh()
-      .then(res => {
-        const data = res.data?.data || res.data || [];
-        setProvinces(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {});
-  }, []);
 
   // ── Fetch products ──────────────────────────────────────────
   const fetchProducts = useCallback(() => {

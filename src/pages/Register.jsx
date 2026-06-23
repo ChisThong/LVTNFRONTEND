@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import registerBg from '../assets/register-bg.png';
+import registerBg from '../assets/register-bg.webp';
 import axiosClient from '../api/axiosClient';
 import '../styles/auth.css';
 

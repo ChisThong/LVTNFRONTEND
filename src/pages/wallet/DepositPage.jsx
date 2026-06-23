@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import walletApi from '../../api/walletApi';
 import toast from 'react-hot-toast';
 import { Wallet, CreditCard, ChevronLeft, Shield, Zap } from 'lucide-react';
+import '../../styles/wallet.css';
 
 function DepositPage() {
   const [amount, setAmount] = useState('');
@@ -44,39 +45,28 @@ function DepositPage() {
   };
 
   return (
-    <div className="page-container" style={{ maxWidth: '600px' }}>
-      <div
-        className="page-header"
-        style={{ marginBottom: '1rem', borderBottom: '1px solid #eaeaea', paddingBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-      >
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.5rem', margin: 0 }}>
+    <div className="page-container wallet-page-container wallet-deposit-container">
+      <div className="page-header wallet-page-header">
+        <h2 className="wallet-title">
           <Wallet color="var(--shopee-orange)" /> Nạp Tiền Vào Ví
         </h2>
-        <button onClick={() => navigate('/wallet')} className="shopee-btn-outline" style={{ padding: '0.4rem 0.8rem' }}>
+        <button onClick={() => navigate('/wallet')} className="shopee-btn-outline wallet-refresh-btn">
           <ChevronLeft size={16} /> Quay lại
         </button>
       </div>
 
-      <div className="shopee-card" style={{ padding: '2rem' }}>
+      <div className="shopee-card wallet-utilities-card">
         <form onSubmit={handleDeposit}>
           {/* Amount input */}
-          <div className="form-group" style={{ marginBottom: '2rem' }}>
-            <label style={{ fontSize: '1.1rem', color: '#555', marginBottom: '0.5rem', display: 'block' }}>
+          <div className="form-group wallet-form-group">
+            <label className="wallet-form-label" style={{ fontSize: '1.1rem' }}>
               Số tiền cần nạp (VNĐ)
             </label>
-            <div style={{ position: 'relative' }}>
-              <span style={{
-                position: 'absolute', left: '1rem', top: '50%',
-                transform: 'translateY(-50%)', fontWeight: 'bold', color: 'var(--shopee-orange)',
-                fontSize: '1.3rem',
-              }}>₫</span>
+            <div className="wallet-deposit-amount-wrapper">
+              <span className="wallet-deposit-currency-symbol">₫</span>
               <input
                 type="number"
-                className="admin-form-control"
-                style={{
-                  width: '100%', paddingLeft: '2.5rem', fontSize: '1.5rem',
-                  fontWeight: 'bold', color: 'var(--shopee-orange)', height: '60px',
-                }}
+                className="admin-form-control wallet-deposit-input"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Nhập số tiền..."
@@ -85,7 +75,7 @@ function DepositPage() {
               />
             </div>
             {amount && parseInt(amount) >= 10000 && (
-              <p style={{ marginTop: '0.5rem', color: '#26aa99', fontSize: '0.9rem' }}>
+              <p className="wallet-deposit-success-hint">
                 ✓ Bạn sẽ nạp: <strong>{formatVND(parseInt(amount))}₫</strong>
               </p>
             )}
@@ -93,24 +83,14 @@ function DepositPage() {
 
           {/* Quick amount buttons */}
           <div style={{ marginBottom: '2rem' }}>
-            <p style={{ color: '#888', marginBottom: '0.8rem', fontSize: '0.9rem' }}>Hoặc chọn mệnh giá nhanh:</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem' }}>
+            <p className="wallet-quick-amounts-label">Hoặc chọn mệnh giá nhanh:</p>
+            <div className="wallet-quick-amounts-grid">
               {quickAmounts.map(amt => (
                 <button
                   key={amt}
                   type="button"
                   onClick={() => setAmount(amt.toString())}
-                  style={{
-                    padding: '0.8rem',
-                    borderRadius: '6px',
-                    border: amount === amt.toString() ? '2px solid #0066cc' : '1px solid #ddd',
-                    background: amount === amt.toString() ? '#e8f0ff' : '#fff',
-                    color: amount === amt.toString() ? '#0066cc' : '#555',
-                    fontWeight: amount === amt.toString() ? 'bold' : 'normal',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    fontSize: '0.9rem',
-                  }}
+                  className={`wallet-quick-amount-btn ${amount === amt.toString() ? 'active' : ''}`}
                 >
                   {formatVND(amt)}₫
                 </button>
@@ -119,20 +99,11 @@ function DepositPage() {
           </div>
 
           {/* VNPay branding */}
-          <div style={{
-            padding: '1rem 1.2rem',
-            background: 'linear-gradient(135deg, #e8f0ff 0%, #f0f7ff 100%)',
-            borderRadius: '8px',
-            marginBottom: '2rem',
-            border: '1px solid #c5d8f5',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}>
+          <div className="wallet-vnpay-branding-box">
             <img
               src="https://vnpay.vn/s1/statics/img/logo2.png"
               alt="VNPay"
-              style={{ width: '60px', height: 'auto', objectFit: 'contain' }}
+              className="wallet-vnpay-logo"
               onError={(e) => {
                 // Fallback text logo nếu ảnh không load
                 e.target.style.display = 'none';
@@ -140,18 +111,18 @@ function DepositPage() {
               }}
             />
             <div>
-              <div style={{ fontWeight: 'bold', color: '#003087', fontSize: '1rem' }}>
+              <div className="wallet-vnpay-title">
                 Thanh toán qua VNPay
               </div>
-              <div style={{ fontSize: '0.82rem', color: '#555', marginTop: '2px' }}>
+              <div className="wallet-vnpay-subtitle">
                 Hỗ trợ ATM nội địa, Visa, MasterCard, QR Code
               </div>
             </div>
-            <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', color: '#26aa99' }}>
+            <div className="wallet-vnpay-badges">
+              <span className="wallet-vnpay-badge-ssl">
                 <Shield size={12} /> Bảo mật SSL
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', color: '#f59e0b' }}>
+              <span className="wallet-vnpay-badge-instant">
                 <Zap size={12} /> Xử lý tức thì
               </span>
             </div>
@@ -160,26 +131,12 @@ function DepositPage() {
           {/* Submit */}
           <button
             type="submit"
-            className="shopee-btn"
-            style={{
-              width: '100%',
-              padding: '1rem',
-              fontSize: '1.1rem',
-              background: loading || !amount ? '#ccc' : 'linear-gradient(135deg, #0066cc 0%, #004999 100%)',
-              border: 'none',
-              borderRadius: '8px',
-              color: '#fff',
-              cursor: loading || !amount ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
-            }}
+            className={`shopee-btn wallet-deposit-submit-btn ${loading || !amount ? 'disabled' : 'active'}`}
             disabled={loading || !amount}
           >
             {loading ? (
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                <span
-                  className="spinner"
-                  style={{ width: '20px', height: '20px', borderWidth: '2px', borderColor: '#fff', borderTopColor: 'transparent' }}
-                />
+                <span className="spinner wallet-deposit-submit-spinner" />
                 Đang xử lý...
               </span>
             ) : (
@@ -189,7 +146,7 @@ function DepositPage() {
             )}
           </button>
 
-          <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.82rem', color: '#999' }}>
+          <p className="wallet-deposit-footer-tip">
             Bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất giao dịch.
           </p>
         </form>

@@ -6,7 +6,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Search, Filter, Layers, Box, Globe, RotateCw, X, ChevronRight, ShoppingCart, Info } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../api/axiosClient';
-import bannerBg from '../assets/bannermap.png';
+import bannerBg from '../assets/bannermap.webp';
 import '../styles/map.css';
 
 // Coordinated lookups for Southern Vietnam provinces

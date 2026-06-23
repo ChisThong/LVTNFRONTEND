@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { getMyShop } from '../../api/shopApi';
+import { Link, useOutletContext } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Package, ShoppingBag, DollarSign, TrendingUp, Users, Star, ArrowRight } from 'lucide-react';
 import '../../styles/seller.css';
@@ -64,26 +63,7 @@ const formatCurrency = (value) => {
 };
 
 export default function SellerDashboard() {
-  const [shop,    setShop]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState('');
-
-  useEffect(() => {
-    getMyShop()
-      .then(res => {
-        if (res.data?.success) setShop(res.data.data);
-        else setError(res.data?.message || 'Không lấy được thông tin gian hàng.');
-      })
-      .catch(err => {
-        const msg = err?.response?.data?.message;
-        if (err?.response?.status === 404) {
-          setError('Bạn chưa đăng ký gian hàng.');
-        } else {
-          setError(msg || 'Có lỗi xảy ra. Vui lòng thử lại.');
-        }
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const { shop, shopLoading: loading, shopError: error } = useOutletContext();
 
   const status = shop ? (STATUS_CONFIG[shop.TrangThaiDuyet] || STATUS_CONFIG.cho_duyet) : null;
 

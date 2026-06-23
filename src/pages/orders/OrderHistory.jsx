@@ -1,46 +1,63 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
-import { Package, Clock, CheckCircle, Truck, XCircle, ChevronRight, Store } from 'lucide-react';
+import { Package, Clock, CheckCircle, Truck, XCircle, Store, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatPrice } from '../../api/productPublicApi';
+import '../../styles/orders.css';
 
 const BACKEND_URL = "http://localhost:8000/storage/";
-
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150";
 
-// Helper lấy ảnh
-const getProductImage = (item) => {
-    if (!item) return FALLBACK_IMAGE;
-    
-    let sp = item.san_pham || item.product || {};
-    let imgPath = sp.HinhAnh || sp.hinhanh || sp.hinh_anh || sp.image || sp.HinhAnhDauTien;
-
-    if (!imgPath || typeof imgPath !== 'string') {
-        if (Array.isArray(sp.hinh_anh) && sp.hinh_anh.length > 0) {
-            imgPath = sp.hinh_anh[0].HinhAnh || sp.hinh_anh[0].hinhanh;
-        } else if (Array.isArray(sp.hinhanh) && sp.hinhanh.length > 0) {
-            imgPath = sp.hinhanh[0].HinhAnh || sp.hinhanh[0].hinhanh;
-        }
-    }
-
-    if (imgPath && typeof imgPath === 'string') {
-        return imgPath.startsWith('http') ? imgPath : `${BACKEND_URL}${imgPath}`;
-    }
-
-    return FALLBACK_IMAGE;
+// ── Mapping trạng thái DB (số) ↔ tab key (chuỗi) ─────────────────────────────
+const STATUS_MAP = {
+  pending:    [0],       // Chờ xác nhận
+  processing: [1],       // Đã xác nhận (đang xử lý)
+  shipping:   [2],       // Đang giao
+  completed:  [3],       // Hoàn tất
+  cancelled:  [4],       // Đã hủy
 };
 
+const ORDER_TABS = [
+  { key: 'all',        label: 'Tất cả' },
+  { key: 'pending',    label: 'Chờ xác nhận' },
+  { key: 'processing', label: 'Đang xử lý' },
+  { key: 'shipping',   label: 'Đang giao' },
+  { key: 'completed',  label: 'Đã giao' },
+  { key: 'cancelled',  label: 'Đã hủy' },
+];
+
+// ── Helper lấy ảnh ────────────────────────────────────────────────────────────
+const getProductImage = (item) => {
+  if (!item) return FALLBACK_IMAGE;
+  let sp = item.san_pham || item.product || {};
+  let imgPath = sp.HinhAnh || sp.hinhanh || sp.hinh_anh || sp.image || sp.HinhAnhDauTien;
+
+  if (!imgPath || typeof imgPath !== 'string') {
+    if (Array.isArray(sp.hinh_anh) && sp.hinh_anh.length > 0) {
+      imgPath = sp.hinh_anh[0].HinhAnh || sp.hinh_anh[0].hinhanh;
+    } else if (Array.isArray(sp.hinhanh) && sp.hinhanh.length > 0) {
+      imgPath = sp.hinhanh[0].HinhAnh || sp.hinhanh[0].hinhanh;
+    }
+  }
+
+  if (imgPath && typeof imgPath === 'string') {
+    return imgPath.startsWith('http') ? imgPath : `${BACKEND_URL}${imgPath}`;
+  }
+  return FALLBACK_IMAGE;
+};
+
+// ── Component chính ───────────────────────────────────────────────────────────
 export default function OrderHistory() {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [orders, setOrders]       = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [activeTab, setActiveTab] = useState('all'); // Tab đang chọn
 
-  // Lấy danh sách đơn hàng
+  // ── Fetch ──
   const fetchOrders = async () => {
     try {
       const res = await axiosClient.get('/don-hang');
-      // Trả về là DonHangTong
       setOrders(res.data.data.data || res.data.data || []);
     } catch (err) {
       console.error(err);
@@ -50,143 +67,258 @@ export default function OrderHistory() {
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  useEffect(() => { fetchOrders(); }, []);
 
+  // ── Hủy đơn ──
   const handleCancelOrder = async (idDonHangCon) => {
-    if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này không? Quá trình này không thể hoàn tác.')) {
-      return;
-    }
-
+    if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này không? Quá trình này không thể hoàn tác.')) return;
     try {
       toast.loading('Đang xử lý hủy đơn...', { id: 'cancelOrder' });
       const res = await axiosClient.put(`/orders/${idDonHangCon}/cancel`);
       toast.success(res.data.message || 'Đã hủy đơn hàng thành công!', { id: 'cancelOrder' });
-      fetchOrders(); // Load lại danh sách sau khi hủy
+      fetchOrders();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi hủy đơn', { id: 'cancelOrder' });
     }
   };
 
+  // ── Status helper ──
   const getStatusInfo = (status) => {
     switch (status) {
       case 0: return { label: 'Chờ xác nhận', color: '#f59e0b', icon: <Clock size={16}/> };
-      case 1: return { label: 'Đã xác nhận', color: '#3b82f6', icon: <CheckCircle size={16}/> };
-      case 2: return { label: 'Đang giao', color: '#10b981', icon: <Truck size={16}/> };
-      case 3: return { label: 'Hoàn tất', color: '#16a34a', icon: <CheckCircle size={16}/> };
-      case 4: return { label: 'Đã hủy', color: '#ef4444', icon: <XCircle size={16}/> };
-      default: return { label: 'Không rõ', color: '#6b7280', icon: <Package size={16}/> };
+      case 1: return { label: 'Đã xác nhận',  color: '#3b82f6', icon: <CheckCircle size={16}/> };
+      case 2: return { label: 'Đang giao',    color: '#10b981', icon: <Truck size={16}/> };
+      case 3: return { label: 'Hoàn tất',     color: '#16a34a', icon: <CheckCircle size={16}/> };
+      case 4: return { label: 'Đã hủy',       color: '#ef4444', icon: <XCircle size={16}/> };
+      default:return { label: 'Không rõ',     color: '#6b7280', icon: <Package size={16}/> };
     }
   };
 
+  // ── Filter theo tab ──
+  // orders là mảng DonHangTong; mỗi DonHangTong có don_hangs[] (đơn con).
+  // Một DonHangTong hiển thị khi có ÍT NHẤT 1 đơn con khớp với tab đang chọn.
+  const filteredOrders = activeTab === 'all'
+    ? orders
+    : orders
+        .map((dht) => ({
+          ...dht,
+          don_hangs: (dht.don_hangs || []).filter((dc) =>
+            STATUS_MAP[activeTab]?.includes(dc.TrangThai)
+          ),
+        }))
+        .filter((dht) => dht.don_hangs.length > 0);
+
+  // ── Đếm số đơn con theo tab (cho badge) ──
+  const countByTab = (key) => {
+    if (key === 'all') return orders.reduce((s, o) => s + (o.don_hangs?.length || 0), 0);
+    return orders.reduce(
+      (s, o) =>
+        s + (o.don_hangs || []).filter((dc) => STATUS_MAP[key]?.includes(dc.TrangThai)).length,
+      0
+    );
+  };
+
+  // ── Loading ──
   if (loading) {
-    return <div style={{ minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>Đang tải...</div>;
+    return (
+      <div className="loading-screen order-loading-screen">
+        <div className="spinner order-loading-spinner" />
+        <p className="order-loading-text">Đang tải đơn hàng...</p>
+      </div>
+    );
   }
 
+  // ── Render ──
   return (
-    <div style={{ backgroundColor: '#f5f5f5', minHeight: '80vh', padding: '120px 5% 40px' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        
-        <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+    <div className="order-history-page">
+      <div className="order-history-container">
+
+        {/* ── Tiêu đề ── */}
+        <h2 className="order-history-title">
           <Package color="var(--shopee-orange)" /> Đơn mua của tôi
         </h2>
 
-        {orders.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: '8px' }}>
-            <Package size={60} color="#ccc" style={{ marginBottom: '1rem' }} />
-            <h3>Chưa có đơn hàng nào</h3>
-            <p style={{ color: '#666', marginBottom: '1.5rem' }}>Bạn chưa có đơn hàng nào trong lịch sử.</p>
-            <button onClick={() => navigate('/products')} className="shopee-btn">Tiếp tục mua sắm</button>
-          </div>
-        ) : (
-          orders.map((donHangTong) => (
-            <div key={donHangTong.ID_DonHangTong} style={{ marginBottom: '2rem' }}>
-              
-              {/* Header Đơn hàng tổng */}
-              <div style={{ background: '#fff', padding: '1rem', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* ══════════════════════════════════════════════════
+            THANH TAB TRẠNG THÁI — Shopee style
+            ══════════════════════════════════════════════════ */}
+        <div className="order-tabs">
+          {ORDER_TABS.map((tab) => {
+            const count   = countByTab(tab.key);
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                id={`order-tab-${tab.key}`}
+                onClick={() => setActiveTab(tab.key)}
+                className={`order-tab-btn ${isActive ? 'active' : ''}`}
+              >
+                {tab.label}
+                {/* Badge số lượng */}
+                {count > 0 && (
+                  <span className="order-tab-badge">
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ══════════════════════════════════════════════════
+            NỘI DUNG ĐƠN HÀNG
+            ══════════════════════════════════════════════════ */}
+        <div className="order-content-list">
+
+          {/* Empty state toàn bộ */}
+          {orders.length === 0 && (
+            <div className="order-empty-state">
+              <Package size={60} color="#ccc" className="order-empty-icon" />
+              <h3>Chưa có đơn hàng nào</h3>
+              <p className="order-empty-text">Bạn chưa có đơn hàng nào trong lịch sử.</p>
+              <button onClick={() => navigate('/products')} className="shopee-btn">
+                Tiếp tục mua sắm
+              </button>
+            </div>
+          )}
+
+          {/* Empty state theo tab */}
+          {orders.length > 0 && filteredOrders.length === 0 && (
+            <div className="order-empty-state">
+              <ShoppingBag size={64} color="#e0e0e0" className="order-empty-icon" />
+              <h3 className="order-empty-subtitle" style={{ color: '#bbb', fontWeight: 500 }}>Chưa có đơn hàng nào thuộc trạng thái này</h3>
+              <p className="order-empty-subtitle">
+                Thử chọn tab khác hoặc tiếp tục mua sắm nhé!
+              </p>
+              <button
+                onClick={() => setActiveTab('all')}
+                className="shopee-btn-outline order-empty-btn-all"
+              >
+                Xem tất cả đơn
+              </button>
+              <button
+                onClick={() => navigate('/products')}
+                className="shopee-btn order-empty-btn-shop"
+              >
+                Mua sắm ngay
+              </button>
+            </div>
+          )}
+
+          {/* Danh sách đơn hàng đã lọc */}
+          {filteredOrders.map((donHangTong) => (
+            <div key={donHangTong.ID_DonHangTong} className="order-group-wrapper">
+
+              {/* Header đơn hàng tổng */}
+              <div className="order-group-header">
                 <div>
-                  <strong style={{ fontSize: '1.1rem' }}>Mã Đơn Tổng: #{donHangTong.ID_DonHangTong}</strong>
-                  <span style={{ marginLeft: '1rem', color: '#666', fontSize: '0.9rem' }}>
-                    Thanh toán: {donHangTong.PhuongThucThanhToan} 
-                    {donHangTong.TrangThaiThanhToan === 1 ? ' (Đã thanh toán)' : ' (Chưa thanh toán)'}
+                  <strong className="order-group-id">
+                    Mã Đơn Tổng: #{donHangTong.ID_DonHangTong}
+                  </strong>
+                  <span className="order-group-payment">
+                    {donHangTong.PhuongThucThanhToan}
+                    {donHangTong.TrangThaiThanhToan === 1 ? ' · Đã thanh toán' : ' · Chưa thanh toán'}
                   </span>
                 </div>
-                <strong style={{ color: 'var(--shopee-orange)' }}>Tổng: {formatPrice(donHangTong.TongGiaTien)}</strong>
+                <strong className="order-group-total">
+                  Tổng: {formatPrice(donHangTong.TongGiaTien)}
+                </strong>
               </div>
 
-              {/* Danh sách các đơn hàng con (Mỗi shop 1 đơn con) */}
+              {/* Danh sách đơn con */}
               {donHangTong.don_hangs?.map((donHangCon) => {
                 const statusInfo = getStatusInfo(donHangCon.TrangThai);
+                const isLast = donHangTong.don_hangs.length === 1;
                 return (
-                  <div key={donHangCon.ID_DonHang} style={{ background: '#fff', marginBottom: '0.5rem', padding: '1.5rem', borderRadius: donHangTong.don_hangs.length === 1 ? '0 0 8px 8px' : '0' }}>
-                    
-                    {/* Thông tin Shop */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee', paddingBottom: '1rem', marginBottom: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
-                        <Store size={18} /> {donHangCon.shop?.TenShop || 'Tên Shop'}
-                        <button className="shopee-btn-outline" style={{ padding: '2px 8px', fontSize: '0.8rem', marginLeft: '10px' }} onClick={() => navigate(`/shops/${donHangCon.ID_Shop}`)}>Xem Shop</button>
+                  <div
+                    key={donHangCon.ID_DonHang}
+                    className={`order-item-card ${isLast ? 'order-item-card--last' : ''}`}
+                  >
+                    {/* Shop header */}
+                    <div className="order-item-shop-header">
+                      <div className="order-item-shop-info">
+                        <Store size={18} />
+                        {donHangCon.shop?.TenShop || 'Tên Shop'}
+                        <button
+                          className="shopee-btn-outline order-item-shop-btn"
+                          onClick={() => navigate(`/shops/${donHangCon.ID_Shop}`)}
+                        >
+                          Xem Shop
+                        </button>
                       </div>
-                      <div style={{ color: statusInfo.color, display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
+
+                      {/* Badge trạng thái */}
+                      <div
+                        className="order-item-status-badge"
+                        style={{
+                          '--status-color': statusInfo.color,
+                          '--status-bg': `${statusInfo.color}15`,
+                          '--status-border': `${statusInfo.color}40`
+                        }}
+                      >
                         {statusInfo.icon} {statusInfo.label}
                       </div>
                     </div>
 
-                    {/* Danh sách sản phẩm của Đơn con */}
+                    {/* Sản phẩm */}
                     {donHangCon.chi_tiet?.map((ct) => (
-                      <div key={ct.ID_ChiTiet} style={{ display: 'flex', gap: '15px', marginBottom: '1rem' }}>
-                        <img src={getProductImage(ct)} onError={(e) => { e.target.src = FALLBACK_IMAGE; }} alt="Product" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #eee' }} />
-                        <div style={{ flex: 1 }}>
-                          <h4 style={{ margin: '0 0 5px 0' }}>{ct.san_pham?.TenSanPham}</h4>
-                          <div style={{ color: '#666', fontSize: '0.9rem' }}>x{ct.SoLuong}</div>
+                      <div key={ct.ID_ChiTiet} className="order-item-product-row">
+                        <img
+                          src={getProductImage(ct)}
+                          onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
+                          alt="Product"
+                          className="order-item-product-img"
+                        />
+                        <div className="order-item-product-info">
+                          <h4 className="order-item-product-title">
+                            {ct.san_pham?.TenSanPham}
+                          </h4>
+                          <div className="order-item-product-qty">x{ct.SoLuong}</div>
                         </div>
-                        <div style={{ fontWeight: 'bold', color: 'var(--shopee-orange)' }}>
+                        <div className="order-item-product-price">
                           {formatPrice(Number(ct.TongGia) || 0)}
                         </div>
                       </div>
                     ))}
 
-                    {/* Action Bar của đơn con */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
-                      <div style={{ color: '#666', fontSize: '0.9rem' }}>
-                        Mã vận đơn: {donHangCon.MaVanDon || 'Chưa có'}
+                    {/* Action bar */}
+                    <div className="order-item-action-row">
+                      <div className="order-item-tracking-code">
+                        Mã vận đơn: <span className="order-item-tracking-value">{donHangCon.MaVanDon || 'Chưa có'}</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div>Thành tiền: <strong style={{ color: 'var(--shopee-orange)', fontSize: '1.2rem' }}>{formatPrice(donHangCon.TongGia + donHangCon.PhiVanChuyen)}</strong></div>
-                        
-                        {/* NÚT HỦY ĐƠN - Chỉ hiện khi chờ xác nhận (0) */}
+
+                      <div className="order-item-buttons-group">
+                        <div className="order-item-total-price-text">
+                          Thành tiền:{' '}
+                          <strong className="order-item-total-price-val">
+                            {formatPrice(donHangCon.TongGia + donHangCon.PhiVanChuyen)}
+                          </strong>
+                        </div>
+
+                        {/* Nút Hủy — chỉ khi chờ xác nhận */}
                         {donHangCon.TrangThai === 0 && (
-                          <button 
+                          <button
                             onClick={() => handleCancelOrder(donHangCon.ID_DonHang)}
-                            style={{ 
-                              padding: '8px 16px', 
-                              backgroundColor: '#fff', 
-                              border: '1px solid #ccc', 
-                              borderRadius: '4px', 
-                              color: '#666',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
-                              transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => { e.target.style.borderColor = '#d32f2f'; e.target.style.color = '#d32f2f'; }}
-                            onMouseOut={(e) => { e.target.style.borderColor = '#ccc'; e.target.style.color = '#666'; }}
+                            className="order-item-btn-cancel"
                           >
-                            Hủy Đơn Hàng
+                            Hủy Đơn
                           </button>
                         )}
 
+                        {/* Nút Đánh giá — chỉ khi hoàn tất */}
                         {donHangCon.TrangThai === 3 && (
-                          <button className="shopee-btn" style={{ padding: '8px 16px' }}>Đánh Giá</button>
+                          <button className="shopee-btn order-item-btn-review">
+                            Đánh Giá
+                          </button>
                         )}
                       </div>
                     </div>
-
                   </div>
                 );
               })}
             </div>
-          ))
-        )}
+          ))}
+        </div>
+
       </div>
     </div>
   );

@@ -1,0 +1,365 @@
+/* CSS for Order History Page */
+.order-history-page {
+  background-color: #f5f5f5;
+  min-height: 80vh;
+  padding: 120px 5% 40px;
+}
+
+.order-history-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.order-history-title {
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-loading-screen {
+  min-height: 80vh;
+}
+
+.order-loading-spinner {
+  border-color: var(--shopee-orange);
+  border-top-color: transparent;
+}
+
+.order-loading-text {
+  color: #888;
+}
+
+/* Order Tabs */
+.order-tabs {
+  display: flex;
+  background: #fff;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 0;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  WebkitOverflowScrolling: touch;
+  scrollbar-width: none;
+}
+
+.order-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.order-tab-btn {
+  flex: 0 0 auto;
+  padding: 1rem 1.4rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: #555;
+  font-weight: 400;
+  font-size: 0.92rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.order-tab-btn:hover {
+  color: var(--shopee-orange);
+}
+
+.order-tab-btn.active {
+  border-bottom: 2px solid var(--shopee-orange);
+  color: var(--shopee-orange);
+  font-weight: 700;
+}
+
+.order-tab-badge {
+  background: #e0e0e0;
+  color: #555;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  min-width: 20px;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.order-tab-btn.active .order-tab-badge {
+  background: var(--shopee-orange);
+  color: #fff;
+}
+
+/* Order Content Container */
+.order-content-list {
+  padding-top: 1.5rem;
+}
+
+/* Empty States */
+.order-empty-state {
+  text-align: center;
+  padding: 4rem;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.order-empty-icon {
+  margin-bottom: 1rem;
+}
+
+.order-empty-text {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.order-empty-subtitle {
+  color: #ccc;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.order-empty-btn-all {
+  margin-top: 1.5rem;
+  margin-right: 0.75rem;
+}
+
+.order-empty-btn-shop {
+  margin-top: 1.5rem;
+}
+
+/* Order Groups (Don Hang Tong) */
+.order-group-wrapper {
+  margin-bottom: 2rem;
+}
+
+.order-group-header {
+  background: #fff;
+  padding: 0.85rem 1rem;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.order-group-id {
+  font-size: 1rem;
+}
+
+.order-group-payment {
+  margin-left: 1rem;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.order-group-total {
+  color: var(--shopee-orange);
+}
+
+/* Order Items (Don Hang Con) */
+.order-item-card {
+  background: #fff;
+  margin-bottom: 0.5rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.order-item-card--last {
+  border-radius: 0 0 8px 8px;
+}
+
+.order-item-shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.order-item-shop-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.order-item-shop-btn {
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  margin-left: 6px;
+}
+
+.order-item-status-badge {
+  color: var(--status-color, #555);
+  background-color: var(--status-bg, #f5f5f5);
+  border: 1px solid var(--status-border, #ccc);
+  border-radius: 99px;
+  padding: 3px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Product list inside Order */
+.order-item-product-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.order-item-product-img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.order-item-product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.order-item-product-title {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.order-item-product-qty {
+  color: #888;
+  font-size: 0.88rem;
+}
+
+.order-item-product-price {
+  font-weight: bold;
+  color: var(--shopee-orange);
+  flex-shrink: 0;
+}
+
+/* Footer / Action row inside Order */
+.order-item-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.order-item-tracking-code {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.order-item-tracking-value {
+  font-weight: 500;
+  color: #555;
+}
+
+.order-item-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order-item-total-price-text {
+  font-size: 0.9rem;
+}
+
+.order-item-total-price-val {
+  color: var(--shopee-orange);
+  font-size: 1.1rem;
+}
+
+.order-item-btn-cancel {
+  padding: 7px 14px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #666;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.88rem;
+  transition: all 0.2s;
+}
+
+.order-item-btn-cancel:hover {
+  border-color: #d32f2f;
+  color: #d32f2f;
+}
+
+.order-item-btn-review {
+  padding: 7px 14px;
+  font-size: 0.88rem;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .order-history-page {
+    padding: 80px 3% 20px;
+  }
+  .order-group-header,
+  .order-item-shop-header,
+  .order-item-action-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .order-item-buttons-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .order-empty-state {
+    padding: 2rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-history-page {
+    padding: 70px 2% 15px;
+  }
+  .order-item-card {
+    padding: 1rem;
+  }
+  .order-item-product-row {
+    gap: 10px;
+  }
+  .order-item-product-img {
+    width: 60px;
+    height: 60px;
+  }
+  .order-item-buttons-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .order-item-btn-cancel,
+  .order-item-btn-review {
+    width: 100%;
+    text-align: center;
+  }
+  .order-empty-btn-all {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+  .order-empty-btn-shop {
+    width: 100%;
+  }
+}

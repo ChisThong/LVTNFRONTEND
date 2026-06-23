@@ -1,7 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useState, useEffect } from 'react';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/logo.webp';
 import '../styles/navbar-admin.css';
 import { 
     LayoutDashboard, Store, ShoppingBag, Package, Map, FileText, BarChart3, 

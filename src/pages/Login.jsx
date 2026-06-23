@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import loginBg from '../assets/login-bg.png';
+import loginBg from '../assets/login-bg.webp';
 import axiosClient from '../api/axiosClient';
 import '../styles/auth.css';
 
@@ -55,23 +55,20 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submit clicked. Form data:", form);
     setLoading(true);
     setErrors({});
     setGeneralError('');
     setIsUnverified(false);
 
     try {
-      console.log("Sending API request to /auth/login...");
       const res = await axiosClient.post('/auth/login', {
         email: form.email,
         matkhau: form.password,  // field backend là matkhau
       });
-      console.log("API response success:", res.data);
 
       const { access_token, user } = res.data.data ?? res.data;
       localStorage.setItem('token', access_token ?? res.data.token);
-      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('user', JSON.stringify(user));
 
       // Điều hướng theo role
       const roleId = user.role?.ID_role ?? user.ID_role;
@@ -83,7 +80,6 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      console.error("API error caught:", err);
       if (err.response?.status === 403) {
         // Chưa xác thực email
         const emailFromApi = err.response.data?.data?.email ?? form.email;
@@ -143,12 +139,12 @@ export default function Login() {
 
           {/* Error banner */}
           {generalError && (
-            <div className="auth-error-banner" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div className="auth-error-banner auth-error-banner--column">
               <span>{generalError}</span>
               {isUnverified && (
                 <Link
                   to="/verify-otp"
-                  style={{ color: '#c62828', fontWeight: 'bold', textDecoration: 'underline', marginTop: '0.4rem' }}
+                  className="auth-error-banner-link"
                 >
                   Bấm vào đây để xác thực ngay
                 </Link>

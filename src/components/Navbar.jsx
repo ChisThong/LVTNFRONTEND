@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/logo.webp';
 
 /* SVG Icons */
 const IconSearch = () => (

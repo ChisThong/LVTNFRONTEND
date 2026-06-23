@@ -30,10 +30,10 @@ import SellerProductEdit from './pages/seller/SellerProductEdit';
 import SellerOrders from './pages/seller/SellerOrders';
 
 // ── Wallet Pages ────────────────────────────────────────────
-import WalletPage from './pages/wallet/WalletPage';
+import UserWallet from './pages/wallet/UserWallet';
+import SellerWallet from './pages/wallet/SellerWallet';
 import DepositPage from './pages/wallet/DepositPage';
 import WalletTransactions from './pages/wallet/WalletTransactions';
-import WithdrawPage from './pages/wallet/WithdrawPage';
 import PaymentSuccess from './pages/wallet/PaymentSuccess';
 import VNPayReturnPage from './pages/checkout/VNPayReturnPage';
 import AdminWalletDashboard from './pages/admin/AdminWalletDashboard';
@@ -96,17 +96,18 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* ════════════════════════════════════════════════
-            WALLET ROUTES — ProtectedRoute
+            WALLET ROUTES — ProtectedRoute (role 1, 2, 3)
+            /wallet        → UserWallet  (Buyer)
+            /seller/wallet → SellerWallet (via SellerLayout bên dưới)
             ════════════════════════════════════════════════ */}
         <Route element={<ProtectedRoute allowedRoles={[1, 2, 3]} />}>
           <Route element={<PublicLayout />}>
-            <Route path="/wallet" element={<WalletPage />} />
-            <Route path="/wallet/deposit" element={<DepositPage />} />
+            <Route path="/wallet"              element={<UserWallet />} />
+            <Route path="/wallet/deposit"      element={<DepositPage />} />
             <Route path="/wallet/transactions" element={<WalletTransactions />} />
-            <Route path="/wallet/withdraw" element={<WithdrawPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/orders" element={<OrderHistory />} />
-            <Route path="/account" element={<AccountPage />} />
+            <Route path="/checkout"            element={<CheckoutPage />} />
+            <Route path="/orders"              element={<OrderHistory />} />
+            <Route path="/account"             element={<AccountPage />} />
           </Route>
         </Route>
 
@@ -129,7 +130,8 @@ function App() {
             <Route path="inventory"  element={<div style={{ padding: '2rem' }}><h2>Quản lý kho (Đang phát triển)</h2></div>} />
             <Route path="revenue"    element={<div style={{ padding: '2rem' }}><h2>Thống kê doanh thu (Đang phát triển)</h2></div>} />
             <Route path="reviews"    element={<div style={{ padding: '2rem' }}><h2>Đánh giá khách hàng (Đang phát triển)</h2></div>} />
-            <Route path="wallet"     element={<WalletPage />} />
+            <Route path="wallet"        element={<SellerWallet />} />
+            <Route path="wallet/transactions" element={<WalletTransactions backPath="/seller/wallet" />} />
           </Route>
         </Route>
 
