@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import { Menu, Bell } from 'lucide-react';
 import '../../styles/navbar-admin.css';
+import '../../styles/admin-custom.css';
 
 function Admin() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,9 +19,9 @@ function Admin() {
         if (path.includes('/admin/products')) return 'Quản lý sản phẩm';
         if (path.includes('/admin/regions')) return 'Danh mục vùng miền';
         if (path.includes('/admin/posts')) return 'Quản lý bài viết';
-        if (path.includes('/admin/reports')) return 'Báo cáo & Thống kê';
         if (path.includes('/admin/users')) return 'Quản lý người dùng';
-        return 'Báo cáo & Thống kê';
+        if (path.includes('/admin/wallet')) return 'Quản lý Ví điện tử';
+        return 'Quản trị hệ thống';
     };
 
     return (
@@ -46,8 +47,8 @@ function Admin() {
             </header>
 
             {/* Sidebar Backdrop */}
-            <div 
-                className={`admin-sidebar-backdrop ${sidebarOpen ? 'show' : ''}`} 
+            <div
+                className={`admin-sidebar-backdrop ${sidebarOpen ? 'show' : ''}`}
                 onClick={() => setSidebarOpen(false)}
             />
 

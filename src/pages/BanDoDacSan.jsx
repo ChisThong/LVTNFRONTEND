@@ -9,6 +9,8 @@ import axiosClient from '../api/axiosClient';
 import bannerBg from '../assets/bannermap.webp';
 import '../styles/map.css';
 
+import ranhGioiData from '../../RanhGioi.json';
+
 // Coordinated lookups for Southern Vietnam provinces
 const PROVINCE_COORDINATES = {
   "TP. Hồ Chí Minh": { lat: 10.776, lng: 106.701 },
@@ -31,6 +33,102 @@ const PROVINCE_COORDINATES = {
   "Bình Phước": { lat: 11.532, lng: 106.884 },
   "Bà Rịa - Vũng Tàu": { lat: 10.496, lng: 107.170 },
 };
+
+// Post-merger groups mapping
+const MERGER_GROUPS = {
+  "TP. Hồ Chí Minh": {
+    name: "Thành phố Hồ Chí Minh",
+    constituents: ["TP. Hồ Chí Minh", "Thành phố Hồ Chí Minh", "Bà Rịa - Vũng Tàu", "Bình Dương"],
+    geojsonNames: ["HồChíMinh", "BàRịa-VũngTàu", "BìnhDương"],
+    color: "#ff4d4d",
+    center: { lat: 10.776, lng: 106.701 } // Đặt tại TP. HCM hiện nay
+  },
+  "Đồng Nai": {
+    name: "Tỉnh Đồng Nai",
+    constituents: ["Đồng Nai", "Bình Phước"],
+    geojsonNames: ["ĐồngNai", "BìnhPhước"],
+    color: "#ff9f43",
+    center: { lat: 10.957, lng: 106.842 } // Đặt tại Đồng Nai hiện nay
+  },
+  "Tây Ninh": {
+    name: "Tỉnh Tây Ninh",
+    constituents: ["Tây Ninh", "Long An"],
+    geojsonNames: ["TâyNinh", "LongAn"],
+    color: "#10b981",
+    center: { lat: 10.538, lng: 106.413 } // Đặt tại Long An
+  },
+  "Cần Thơ": {
+    name: "Thành phố Cần Thơ",
+    constituents: ["Cần Thơ", "TP. Cần Thơ", "Sóc Trăng", "Hậu Giang"],
+    geojsonNames: ["CầnThơ", "SócTrăng", "HậuGiang"],
+    color: "#2e86de",
+    center: { lat: 10.036, lng: 105.787 } // Đặt tại Cần Thơ hiện nay
+  },
+  "Vĩnh Long": {
+    name: "Tỉnh Vĩnh Long",
+    constituents: ["Vĩnh Long", "Bến Tre", "Trà Vinh"],
+    geojsonNames: ["VĩnhLong", "BếnTre", "TràVinh"],
+    color: "#ff9ff3",
+    center: { lat: 10.252, lng: 105.972 } // Đặt tại Vĩnh Long hiện nay
+  },
+  "Đồng Tháp": {
+    name: "Tỉnh Đồng Tháp",
+    constituents: ["Đồng Tháp", "Tiền Giang"],
+    geojsonNames: ["ĐồngTháp", "TiềnGiang"],
+    color: "#00d2d3",
+    center: { lat: 10.449, lng: 106.341 } // Đặt tại Tiền Giang
+  },
+  "Cà Mau": {
+    name: "Tỉnh Cà Mau",
+    constituents: ["Cà Mau", "Bạc Liêu"],
+    geojsonNames: ["CàMau", "BạcLiêu"],
+    color: "#ee5253",
+    center: { lat: 9.176, lng: 105.152 } // Đặt tại Cà Mau hiện nay
+  },
+  "An Giang": {
+    name: "Tỉnh An Giang",
+    constituents: ["An Giang", "Kiên Giang"],
+    geojsonNames: ["AnGiang", "KiênGiang"],
+    color: "#5f27cd",
+    center: { lat: 9.982, lng: 105.124 } // Đặt tại Kiên Giang
+  }
+};
+
+const FRIENDLY_NAMES = {
+  "TP. Hồ Chí Minh": "Thành phố Hồ Chí Minh",
+  "Đồng Nai": "Tỉnh Đồng Nai",
+  "Tây Ninh": "Tỉnh Tây Ninh",
+  "Cần Thơ": "Thành phố Cần Thơ",
+  "Vĩnh Long": "Tỉnh Vĩnh Long",
+  "Đồng Tháp": "Tỉnh Đồng Tháp",
+  "Cà Mau": "Tỉnh Cà Mau",
+  "An Giang": "Tỉnh An Giang"
+};
+
+const NORMAL_PROVINCES = {
+  "TP. Hồ Chí Minh": { geojsonNames: ["HồChíMinh"], color: "#ff4d4d", center: { lat: 10.776, lng: 106.701 } },
+  "Thành phố Hồ Chí Minh": { geojsonNames: ["HồChíMinh"], color: "#ff4d4d", center: { lat: 10.776, lng: 106.701 } },
+  "Bà Rịa - Vũng Tàu": { geojsonNames: ["BàRịa-VũngTàu"], color: "#ff9f43", center: { lat: 10.496, lng: 107.170 } },
+  "Bình Dương": { geojsonNames: ["BìnhDương"], color: "#10b981", center: { lat: 10.980, lng: 106.651 } },
+  "Bình Phước": { geojsonNames: ["BìnhPhước"], color: "#00d2d3", center: { lat: 11.532, lng: 106.884 } },
+  "Đồng Nai": { geojsonNames: ["ĐồngNai"], color: "#5f27cd", center: { lat: 10.957, lng: 106.842 } },
+  "Long An": { geojsonNames: ["LongAn"], color: "#ff9ff3", center: { lat: 10.538, lng: 106.413 } },
+  "Tây Ninh": { geojsonNames: ["TâyNinh"], color: "#2e86de", center: { lat: 11.362, lng: 106.126 } },
+  "Tiền Giang": { geojsonNames: ["TiềnGiang"], color: "#ee5253", center: { lat: 10.449, lng: 106.341 } },
+  "Đồng Tháp": { geojsonNames: ["ĐồngTháp"], color: "#ff4d4d", center: { lat: 10.435, lng: 105.632 } },
+  "Kiên Giang": { geojsonNames: ["KiênGiang"], color: "#ff9f43", center: { lat: 9.982, lng: 105.124 } },
+  "An Giang": { geojsonNames: ["AnGiang"], color: "#10b981", center: { lat: 10.372, lng: 105.437 } },
+  "Bến Tre": { geojsonNames: ["BếnTre"], color: "#00d2d3", center: { lat: 10.243, lng: 106.375 } },
+  "Trà Vinh": { geojsonNames: ["TràVinh"], color: "#5f27cd", center: { lat: 9.948, lng: 106.340 } },
+  "Vĩnh Long": { geojsonNames: ["VĩnhLong"], color: "#ff9ff3", center: { lat: 10.252, lng: 105.972 } },
+  "Cần Thơ": { geojsonNames: ["CầnThơ"], color: "#2e86de", center: { lat: 10.036, lng: 105.787 } },
+  "TP. Cần Thơ": { geojsonNames: ["CầnThơ"], color: "#2e86de", center: { lat: 10.036, lng: 105.787 } },
+  "Sóc Trăng": { geojsonNames: ["SócTrăng"], color: "#ee5253", center: { lat: 9.602, lng: 105.973 } },
+  "Hậu Giang": { geojsonNames: ["HậuGiang"], color: "#ff4d4d", center: { lat: 9.784, lng: 105.470 } },
+  "Bạc Liêu": { geojsonNames: ["BạcLiêu"], color: "#ff9f43", center: { lat: 9.294, lng: 105.727 } },
+  "Cà Mau": { geojsonNames: ["CàMau"], color: "#10b981", center: { lat: 9.176, lng: 105.152 } }
+};
+
 
 export default function BanDoDacSan() {
   const mapContainerRef = useRef(null);
@@ -112,7 +210,8 @@ export default function BanDoDacSan() {
     });
 
     return Object.entries(counts).map(([province, count], index) => {
-      const coords = PROVINCE_COORDINATES[province] || { lat: 10.0, lng: 105.0 };
+      const group = MERGER_GROUPS[province];
+      const coords = group ? group.center : (PROVINCE_COORDINATES[province] || { lat: 10.0, lng: 105.0 });
       return {
         id: index,
         lat: coords.lat,
@@ -165,6 +264,37 @@ export default function BanDoDacSan() {
         tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
         tileSize: 256
       });
+
+      // Add Boundary GeoJSON Source
+      map.addSource('province-boundaries', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        }
+      });
+
+      // Fill Layer
+      map.addLayer({
+        id: 'province-boundaries-fill',
+        type: 'fill',
+        source: 'province-boundaries',
+        paint: {
+          'fill-color': ['get', 'color'],
+          'fill-opacity': 0.15
+        }
+      });
+
+      // Outline Line Layer
+      map.addLayer({
+        id: 'province-boundaries-line',
+        type: 'line',
+        source: 'province-boundaries',
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-width': 2.5
+        }
+      });
     });
 
     return () => {
@@ -172,6 +302,64 @@ export default function BanDoDacSan() {
       map.remove();
     };
   }, []);
+
+  // Update Province Boundaries on Map
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const updateBoundaries = () => {
+      const source = map.getSource('province-boundaries');
+      if (!source) return;
+
+      let features = [];
+
+      if (selectedProvince === 'all') {
+        // Do not show any boundaries normally when "all" is selected
+        features = [];
+      } else {
+        // Show only selected merged group's constituents
+        const group = MERGER_GROUPS[selectedProvince];
+        if (group) {
+          const activeGeojsonNames = group.geojsonNames;
+          const boundaryColor = group.color;
+
+          // Fly to the specified headquarters position
+          map.flyTo({
+            center: [group.center.lng, group.center.lat],
+            zoom: 9.2,
+            duration: 1500
+          });
+
+          triggerToast(group.name, `Hiển thị ranh giới khu vực sáp nhập ${group.name}.`);
+
+          ranhGioiData.features.forEach(f => {
+            const name1 = f.properties.NAME_1;
+            if (activeGeojsonNames.some(gn => gn.toLowerCase() === name1.toLowerCase())) {
+              features.push({
+                ...f,
+                properties: {
+                  ...f.properties,
+                  color: boundaryColor
+                }
+              });
+            }
+          });
+        }
+      }
+
+      source.setData({
+        type: 'FeatureCollection',
+        features: features
+      });
+    };
+
+    if (map.isStyleLoaded()) {
+      updateBoundaries();
+    } else {
+      map.once('load', updateBoundaries);
+    }
+  }, [selectedProvince]);
 
   // Update Satellite Layer
   useEffect(() => {
@@ -518,7 +706,7 @@ export default function BanDoDacSan() {
               </div>
 
               <div>
-                <span className="filter-label">Khu vực / Tỉnh thành</span>
+                <span className="filter-label">Khu vực / Tỉnh thành (Đã sáp nhập)</span>
                 <select 
                   className="province-select" 
                   id="provinceSelect"
@@ -528,7 +716,7 @@ export default function BanDoDacSan() {
                   <option value="all">Toàn miền Nam (Tất cả)</option>
                   {TinhThanh.map(tinh => (
                     <option key={tinh.ID_TinhThanh || tinh.id} value={tinh.TenTinhThanh}>
-                      {tinh.TenTinhThanh}
+                      {FRIENDLY_NAMES[tinh.TenTinhThanh] || tinh.TenTinhThanh}
                     </option>
                   ))}
                 </select>
@@ -603,7 +791,6 @@ export default function BanDoDacSan() {
               <h3 id="popup-title">{activePin.title}</h3>
               <p id="popup-desc">{activePin.desc}</p>
               <div className="popup-actions">
-                <button className="btn-3d-popup" onClick={openPinShowroom}>XEM 3D</button>
                 <button className="btn-buy" onClick={() => alert('Đã thêm vào giỏ hàng!')}>MUA NGAY</button>
                 <button className="btn-story" onClick={() => window.location.href = `/stories?search=${encodeURIComponent(activePin.title)}`}>CÂU CHUYỆN</button>
               </div>

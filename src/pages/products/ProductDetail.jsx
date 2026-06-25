@@ -477,9 +477,42 @@ export default function ProductDetail() {
                       <input 
                         type="file" 
                         accept="image/*"
-                        onChange={(e) => setImageFile(e.target.files[0])}
+                        onChange={(e) => setImageFile(e.target.files[0] || null)}
                         style={{ display: 'block', width: '100%' }}
                       />
+                      {imageFile && (
+                        <div style={{ marginTop: '0.75rem', position: 'relative', display: 'inline-block' }}>
+                          <img 
+                            src={URL.createObjectURL(imageFile)} 
+                            alt="Preview" 
+                            style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #ddd' }} 
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setImageFile(null)}
+                            style={{
+                              position: 'absolute',
+                              top: '-8px',
+                              right: '-8px',
+                              background: '#ef4444',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: '20px',
+                              height: '20px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <button 
@@ -536,10 +569,10 @@ export default function ProductDetail() {
                       {rev.HinhAnh && (
                         <div style={{ marginTop: '0.5rem' }}>
                           <img 
-                            src={`http://127.0.0.1:8000/storage/${rev.HinhAnh}`} 
+                            src={rev.HinhAnh.startsWith('http') ? rev.HinhAnh : `http://127.0.0.1:8000/storage/${rev.HinhAnh}`} 
                             alt="Hình ảnh thực tế từ khách hàng" 
                             style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-color)' }} 
-                            onError={(e) => e.target.style.display = 'none'}
+                            onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         </div>
                       )}

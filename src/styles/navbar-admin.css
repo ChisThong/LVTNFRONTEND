@@ -1060,21 +1060,6 @@ body {
     gap: 10px;
 }
 
-.map-config-layout {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.province-list {
-    width: 300px;
-    flex-shrink: 0;
-}
-
-.map-pins-area {
-    flex-grow: 1;
-}
-
 .order-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1221,16 +1206,6 @@ body {
 
     .dashboard-shortcuts-grid {
         grid-template-columns: 1fr !important;
-    }
-
-    .map-config-layout {
-        flex-direction: column !important;
-        align-items: stretch !important;
-    }
-
-    .province-list {
-        width: 100% !important;
-        margin-bottom: 1rem !important;
     }
 
     .order-info-grid {
