@@ -836,3 +836,17 @@
     padding: 1.25rem 1rem;
   }
 }
+
+/* Responsive charts grid */
+.charts-row-responsive {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .charts-row-responsive {
+    grid-template-columns: 1fr !important;
+  }
+}

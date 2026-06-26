@@ -7,7 +7,7 @@ import {
   CreditCard, LayoutGrid, BookOpenCheck, Inbox, Leaf, 
   ThumbsUp, Truck, Plus, Check 
 } from 'lucide-react';
-import { getPublicShopDetail, formatPrice } from '../../api/productPublicApi';
+import { getPublicShopDetail, formatPrice, getPublicShopReviews } from '../../api/productPublicApi';
 import './ShopDetail.css';
 
 export default function ShopDetail() {
@@ -20,6 +20,13 @@ export default function ShopDetail() {
   const [activeTab, setActiveTab] = useState('grid-showcase');
   const [followed, setFollowed] = useState(false);
   const [addingToCart, setAddingToCart] = useState({});
+
+  // Các State phục vụ quản lý đánh giá của Shop
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
+  const [reviewsCount, setReviewsCount] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -36,6 +43,36 @@ export default function ShopDetail() {
       .catch(() => setError('Không thể tải thông tin gian hàng. Vui lòng thử lại.'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Effect: Tải số lượng đánh giá của Shop để hiển thị trên Tab Button khi đổi Shop
+  useEffect(() => {
+    if (!id) return;
+    getPublicShopReviews(id, 1)
+      .then(res => {
+        const resData = res.data?.data;
+        if (resData) {
+          setReviewsCount(resData.total || 0);
+        }
+      })
+      .catch(err => console.error("Lỗi khi lấy số lượng đánh giá của shop:", err));
+  }, [id]);
+
+  // Effect: Tải dữ liệu đánh giá chi tiết (và có phân trang) khi chuyển sang Tab Đánh Giá
+  useEffect(() => {
+    if (activeTab === 'reviews-showcase' && id) {
+      setLoadingReviews(true);
+      getPublicShopReviews(id, reviewsPage)
+        .then(res => {
+          const resData = res.data?.data;
+          if (resData) {
+            setReviews(resData.data || []);
+            setReviewsTotalPages(resData.last_page || 1);
+          }
+        })
+        .catch(err => console.error("Lỗi khi tải danh sách đánh giá:", err))
+        .finally(() => setLoadingReviews(false));
+    }
+  }, [id, activeTab, reviewsPage]);
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation();
@@ -215,6 +252,15 @@ export default function ShopDetail() {
               >
                 <BookOpenCheck /> Giới thiệu & Cam kết sản phẩm
               </button>
+              <button 
+                className={`premium-tab-btn ${activeTab === 'reviews-showcase' ? 'active' : ''}`} 
+                onClick={() => {
+                  setActiveTab('reviews-showcase');
+                  setReviewsPage(1); // Reset về trang 1 khi đổi tab
+                }}
+              >
+                <Star /> Đánh giá Shop ({reviewsCount})
+              </button>
             </div>
 
             {/* Products Grid Showcase */}
@@ -280,7 +326,7 @@ export default function ShopDetail() {
                   <p className="story-para">{shop.GioiThieu || 'Shop đang cập nhật thông tin giới thiệu chi tiết...'}</p>
                   
                   <div className="commitments-section">
-                    <h3><Star /> Tiêu Chuẩn Chất Lượng & Cam Kết Sản Phẩm:</h3>
+                    <h3><Star /> Tiêu Chuẩn Chất Lượng & Cam Thiết Sản Phẩm:</h3>
                     <div className="commit-grid">
                       <div className="commit-item">
                         <div className="commit-icon"><Leaf /></div>
@@ -313,6 +359,134 @@ export default function ShopDetail() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Reviews Showcase */}
+            <div className={`premium-tab-pane ${activeTab === 'reviews-showcase' ? 'active' : ''}`}>
+              <div className="premium-story-panel" style={{ display: 'block', padding: '2.5rem' }}>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Star fill="var(--primary)" size={26} /> Đánh giá từ khách hàng
+                </h2>
+
+                {loadingReviews ? (
+                  <div className="loading-state" style={{ padding: '3rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="loading-spinner" style={{ borderTopColor: 'var(--primary)', marginBottom: '10px' }}></div>
+                    <p style={{ color: 'var(--text-muted)' }}>Đang tải danh sách đánh giá của shop...</p>
+                  </div>
+                ) : reviews.length > 0 ? (
+                  <div className="reviews-list" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
+                    {reviews.map((item) => (
+                      <div 
+                        key={item.ID_DanhGia} 
+                        className="review-item" 
+                        style={{ 
+                          background: 'white', 
+                          border: '1px solid #f3ebe4', 
+                          borderRadius: '20px', 
+                          padding: '1.5rem',
+                          boxShadow: '0 8px 24px rgba(163, 67, 45, 0.03)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div 
+                              className="user-avatar" 
+                              style={{ 
+                                width: '44px', 
+                                height: '44px', 
+                                borderRadius: '50%', 
+                                background: '#f5efe9',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 800,
+                                color: 'var(--primary)',
+                                border: '1px solid #ecd8c9'
+                              }}
+                            >
+                              {item.user?.HoTen ? item.user.HoTen.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div>
+                              <strong style={{ display: 'block', color: 'var(--text-dark)', fontSize: '1rem' }}>
+                                {item.user?.HoTen || 'Người dùng ẩn danh'}
+                              </strong>
+                              {item.san_pham && (
+                                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                  Sản phẩm: <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{item.san_pham.TenSanPham}</span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'flex', gap: '2px' }}>
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                size={16} 
+                                fill={i < item.SoSao ? '#F59E0B' : 'transparent'} 
+                                color={i < item.SoSao ? '#F59E0B' : '#cbd5e1'} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <p style={{ fontSize: '0.92rem', color: '#475569', lineHeight: 1.6, margin: '0 0 1rem 0', paddingLeft: '4px' }}>
+                          {item.NoiDung || 'Không có bình luận chi tiết.'}
+                        </p>
+
+                        {item.phan_hoi && (
+                          <div 
+                            className="shop-response" 
+                            style={{ 
+                              background: '#faf8f6', 
+                              borderLeft: '4px solid var(--primary)', 
+                              borderRadius: '12px', 
+                              padding: '1.2rem',
+                              marginTop: '1rem',
+                              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.01)'
+                            }}
+                          >
+                            <strong style={{ fontSize: '0.85rem', color: 'var(--primary)', display: 'block', marginBottom: '6px' }}>
+                              Phản hồi từ Chủ Shop:
+                            </strong>
+                            <p style={{ fontSize: '0.85rem', color: '#334155', margin: 0, lineHeight: 1.5 }}>
+                              {item.phan_hoi.NoiDung}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {reviewsTotalPages > 1 && (
+                      <div className="pagination" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '2rem' }}>
+                        {[...Array(reviewsTotalPages)].map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setReviewsPage(i + 1)}
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: '10px',
+                              border: '1px solid #ecd8c9',
+                              background: reviewsPage === i + 1 ? 'var(--primary)' : '#fff',
+                              color: reviewsPage === i + 1 ? '#fff' : 'var(--text-dark)',
+                              cursor: 'pointer',
+                              fontWeight: 700,
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="empty-reviews-pane" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+                    <Inbox size={54} style={{ color: '#ecd8c9', marginBottom: '15px' }} />
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Gian hàng này chưa nhận được đánh giá nào.</p>
+                  </div>
+                )}
               </div>
             </div>
 

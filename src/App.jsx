@@ -28,6 +28,8 @@ import SellerProducts from './pages/seller/SellerProducts';
 import SellerProductCreate from './pages/seller/SellerProductCreate';
 import SellerProductEdit from './pages/seller/SellerProductEdit';
 import SellerOrders from './pages/seller/SellerOrders';
+import SellerReviews from './pages/seller/SellerReviews';
+import SellerBaoCaoThongKe from './pages/seller/SellerBaoCaoThongKe';
 
 // ── Wallet Pages ────────────────────────────────────────────
 import UserWallet from './pages/wallet/UserWallet';
@@ -127,9 +129,8 @@ function App() {
               <Route path="products/create" element={<SellerProductCreate />} />
               <Route path="products/edit/:id" element={<SellerProductEdit />} />
               <Route path="orders" element={<SellerOrders />} />
-              <Route path="inventory" element={<div style={{ padding: '2rem' }}><h2>Quản lý kho (Đang phát triển)</h2></div>} />
-              <Route path="revenue" element={<div style={{ padding: '2rem' }}><h2>Thống kê doanh thu (Đang phát triển)</h2></div>} />
-              <Route path="reviews" element={<div style={{ padding: '2rem' }}><h2>Đánh giá khách hàng (Đang phát triển)</h2></div>} />
+              <Route path="revenue" element={<SellerBaoCaoThongKe />} />
+              <Route path="reviews" element={<SellerReviews />} />
               <Route path="wallet" element={<SellerWallet />} />
               <Route path="wallet/transactions" element={<WalletTransactions backPath="/seller/wallet" />} />
             </Route>

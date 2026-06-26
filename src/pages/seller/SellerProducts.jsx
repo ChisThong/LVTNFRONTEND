@@ -168,32 +168,6 @@ export default function SellerProducts() {
 
   return (
     <div className="sp-page-new">
-      {/* ── TOPBAR ── */}
-      <header className="sp-topbar-new">
-        <div className="sp-search-pill">
-          <Search size={18} className="icon" />
-          <input 
-            type="text" 
-            placeholder="Tìm kiếm sản phẩm theo tên, SKU..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="sp-topbar-actions-new">
-          <Link to="/" className="sp-pill-btn">
-            <Home size={18} /> Về trang chủ
-          </Link>
-          <button className="sp-circle-btn">
-            <Bell size={18} />
-            <span className="sp-noti-dot"></span>
-          </button>
-          <div className="sp-profile-pill">
-            <div className="sp-avatar-circle">{avatarText}</div>
-            <span className="sp-profile-name">{displayName}</span>
-          </div>
-        </div>
-      </header>
-
       {/* ── MAIN CONTENT ── */}
       <div className="sp-content-new">
         
@@ -211,6 +185,16 @@ export default function SellerProducts() {
 
         {/* Filters */}
         <div className="sp-filters-row">
+          <div className="sp-search-pill" style={{ flex: 1, minWidth: '220px', margin: 0 }}>
+            <Search size={18} className="icon" />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm sản phẩm..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
           <div className="sp-select-pill">
             <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
               <option value="">Tất cả danh mục</option>

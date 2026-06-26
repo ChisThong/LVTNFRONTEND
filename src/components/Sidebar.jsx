@@ -169,9 +169,6 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                         <NavLink to="/seller/orders" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Quản lý đơn hàng" onClick={handleMenuClick}>
                             <ShoppingCart size={20} /> <span>Quản lý đơn hàng</span>
                         </NavLink>
-                        <NavLink to="/seller/inventory" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Quản lý kho" onClick={handleMenuClick}>
-                            <Archive size={20} /> <span>Quản lý kho</span>
-                        </NavLink>
                         <NavLink to="/seller/reviews" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Đánh giá khách hàng" onClick={handleMenuClick}>
                             <Star size={20} /> <span>Đánh giá khách hàng</span>
                         </NavLink>

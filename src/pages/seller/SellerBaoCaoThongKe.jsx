@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getThongKeDoanhThu } from "../../api/baocaoAPI";
+import { getSellerThongKeDoanhThu } from "../../api/baocaoAPI";
 import { useState } from "react";
 import "../../styles/reports.css";
 import { 
@@ -10,12 +10,13 @@ import {
     DollarSign, 
     Calendar, 
     TrendingUp, 
-    MapPin, 
     Award, 
     Filter,
     ChevronDown,
     Download,
-    FileText
+    FileText,
+    Star,
+    AlertCircle
 } from "lucide-react";
 import { 
     AreaChart, 
@@ -26,14 +27,12 @@ import {
     Tooltip, 
     Legend, 
     ResponsiveContainer,
-    BarChart,
-    Bar,
-    Cell,
     PieChart,
-    Pie
+    Pie,
+    Cell
 } from "recharts";
 
-export default function BaoCaoThongKe() {
+export default function SellerBaoCaoThongKe() {
     const getInitialStartDate = () => {
         const today = new Date();
         const y = today.getFullYear();
@@ -54,17 +53,16 @@ export default function BaoCaoThongKe() {
     const [loai, setloai] = useState("date"); 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showAllProducts, setShowAllProducts] = useState(false);
-    const [showAllShops, setShowAllShops] = useState(false);
 
     const { data: responseData } = useQuery({
-        queryKey: ['DT', tungay, denngay, loai], 
+        queryKey: ['sellerDT', tungay, denngay, loai], 
         queryFn: async () => {
             const params = {
                 tungay: tungay || undefined,
                 denngay: denngay || undefined,
                 Loai: loai 
             };
-            const response = await getThongKeDoanhThu(params);
+            const response = await getSellerThongKeDoanhThu(params);
             return response.data;
         }
     });
@@ -79,18 +77,13 @@ export default function BaoCaoThongKe() {
     const tongSanPham = responseData?.SLsp || 0;
     const phantramSanPham = responseData?.phantramSP || 0;
 
-    const tongShop = responseData?.GHthangnay || 0;
-    const phantramShop = responseData?.phantramGH || 0;
-
-    const tongUser = responseData?.Sluser || 0;
-    const phantramUser = responseData?.phamtramuser || 0;
+    const ratingAvg = responseData?.RatingAvg || 5.0;
+    const ratingCount = responseData?.RatingCount || 0;
+    const phantramRating = responseData?.phantramRating || 0;
 
     const topProducts = responseData?.Topsp || [];
-    const topShops = responseData?.Topshop || [];
-    const provinces = responseData?.TinhThanhTK || [];
-    const danhMucTK = responseData?.DanhMucTK || [];
-    const blogTinhThanhTK = responseData?.BlogTinhThanhTK || [];
-    const adminChoXuLy = responseData?.AdminChoXuLy || null;
+    const orderStatusBreakdown = responseData?.OrderStatusBreakdown || [];
+    const sellerChoXuLy = responseData?.SellerChoXuLy || null;
 
     // Tính doanh số lọc và số đơn lọc trực tiếp từ mảng biểu đồ được lọc
     const TongDT_Loc = dataBiudo.reduce((sum, item) => sum + (item.doanh_thu || 0), 0);
@@ -121,18 +114,17 @@ export default function BaoCaoThongKe() {
         let csvContent = "\uFEFF";
         
         // 1. Header Info
-        csvContent += `BÁO CÁO THỐNG KÊ DOANH THU,,,\n`;
+        csvContent += `BÁO CÁO THỐNG KÊ DOANH THU GIAN HÀNG,,,\n`;
         csvContent += `Khoảng thời gian:,${formatDateVN(tungay)} - ${formatDateVN(denngay)},,\n`;
         csvContent += `Loại báo cáo:,${loai === 'date' ? 'Ngày' : loai === 'month' ? 'Tháng' : loai === 'quarter' ? 'Quý' : 'Năm'},,\n\n`;
 
         // 2. Summary Stats
-        csvContent += `TỔNG QUAN HỆ THỐNG,,,\n`;
+        csvContent += `TỔNG QUAN GIAN HÀNG,,,\n`;
         csvContent += `Chỉ số,Giá trị,Tăng trưởng so với tháng trước\n`;
         csvContent += `Doanh thu tháng này,${tongDoanhThu} VND,${phantramDoanhThu}%\n`;
         csvContent += `Đơn hàng tháng này,${tongDonHang} Đơn,${phantramDonHang}%\n`;
         csvContent += `Sản phẩm mới,${tongSanPham},${phantramSanPham}%\n`;
-        csvContent += `Gian hàng mới,${tongShop},${phantramShop}%\n`;
-        csvContent += `Thành viên mới,${tongUser},${phantramUser}%\n\n`;
+        csvContent += `Đánh giá trung bình,${ratingAvg}/5.0 (Lượt đánh giá: ${ratingCount}),${phantramRating}%\n\n`;
 
         // 3. Chart Data table
         csvContent += `CHI TIẾT DOANH THU THEO THỜI GIAN,,,\n`;
@@ -150,35 +142,11 @@ export default function BaoCaoThongKe() {
         });
         csvContent += `\n`;
 
-        // 5. Top Shops
-        csvContent += `TOP SHOP DOANH THU CAO,,,\n`;
-        csvContent += `Hạng,Tên shop,Doanh thu (VND)\n`;
-        topShops.forEach((s, idx) => {
-            csvContent += `${idx + 1},"${s.TenShop}",${s.doanh_thu || 0}\n`;
-        });
-        csvContent += `\n`;
-
-        // 6. Products by Province
-        csvContent += `SẢN PHẨM THEO TỈNH THÀNH,,,\n`;
-        csvContent += `Hạng,Tỉnh thành,Số lượng sản phẩm\n`;
-        provinces.forEach((pr, idx) => {
-            csvContent += `${idx + 1},"${pr.tinh_thanh}",${pr.so_luong}\n`;
-        });
-        csvContent += `\n`;
-
-        // 7. Products by Category
-        csvContent += `SẢN PHẨM THEO DANH MỤC,,,\n`;
-        csvContent += `Hạng,Danh mục,Số lượng sản phẩm\n`;
-        danhMucTK.forEach((cat, idx) => {
-            csvContent += `${idx + 1},"${cat.ten_loai}",${cat.so_luong}\n`;
-        });
-        csvContent += `\n`;
-
-        // 8. Blogs by Province
-        csvContent += `BÀI VIẾT THEO TỈNH THÀNH,,,\n`;
-        csvContent += `Hạng,Tỉnh thành,Số lượng bài viết\n`;
-        blogTinhThanhTK.forEach((blog, idx) => {
-            csvContent += `${idx + 1},"${blog.tinh_thanh}",${blog.so_luong_blog}\n`;
+        // 5. Order Status Breakdown
+        csvContent += `TRẠNG THÁI ĐƠN HÀNG,,,\n`;
+        csvContent += `Trạng thái,Số lượng\n`;
+        orderStatusBreakdown.forEach(item => {
+            csvContent += `"${item.name}",${item.value}\n`;
         });
 
         // Trigger Download
@@ -186,7 +154,7 @@ export default function BaoCaoThongKe() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `BaoCaoThongKe_ToanDien_${tungay}_to_${denngay}.csv`);
+        link.setAttribute("download", `BaoCaoThongKe_Seller_${tungay}_to_${denngay}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -247,14 +215,17 @@ export default function BaoCaoThongKe() {
         );
     };
 
+    const PIE_COLORS = ["#eab308", "#3b82f6", "#f97316", "#10b981", "#ef4444"];
+
     return (
-        <div className="reports-container">
+        <div className="reports-container" style={{ padding: "24px" }}>
             <style>{printStyle}</style>
+            
             {/* Header */}
-            <div className="reports-header">
+            <div className="reports-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
                 <div className="reports-title-area">
-                    <h1>Báo cáo & Thống kê</h1>
-                    <p>Theo dõi hoạt động kinh doanh toàn diện trên hệ thống đặc sản</p>
+                    <h1 style={{ fontSize: "24px", fontWeight: "800", color: "#1e293b", margin: "0 0 4px 0" }}>Báo cáo & Thống kê doanh thu</h1>
+                    <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>Theo dõi chi tiết hiệu quả kinh doanh của gian hàng</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }} className="export-buttons-group">
                     <button 
@@ -350,7 +321,7 @@ export default function BaoCaoThongKe() {
             </div>
 
             {/* Banner việc cần xử lý */}
-            {adminChoXuLy && (adminChoXuLy.shop_cho_duyet > 0 || adminChoXuLy.sp_cho_duyet > 0) && (
+            {sellerChoXuLy && (sellerChoXuLy.sp_cho_duyet > 0 || sellerChoXuLy.don_hang_cho_xac_nhan > 0) && (
                 <div style={{
                     display: "flex",
                     alignItems: "center",
@@ -372,19 +343,19 @@ export default function BaoCaoThongKe() {
                         backgroundColor: "#f59e0b",
                         color: "#ffffff"
                     }}>
-                        <Award size={20} />
+                        <AlertCircle size={20} />
                     </div>
                     <div>
-                        <h4 style={{ margin: "0 0 4px 0", color: "#92400e", fontSize: "14px", fontWeight: "700" }}>Thông báo duyệt hệ thống</h4>
+                        <h4 style={{ margin: "0 0 4px 0", color: "#92400e", fontSize: "14px", fontWeight: "700" }}>Thông báo cần xử lý</h4>
                         <p style={{ margin: 0, color: "#b45309", fontSize: "13px" }}>
-                            Hiện đang có <strong>{adminChoXuLy.shop_cho_duyet}</strong> gian hàng và <strong>{adminChoXuLy.sp_cho_duyet}</strong> sản phẩm đang chờ bạn phê duyệt.
+                            Bạn có <strong>{sellerChoXuLy.don_hang_cho_xac_nhan}</strong> đơn hàng đang chờ xác nhận và <strong>{sellerChoXuLy.sp_cho_duyet}</strong> sản phẩm đang chờ kiểm duyệt.
                         </p>
                     </div>
                 </div>
             )}
 
-            {/* Khối hiển thị số liệu Tổng quan (Trong tháng này) */}
-            <div className="overview-grid">
+            {/* Khối hiển thị số liệu Tổng quan */}
+            <div className="overview-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "24px" }}>
                 <div className="stat-card">
                     <div className="stat-card-header">
                         <span className="stat-card-title">Doanh thu tháng này</span>
@@ -403,72 +374,37 @@ export default function BaoCaoThongKe() {
                             <ShoppingCart size={20} />
                         </div>
                     </div>
-                    <h3 className="stat-card-value">{formatNumber(tongDonHang)}</h3>
+                    <h3 className="stat-card-value">{formatNumber(tongDonHang)} đơn</h3>
                     {renderGrowthInfo(phantramDonHang)}
                 </div>
 
                 <div className="stat-card">
                     <div className="stat-card-header">
-                        <span className="stat-card-title">Sản phẩm mới</span>
+                        <span className="stat-card-title">Sản phẩm mới thêm</span>
                         <div className="stat-icon-wrapper products">
                             <Package size={20} />
                         </div>
                     </div>
-                    <h3 className="stat-card-value">{formatNumber(tongSanPham)}</h3>
+                    <h3 className="stat-card-value">{formatNumber(tongSanPham)} SP</h3>
                     {renderGrowthInfo(phantramSanPham)}
                 </div>
 
                 <div className="stat-card">
                     <div className="stat-card-header">
-                        <span className="stat-card-title">Gian hàng mới</span>
-                        <div className="stat-icon-wrapper shops">
-                            <Store size={20} />
+                        <span className="stat-card-title">Đánh giá trung bình</span>
+                        <div className="stat-icon-wrapper shops" style={{ backgroundColor: "#fef3c7", color: "#eab308" }}>
+                            <Star size={20} />
                         </div>
                     </div>
-                    <h3 className="stat-card-value">{formatNumber(tongShop)}</h3>
-                    {renderGrowthInfo(phantramShop)}
-                </div>
-
-                <div className="stat-card">
-                    <div className="stat-card-header">
-                        <span className="stat-card-title">Thành viên mới</span>
-                        <div className="stat-icon-wrapper users">
-                            <Users size={20} />
-                        </div>
-                    </div>
-                    <h3 className="stat-card-value">{formatNumber(tongUser)}</h3>
-                    {renderGrowthInfo(phantramUser)}
-                </div>
-
-                <div className="stat-card" style={{ borderColor: (adminChoXuLy?.shop_cho_duyet > 0) ? "#f59e0b" : "#f1f5f9" }}>
-                    <div className="stat-card-header">
-                        <span className="stat-card-title">Shop chờ duyệt</span>
-                        <div className="stat-icon-wrapper" style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>
-                            <Store size={20} />
-                        </div>
-                    </div>
-                    <h3 className="stat-card-value">{formatNumber(adminChoXuLy?.shop_cho_duyet || 0)}</h3>
-                    <div className="stat-card-desc" style={{ color: "#f59e0b", fontWeight: "600" }}>
-                        <span>Yêu cầu cần xử lý</span>
-                    </div>
-                </div>
-
-                <div className="stat-card" style={{ borderColor: (adminChoXuLy?.sp_cho_duyet > 0) ? "#f59e0b" : "#f1f5f9" }}>
-                    <div className="stat-card-header">
-                        <span className="stat-card-title">Sản phẩm chờ duyệt</span>
-                        <div className="stat-icon-wrapper" style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>
-                            <Package size={20} />
-                        </div>
-                    </div>
-                    <h3 className="stat-card-value">{formatNumber(adminChoXuLy?.sp_cho_duyet || 0)}</h3>
-                    <div className="stat-card-desc" style={{ color: "#f59e0b", fontWeight: "600" }}>
-                        <span>Yêu cầu cần xử lý</span>
+                    <h3 className="stat-card-value">{ratingAvg}/5.0</h3>
+                    <div className="stat-card-desc" style={{ color: "#64748b" }}>
+                        <span>Lượt đánh giá: {ratingCount}</span>
                     </div>
                 </div>
             </div>
 
             {/* Bộ lọc và Biểu đồ Doanh thu */}
-            <div className="chart-section-grid">
+            <div className="chart-section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px", marginBottom: "24px" }}>
                 {/* Bộ lọc */}
                 <div className="card-container">
                     <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between", gap: "20px" }}>
@@ -479,11 +415,11 @@ export default function BaoCaoThongKe() {
                                     Bộ lọc thống kê
                                 </h5>
                             </div>
-                            <p className="card-subtitle">Chọn khoảng thời gian và chế độ gom nhóm để phân tích biểu đồ doanh thu chi tiết.</p>
+                            <p className="card-subtitle" style={{ fontSize: "13px", color: "#64748b", margin: "4px 0 16px 0" }}>Chọn khoảng thời gian và chế độ gom nhóm để phân tích doanh thu.</p>
                             
-                            <div className="filter-group">
-                                <label className="filter-label">Xem tăng trưởng theo</label>
-                                <div className="pill-group">
+                            <div className="filter-group" style={{ marginBottom: "16px" }}>
+                                <label className="filter-label" style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: "13px" }}>Xem tăng trưởng theo</label>
+                                <div className="pill-group" style={{ display: "flex", gap: "8px" }}>
                                     {[
                                         { val: "date", label: "Ngày" },
                                         { val: "month", label: "Tháng" },
@@ -495,6 +431,16 @@ export default function BaoCaoThongKe() {
                                             type="button"
                                             onClick={() => setloai(item.val)}
                                             className={`btn-pill ${loai === item.val ? "active" : ""}`}
+                                            style={{
+                                                padding: "6px 12px",
+                                                border: "1px solid #e2e8f0",
+                                                borderRadius: "20px",
+                                                backgroundColor: loai === item.val ? "#2C3A29" : "#ffffff",
+                                                color: loai === item.val ? "#ffffff" : "#475569",
+                                                fontSize: "12px",
+                                                fontWeight: "600",
+                                                cursor: "pointer"
+                                            }}
                                         >
                                             {item.label}
                                         </button>
@@ -503,7 +449,7 @@ export default function BaoCaoThongKe() {
                             </div>
 
                             <div className="filter-group">
-                                <label className="filter-label">Khoảng thời gian áp dụng</label>
+                                <label className="filter-label" style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: "13px" }}>Khoảng thời gian áp dụng</label>
                                 <div style={{ 
                                     padding: "10px 12px", 
                                     backgroundColor: "#f8fafc", 
@@ -521,15 +467,15 @@ export default function BaoCaoThongKe() {
                             </div>
                         </div>
 
-                        <div className="summary-info-box">
-                            <div className="summary-row">
-                                <div className="summary-col">
-                                    <span className="summary-label">Doanh số lọc</span>
-                                    <span className="summary-value revenue">{formatVND(TongDT_Loc)}</span>
+                        <div className="summary-info-box" style={{ backgroundColor: "#f8fafc", borderRadius: "10px", padding: "16px" }}>
+                            <div className="summary-row" style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div className="summary-col" style={{ display: "flex", flexDirection: "column" }}>
+                                    <span className="summary-label" style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase", fontWeight: "600" }}>Doanh số lọc</span>
+                                    <span className="summary-value revenue" style={{ fontSize: "16px", fontWeight: "800", color: "#10b981" }}>{formatVND(TongDT_Loc)}</span>
                                 </div>
-                                <div className="summary-col">
-                                    <span className="summary-label">Số đơn lọc</span>
-                                    <span className="summary-value orders">{TongDH_Loc} Đơn</span>
+                                <div className="summary-col" style={{ display: "flex", flexDirection: "column" }}>
+                                    <span className="summary-label" style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase", fontWeight: "600" }}>Số đơn lọc</span>
+                                    <span className="summary-value orders" style={{ fontSize: "16px", fontWeight: "800", color: "#3b82f6" }}>{TongDH_Loc} Đơn</span>
                                 </div>
                             </div>
                         </div>
@@ -538,9 +484,9 @@ export default function BaoCaoThongKe() {
 
                 {/* Biểu đồ đường & diện tích */}
                 <div className="card-container">
-                    <div className="card-header-flex">
+                    <div className="card-header-flex" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                         <h5 className="card-title">Biểu đồ tăng trưởng doanh thu & số đơn hàng</h5>
-                        <span className="chart-badge">Chỉ số thực tế</span>
+                        <span className="chart-badge" style={{ fontSize: "11px", backgroundColor: "#f1f5f9", padding: "4px 8px", borderRadius: "12px", color: "#475569", fontWeight: "600" }}>Chỉ số thực tế</span>
                     </div>
 
                     <div style={{ width: "100%", height: 320 }}>
@@ -562,7 +508,7 @@ export default function BaoCaoThongKe() {
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                     <XAxis dataKey="tg" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
-                                    <YAxis yAxisId="left" tickLine={false} axisLine={false} tickFormatter={(v) => `${(v/1000000).toFixed(0)}M`} tick={{ fill: '#64748b', fontSize: 11 }} />
+                                    <YAxis yAxisId="left" tickLine={false} axisLine={false} tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fill: '#64748b', fontSize: 11 }} />
                                     <YAxis yAxisId="right" orientation="right" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
                                     <Tooltip 
                                         contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 8px 30px rgba(0,0,0,0.06)" }}
@@ -604,33 +550,42 @@ export default function BaoCaoThongKe() {
                 </div>
             </div>
 
-            {/* Hàng 3: Top Sản phẩm, Top Shop và Tỉnh Thành */}
-            <div className="bottom-sections-grid">
+            {/* Khối dưới: Top Sản phẩm và Trạng thái Đơn hàng */}
+            <div className="bottom-sections-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
                 {/* Top Sản phẩm bán chạy */}
                 <div className="card-container">
-                    <div className="card-header-flex">
+                    <div className="card-header-flex" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                         <h5 className="card-title">Top sản phẩm bán chạy</h5>
                         <Award size={18} className="text-warning" />
                     </div>
                     <div className="ranking-list" style={{ maxHeight: showAllProducts ? "400px" : "auto", overflowY: showAllProducts ? "auto" : "visible", paddingRight: "4px" }}>
-                        {topProducts.slice(0, showAllProducts ? 50 : 10).map((p, idx) => {
-                            const maxVal = topProducts[0]?.tong_ban || 1;
-                            const percent = ((p.tong_ban || 0) / maxVal) * 100;
-                            return (
-                                <div key={idx} className="ranking-item-col">
-                                    <div className="ranking-item-header">
-                                        <span className="ranking-item-name">{idx + 1}. {p.TenSanPham}</span>
-                                        <span className="ranking-item-value">{p.tong_ban || 0} đã bán</span>
+                        {topProducts.length > 0 ? (
+                            topProducts.slice(0, showAllProducts ? 50 : 10).map((p, idx) => {
+                                const maxVal = topProducts[0]?.tong_ban || 1;
+                                const percent = ((p.tong_ban || 0) / maxVal) * 100;
+                                return (
+                                    <div key={idx} className="ranking-item-col" style={{ marginBottom: "12px" }}>
+                                        <div className="ranking-item-header" style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                                            <span className="ranking-item-name" style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>{idx + 1}. {p.TenSanPham}</span>
+                                            <span className="ranking-item-value" style={{ fontSize: "12px", color: "#64748b" }}>{p.tong_ban || 0} đã bán</span>
+                                        </div>
+                                        <div className="progress-track" style={{ height: "6px", backgroundColor: "#e2e8f0", borderRadius: "3px" }}>
+                                            <div 
+                                                className={`progress-bar-fill color-${idx % 3}`} 
+                                                style={{ 
+                                                    width: `${percent}%`, 
+                                                    height: "100%", 
+                                                    borderRadius: "3px",
+                                                    backgroundColor: idx % 3 === 0 ? "#10b981" : idx % 3 === 1 ? "#3b82f6" : "#fb923c"
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="progress-track">
-                                        <div 
-                                            className={`progress-bar-fill color-${idx % 3}`} 
-                                            style={{ width: `${percent}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        ) : (
+                            <div style={{ textAlign: "center", color: "#64748b", padding: "24px" }}>Không có dữ liệu sản phẩm</div>
+                        )}
                     </div>
                     {topProducts.length > 10 && (
                         <button 
@@ -655,177 +610,51 @@ export default function BaoCaoThongKe() {
                     )}
                 </div>
 
-                {/* Top Shop doanh thu cao */}
+                {/* Trạng thái đơn hàng */}
                 <div className="card-container">
-                    <div className="card-header-flex">
-                        <h5 className="card-title">Top shop doanh thu cao</h5>
-                        <Store size={18} className="text-success" />
-                    </div>
-                    <div className="ranking-list" style={{ maxHeight: showAllShops ? "400px" : "auto", overflowY: showAllShops ? "auto" : "visible", paddingRight: "4px" }}>
-                        {topShops.slice(0, showAllShops ? 50 : 10).map((s, idx) => {
-                            const emojis = ["🥇", "🥈", "🥉"];
-                            return (
-                                <div key={idx} className="shop-rank-item">
-                                    <div className="shop-rank-left">
-                                        <div className={`rank-badge rank-${idx + 1}`}>
-                                            {emojis[idx] || (idx + 1)}
-                                        </div>
-                                        <div>
-                                            <span className="shop-name-main">{s.TenShop}</span>
-                                            <span className="shop-tag-sub">Gian hàng đối tác</span>
-                                        </div>
-                                    </div>
-                                    <span className="shop-revenue-value">{formatVND(s.doanh_thu || 0)}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    {topShops.length > 10 && (
-                        <button 
-                            onClick={() => setShowAllShops(!showAllShops)}
-                            className="btn-view-more"
-                            style={{
-                                width: "100%",
-                                padding: "8px",
-                                marginTop: "12px",
-                                border: "1px dashed #e2e8f0",
-                                borderRadius: "8px",
-                                backgroundColor: "#f8fafc",
-                                color: "#475569",
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                cursor: "pointer",
-                                transition: "all 0.2s"
-                            }}
-                        >
-                            {showAllShops ? "Thu gọn" : "Xem thêm"}
-                        </button>
-                    )}
-                </div>
-
-                {/* Sản phẩm theo tỉnh */}
-                <div className="card-container">
-                    <div className="card-header-flex">
-                        <h5 className="card-title">Sản phẩm theo tỉnh thành</h5>
-                        <MapPin size={18} className="text-danger" />
+                    <div className="card-header-flex" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                        <h5 className="card-title">Phân tích trạng thái đơn hàng</h5>
+                        <ShoppingCart size={18} className="text-success" />
                     </div>
                     
-                    <div style={{ width: "100%", height: 320 }}>
-                        {provinces.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={provinces.slice(0, 10)}
-                                    layout="vertical"
-                                    margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
-                                >
-                                    <XAxis type="number" hide />
-                                    <YAxis dataKey="tinh_thanh" type="category" tickLine={false} axisLine={false} width={80} tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} interval={0} />
-                                    <Tooltip formatter={(value) => [value + " Sản phẩm", "Số lượng"]} />
-                                    <Bar dataKey="so_luong" radius={[0, 8, 8, 0]} barSize={12}>
-                                        {provinces.slice(0, 10).map((entry, index) => {
-                                            const barColors = ["#f43f5e", "#fb7185", "#fecdd3", "#ffe4e6"];
-                                            return <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />;
-                                        })}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#94a3b8" }}>
-                                Không có dữ liệu tỉnh thành
-                            </div>
-                        )}
-                    </div>
-
-
-                    <div className="province-indicator-list">
-                        {provinces.slice(0, 10).map((pr, idx) => (
-                            <div key={idx} className="province-indicator-item">
-                                <div className="province-indicator-label">
-                                    <span className="province-color-dot" style={{ backgroundColor: ["#f43f5e", "#fb7185", "#fecdd3", "#ffe4e6"][idx % 4] }} />
-                                    <span>{pr.tinh_thanh}</span>
-                                </div>
-                                <span style={{ fontWeight: "700" }}>{pr.so_luong}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-            </div>
-
-            {/* Hàng 4: Thống kê Danh mục và Bài viết */}
-            <div className="bottom-sections-grid" style={{ marginTop: "24px", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
-                {/* Sản phẩm theo danh mục */}
-                <div className="card-container">
-                    <div className="card-header-flex">
-                        <h5 className="card-title">Sản phẩm theo danh mục</h5>
-                        <Package size={18} className="text-primary" />
-                    </div>
-                    <div className="ranking-list" style={{ maxHeight: "320px", overflowY: "auto", paddingRight: "4px" }}>
-                        {danhMucTK.length > 0 ? (
-                            danhMucTK.map((cat, idx) => {
-                                const maxVal = danhMucTK[0]?.so_luong || 1;
-                                const percent = ((cat.so_luong || 0) / maxVal) * 100;
-                                return (
-                                    <div key={idx} className="ranking-item-col" style={{ marginBottom: "12px" }}>
-                                        <div className="ranking-item-header">
-                                            <span className="ranking-item-name">{idx + 1}. {cat.ten_loai}</span>
-                                            <span className="ranking-item-value">{cat.so_luong} sản phẩm</span>
-                                        </div>
-                                        <div className="progress-track">
-                                            <div 
-                                                className="progress-bar-fill" 
-                                                style={{ width: `${percent}%`, backgroundColor: "#3b82f6" }}
-                                            />
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100px", color: "#94a3b8" }}>
-                                Không có dữ liệu danh mục
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Bài viết theo tỉnh thành */}
-                <div className="card-container">
-                    <div className="card-header-flex">
-                        <h5 className="card-title">Bài viết theo tỉnh thành</h5>
-                        <MapPin size={18} className="text-success" />
-                    </div>
-                    <div style={{ width: "100%", height: 320, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        {blogTinhThanhTK.length > 0 ? (
+                    <div style={{ width: "100%", height: 260, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        {orderStatusBreakdown.length > 0 && orderStatusBreakdown.some(i => i.value > 0) ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={blogTinhThanhTK}
+                                        data={orderStatusBreakdown}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
                                         outerRadius={90}
-                                        paddingAngle={3}
-                                        dataKey="so_luong_blog"
-                                        nameKey="tinh_thanh"
-                                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                                        paddingAngle={5}
+                                        dataKey="value"
                                     >
-                                        {blogTinhThanhTK.map((entry, index) => {
-                                            const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
-                                            return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
-                                        })}
+                                        {orderStatusBreakdown.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                        ))}
                                     </Pie>
-                                    <Tooltip formatter={(value) => [value + " bài viết", "Số lượng"]} />
+                                    <Tooltip />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100px", color: "#94a3b8" }}>
-                                Không có dữ liệu bài viết
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#94a3b8" }}>
+                                Không có dữ liệu đơn hàng
                             </div>
                         )}
                     </div>
+
+                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "12px", marginTop: "12px" }}>
+                        {orderStatusBreakdown.map((item, idx) => (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px" }}>
+                                <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
+                                <span style={{ color: "#475569" }}>{item.name}:</span>
+                                <strong style={{ color: "#1e293b" }}>{item.value}</strong>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
-
         </div>
     );
 }

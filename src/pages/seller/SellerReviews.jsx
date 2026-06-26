@@ -141,32 +141,6 @@ export default function SellerReviews() {
 
   return (
     <div className="sp-page-new">
-      {/* ── TOPBAR ── */}
-      <header className="sp-topbar-new">
-        <div className="sp-search-pill">
-          <Search size={18} className="icon" />
-          <input 
-            type="text" 
-            placeholder="Tìm kiếm sản phẩm, người dùng..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="sp-topbar-actions-new">
-          <Link to="/" className="sp-pill-btn">
-            <Home size={18} /> Về trang chủ
-          </Link>
-          <button className="sp-circle-btn">
-            <Bell size={18} />
-            <span className="sp-noti-dot"></span>
-          </button>
-          <div className="sp-profile-pill">
-            <div className="sp-avatar-circle">{avatarText}</div>
-            <span className="sp-profile-name">{displayName}</span>
-          </div>
-        </div>
-      </header>
-
       {/* ── MAIN CONTENT ── */}
       <div className="sp-content-new">
         <div className="sp-title-row" style={{ marginBottom: '1.5rem', marginTop: '1rem' }}>
@@ -224,6 +198,17 @@ export default function SellerReviews() {
 
         {/* ── FILTERS ── */}
         <div style={{ background: '#fff', padding: '1.25rem 1.5rem', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+          {/* Tìm kiếm */}
+          <div className="sp-search-pill" style={{ minWidth: '280px', margin: 0 }}>
+            <Search size={18} className="icon" />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm đánh giá..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
           {/* Lọc theo Sao */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>Số sao:</span>
