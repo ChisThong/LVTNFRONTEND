@@ -158,6 +158,46 @@ function DonHangControl() {
         setSelectedOrderId(null);
     };
 
+    // Xác nhận đã giao hàng (Admin) — chuyển trạng thái 2 → 3 & giải ngân ví
+    const handleUpdateToDelivered = async (orderId, maDon) => {
+        const result = await Swal.fire({
+            title: 'Xác nhận đã giao hàng?',
+            html: `Đơn hàng <strong>${maDon}</strong> sẽ được chuyển sang trạng thái <strong>"Đã giao / Hoàn tất"</strong>.<br/><br/>Hệ thống sẽ tự động giải ngân tiền vào ví Seller.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#059669',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: '✅ Xác nhận đã giao',
+            cancelButtonText: 'Hủy',
+            reverseButtons: true,
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await axiosClient.put(`/admin/DonHang/${orderId}/status`, {
+                TrangThai: 3
+            });
+
+            Swal.fire({
+                title: 'Thành công!',
+                text: 'Cập nhật trạng thái đơn hàng thành công. Tiền đã được giải ngân vào ví Seller.',
+                icon: 'success',
+                timer: 2500,
+                showConfirmButton: false,
+            });
+
+            // Refetch để cập nhật cả bảng lẫn các Card thống kê
+            refetch();
+        } catch (err) {
+            Swal.fire(
+                'Lỗi hệ thống!',
+                err.response?.data?.message || 'Không thể cập nhật trạng thái. Vui lòng thử lại.',
+                'error'
+            );
+        }
+    };
+
     // Định dạng tiền tệ
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -486,6 +526,7 @@ function DonHangControl() {
                                                         </span>
                                                     </td>
                                                     <td style={{ textAlign: 'center' }}>
+                                                        {/* Nút xem chi tiết */}
                                                         <button 
                                                             onClick={() => handleOpenDetail(order.ID_DonHang)}
                                                             title="Xem chi tiết đơn hàng"
@@ -495,6 +536,43 @@ function DonHangControl() {
                                                         >
                                                             <Eye size={20} strokeWidth={2.5} />
                                                         </button>
+
+                                                        {/* Nút Xác nhận đã giao — chỉ hiện khi TrangThai === 2 (Đang giao hàng) */}
+                                                        {Number(order.TrangThai) === 2 && (
+                                                            <button
+                                                                onClick={() => handleUpdateToDelivered(order.ID_DonHang, order.MaDonHangCon)}
+                                                                title="Xác nhận đơn hàng đã được giao thành công"
+                                                                style={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '5px',
+                                                                    marginLeft: '6px',
+                                                                    padding: '5px 10px',
+                                                                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                                                    color: '#fff',
+                                                                    border: 'none',
+                                                                    borderRadius: '6px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.78rem',
+                                                                    fontWeight: 700,
+                                                                    letterSpacing: '0.2px',
+                                                                    boxShadow: '0 2px 6px rgba(5,150,105,0.35)',
+                                                                    transition: 'all 0.2s ease',
+                                                                    whiteSpace: 'nowrap',
+                                                                }}
+                                                                onMouseOver={(e) => {
+                                                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(5,150,105,0.5)';
+                                                                }}
+                                                                onMouseOut={(e) => {
+                                                                    e.currentTarget.style.transform = 'translateY(0)';
+                                                                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(5,150,105,0.35)';
+                                                                }}
+                                                            >
+                                                                <Truck size={13} />
+                                                                Đã giao
+                                                            </button>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             );

@@ -164,7 +164,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                         <NavLink to="/seller/dashboard" end className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Tổng quan" onClick={handleMenuClick}>
                             <Store size={20} /> <span>Tổng quan</span>
                         </NavLink>
-                        <NavLink to="/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Ví điện tử của Shop" onClick={handleMenuClick}>
+                        <NavLink to="/seller/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Ví điện tử của Shop" onClick={handleMenuClick}>
                             <Wallet size={20} /> <span>Ví điện tử</span>
                         </NavLink>
                         <NavLink to="/seller/products" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Quản lý sản phẩm" onClick={handleMenuClick}>

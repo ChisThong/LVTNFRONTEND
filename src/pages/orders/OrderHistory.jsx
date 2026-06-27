@@ -82,6 +82,28 @@ export default function OrderHistory() {
     }
   };
 
+  // ── Xác nhận đã nhận hàng ──
+  const handleConfirmReceived = async (idDonHangCon) => {
+    if (!window.confirm('Bạn xác nhận đã nhận được hàng? Hành động này sẽ hoàn tất đơn hàng và giải ngân tiền cho Shop.')) return;
+    try {
+      toast.loading('Đang xử lý...', { id: 'confirmReceived' });
+      const res = await axiosClient.put(`/don-hang/${idDonHangCon}/confirm-received`);
+      toast.success(res.data.message || 'Xác nhận thành công! Cảm ơn bạn đã mua sắm.', { id: 'confirmReceived' });
+
+      // Cập nhật optimistic UI: thây TrangThai 2 → 3 ngay không cần reload toàn bộ
+      setOrders((prev) =>
+        prev.map((dht) => ({
+          ...dht,
+          don_hangs: (dht.don_hangs || []).map((dc) =>
+            dc.ID_DonHang === idDonHangCon ? { ...dc, TrangThai: 3 } : dc
+          ),
+        }))
+      );
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.', { id: 'confirmReceived' });
+    }
+  };
+
   // ── Status helper ──
   const getStatusInfo = (status) => {
     switch (status) {
@@ -301,6 +323,16 @@ export default function OrderHistory() {
                             className="order-item-btn-cancel"
                           >
                             Hủy Đơn
+                          </button>
+                        )}
+
+                        {/* Nút Đã nhận được hàng — chỉ khi đang giao (2) */}
+                        {donHangCon.TrangThai === 2 && (
+                          <button
+                            onClick={() => handleConfirmReceived(donHangCon.ID_DonHang)}
+                            className="order-item-btn-confirm-received"
+                          >
+                            ✅ Đã nhận được hàng
                           </button>
                         )}
 
