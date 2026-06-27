@@ -304,6 +304,41 @@
   color: #d32f2f;
 }
 
+/* Nút Xác nhận đã nhận hàng */
+.order-item-btn-confirm-received {
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.30);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.order-item-btn-confirm-received:hover {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.45);
+  transform: translateY(-1px);
+}
+
+.order-item-btn-confirm-received:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(22, 163, 74, 0.25);
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 2px 8px rgba(22, 163, 74, 0.30); }
+  50%       { box-shadow: 0 2px 16px rgba(22, 163, 74, 0.55); }
+}
+
 .order-item-btn-review {
   padding: 7px 14px;
   font-size: 0.88rem;
@@ -350,9 +385,11 @@
     width: 100%;
   }
   .order-item-btn-cancel,
+  .order-item-btn-confirm-received,
   .order-item-btn-review {
     width: 100%;
     text-align: center;
+    justify-content: center;
   }
   .order-empty-btn-all {
     margin-right: 0;

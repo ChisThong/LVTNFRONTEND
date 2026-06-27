@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useWallet } from '../../context/WalletContext';
 import {
   Wallet, Lock, History, ArrowUpCircle, ArrowDownCircle, X, Store,
+  RefreshCw,
 } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 import walletApi from '../../api/walletApi';
@@ -22,13 +22,17 @@ const formatCurrency = (amount) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  SellerWallet — Ví dành cho Người bán (Seller / role 3)
+//  SellerWallet — Ví doanh thu dành cho Người bán (Seller / role 3)
+//  API: GET /api/seller/wallet  (không dùng WalletContext của buyer)
 // ─────────────────────────────────────────────────────────────────────────────
 function SellerWallet() {
-  const { wallet, walletLoading, fetchWallet } = useWallet();
   const navigate = useNavigate();
 
-  // ── Thông tin shop của seller (để điền sẵn tài khoản ngân hàng mặc định) ──
+  // ── State ví riêng của Seller (tách biệt với WalletContext của buyer) ──────
+  const [sellerWallet, setSellerWallet] = useState(null);
+  const [walletLoading, setWalletLoading] = useState(true);
+
+  // ── Thông tin shop (để điền sẵn tài khoản ngân hàng mặc định) ─────────────
   const [shop, setShop] = useState(null);
 
   // ── Modal rút tiền ──
@@ -41,16 +45,37 @@ function SellerWallet() {
   });
   const [processing, setProcessing] = useState(false);
 
+  // ── Fetch ví Seller từ đúng endpoint /seller/wallet ──────────────────────
+  const fetchSellerWallet = useCallback(async () => {
+    setWalletLoading(true);
+    try {
+      const res = await axiosClient.get('/seller/wallet');
+      if (res.data?.data) {
+        setSellerWallet(res.data.data);
+      } else {
+        // Fallback nếu backend trả trực tiếp object
+        setSellerWallet(res.data || null);
+      }
+    } catch (err) {
+      console.error('SellerWallet: failed to fetch /seller/wallet', err);
+      toast.error('Không thể tải thông tin ví. Vui lòng thử lại.');
+      setSellerWallet(null);
+    } finally {
+      setWalletLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    fetchWallet();
+    fetchSellerWallet();
+
+    // Lấy thông tin shop để hiển thị ngân hàng mặc định
     axiosClient
       .get('/me')
       .then((res) => {
         if (res.data?.data?.shop) setShop(res.data.data.shop);
       })
       .catch((err) => console.error('SellerWallet: failed to fetch /me', err));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchSellerWallet]);
 
   // ── Helpers ──
   const openWithdrawModal = () => {
@@ -69,24 +94,23 @@ function SellerWallet() {
 
     const amount = Number(withdrawForm.amount);
     if (amount < 10000) return toast.error('Số tiền rút tối thiểu là 10.000đ');
-    if (amount > (wallet?.balance ?? 0)) return toast.error('Số dư không đủ để rút số tiền này');
+    if (amount > (sellerWallet?.balance ?? 0))
+      return toast.error('Số dư không đủ để rút số tiền này');
 
     let finalBankName, finalBankAccount;
 
     if (!isCustomBank) {
-      // Dùng tài khoản mặc định trong hồ sơ gian hàng
       if (!hasDefaultBank) {
         return toast.error(
           'Bạn chưa cấu hình ngân hàng mặc định. Vui lòng cập nhật hồ sơ gian hàng hoặc chọn tài khoản khác.'
         );
       }
-      finalBankName = shop.TenNganHang;
+      finalBankName    = shop.TenNganHang;
       finalBankAccount = shop.SoTaiKhoang;
     } else {
-      // Nhập tay
       if (!withdrawForm.bankName) return toast.error('Vui lòng chọn ngân hàng');
       if (!withdrawForm.bankAccount.trim()) return toast.error('Vui lòng nhập số tài khoản');
-      finalBankName = withdrawForm.bankName;
+      finalBankName    = withdrawForm.bankName;
       finalBankAccount = withdrawForm.bankAccount.trim();
     }
 
@@ -95,14 +119,14 @@ function SellerWallet() {
     try {
       await walletApi.withdraw({
         amount,
-        bank_name: finalBankName,
+        bank_name:    finalBankName,
         bank_account: finalBankAccount,
       });
       toast.success('Gửi yêu cầu rút tiền thành công! Đang chờ admin duyệt.', {
         id: 'sw-withdraw',
       });
       closeWithdrawModal();
-      fetchWallet();
+      fetchSellerWallet(); // Reload số dư sau khi gửi yêu cầu
     } catch (err) {
       toast.error(
         err.response?.data?.message || 'Có lỗi xảy ra khi yêu cầu rút tiền',
@@ -114,14 +138,14 @@ function SellerWallet() {
   };
 
   // ── Loading state ──
-  if (walletLoading && !wallet) {
+  if (walletLoading && !sellerWallet) {
     return (
       <div className="loading-screen wallet-loading-screen">
         <div
           className="spinner wallet-loading-spinner"
           style={{ borderColor: TEAL }}
         />
-        <p>Đang tải thông tin ví...</p>
+        <p>Đang tải thông tin ví doanh thu...</p>
       </div>
     );
   }
@@ -152,9 +176,11 @@ function SellerWallet() {
         </h2>
         <button
           id="sw-refresh-btn"
-          onClick={fetchWallet}
+          onClick={fetchSellerWallet}
           className="shopee-btn-outline wallet-refresh-btn"
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
         >
+          <RefreshCw size={15} />
           Làm mới
         </button>
       </div>
@@ -171,7 +197,7 @@ function SellerWallet() {
             Số dư khả dụng
           </h3>
           <h1 className="wallet-card-value wallet-card-value--teal">
-            {formatCurrency(wallet?.balance)}
+            {formatCurrency(sellerWallet?.balance)}
           </h1>
 
           {/* Action buttons — Rút tiền ưu tiên cho Seller */}
@@ -207,7 +233,7 @@ function SellerWallet() {
               </h3>
             </div>
             <h2 className="wallet-pending-value">
-              {formatCurrency(wallet?.frozen_balance)}
+              {formatCurrency(sellerWallet?.frozen_balance)}
             </h2>
             <p className="wallet-pending-desc">
               Số tiền đang chờ xác nhận hoàn tất đơn hàng hoặc yêu cầu rút tiền đang duyệt.
@@ -233,7 +259,8 @@ function SellerWallet() {
       {/* ── Thông tin gian hàng ── */}
       <div className="shopee-card wallet-utilities-card">
         <h3 className="wallet-utilities-title">
-          <Store size={20} color={TEAL} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Thông tin thanh toán gian hàng
+          <Store size={20} color={TEAL} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+          Thông tin thanh toán gian hàng
         </h3>
 
         <div className="wallet-utilities-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
@@ -284,7 +311,11 @@ function SellerWallet() {
         <div id="sw-withdraw-modal" className="wallet-modal-overlay">
           <div className="wallet-modal-content" style={{ maxWidth: '420px' }}>
             {/* Close */}
-            <button onClick={closeWithdrawModal} className="wallet-modal-close" style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', cursor: 'pointer', color: '#888' }}>
+            <button
+              onClick={closeWithdrawModal}
+              className="wallet-modal-close"
+              style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', cursor: 'pointer', color: '#888' }}
+            >
               <X size={20} />
             </button>
 
@@ -303,7 +334,7 @@ function SellerWallet() {
                   type="number"
                   required
                   min="10000"
-                  max={wallet?.balance ?? 0}
+                  max={sellerWallet?.balance ?? 0}
                   placeholder="Ví dụ: 500.000"
                   value={withdrawForm.amount}
                   onChange={(e) => setWithdrawForm({ ...withdrawForm, amount: e.target.value })}
@@ -311,7 +342,7 @@ function SellerWallet() {
                 />
                 <div className="wallet-input-tip">
                   <span>Tối thiểu: 10.000đ</span>
-                  <span>Tối đa: {formatCurrency(wallet?.balance)}</span>
+                  <span>Tối đa: {formatCurrency(sellerWallet?.balance)}</span>
                 </div>
               </div>
 
