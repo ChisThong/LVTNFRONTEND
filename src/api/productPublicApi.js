@@ -73,3 +73,10 @@ export const createProductReview = (data) => {
   return axiosClient.post('/reviews', data);
 };
 
+/**
+ * GET /api/shops/{idShop}/reviews — Public, lấy danh sách đánh giá của Shop
+ */
+export const getPublicShopReviews = (idShop, page = 1) => {
+  return axiosClient.get(`/shops/${idShop}/reviews?page=${page}`);
+};
+

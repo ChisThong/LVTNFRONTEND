@@ -1,10 +1,10 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import logoImg from '../assets/logo.webp';
 import '../styles/navbar-admin.css';
-import { 
-    LayoutDashboard, Store, ShoppingBag, Package, Map, FileText, BarChart3, 
+import {
+    LayoutDashboard, Store, ShoppingBag, Package, Map, FileText, BarChart3,
     ChevronUp, LogOut, Settings, Home, User, Menu,
     ShoppingCart, Archive, Star, ChevronDown, Wallet
 } from 'lucide-react';
@@ -12,26 +12,23 @@ import {
 function Sidebar({ role, mobileOpen, setMobileOpen }) {
     const navigate = useNavigate();
     const location = useLocation();
-    
-    // Dropdown state for Seller settings menu
+
     const isShopSettingRoute =
         location.pathname.startsWith("/seller/settings") ||
         location.pathname.startsWith("/seller/shop/edit");
 
     const [shopMenuOpen, setShopMenuOpen] = useState(isShopSettingRoute);
+    const [prevPath, setPrevPath] = useState(location.pathname);
 
-    useEffect(() => {
+    if (location.pathname !== prevPath) {
+        setPrevPath(location.pathname);
         if (role === 'seller') {
             setShopMenuOpen(isShopSettingRoute);
         }
-    }, [location.pathname, isShopSettingRoute, role]);
-
-    // Role-based variables
+    }
     const storageKey = role === 'admin' ? "adminSidebarCollapsed" : "sellerSidebarCollapsed";
     const dashboardLink = role === 'admin' ? "/admin/dashboard" : "/seller/dashboard";
     const logoText = role === 'admin' ? "NamBộ CENTRAL" : "Kênh Người Bán";
-
-    // Sidebar collapse state
     const [collapsed, setCollapsed] = useState(() => {
         return localStorage.getItem(storageKey) === "true";
     });
@@ -47,10 +44,8 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
         localStorage.setItem(storageKey, "true");
         if (setMobileOpen) setMobileOpen(false);
     };
-
-    // User info & Logout logic (Unified Footer)
     const [ismenu, setmenu] = useState(false);
-    
+
     const [userInfo] = useState(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -73,7 +68,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
     const handleLogout = async () => {
         try {
             if (role === 'admin') {
-                await axiosClient.post('/logout'); 
+                await axiosClient.post('/logout');
             }
         } catch (error) {
             console.error("Lỗi đăng xuất:", error);
@@ -104,7 +99,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                         <span className="admin-logo-text" style={{ color: 'var(--gold)', fontSize: '1.2rem', fontWeight: 700 }}>{logoText}</span>
                     )}
                 </NavLink>
-                <button 
+                <button
                     onClick={toggleSidebar}
                     style={{
                         position: 'absolute',
@@ -132,6 +127,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                         <NavLink to="/admin/dashboard" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Dashboard hệ thống">
                             <LayoutDashboard size={20} /> <span>Dashboard hệ thống</span>
                         </NavLink>
+                       
                         <NavLink to="/admin/shops" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Duyệt gian hàng">
                             <Store size={20} /> <span>Duyệt gian hàng</span>
                         </NavLink>
@@ -142,19 +138,19 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                             <Package size={20} /> <span>Quản lý sản phẩm</span>
                         </NavLink>
                         <NavLink to="/admin/regions" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Danh mục vùng miền">
-                           <Map size={20} /> <span>Danh mục vùng miền</span>
+                            <Map size={20} /> <span>Danh mục vùng miền</span>
                         </NavLink>
                         <NavLink to="/admin/posts" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Quản lý bài viết">
                             <FileText size={20} /> <span>Quản lý bài viết</span>
                         </NavLink>
-                        <NavLink to="/admin/reports" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Báo cáo & Thống kê">
-                            <BarChart3 size={20} /> <span>Báo cáo & Thống kê</span>
-                        </NavLink>
-                         <NavLink to="/admin/users" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Quản lý người dùng">
+                        <NavLink to="/admin/users" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Quản lý người dùng">
                             <User size={20} /> <span>Quản lý người dùng</span>
                         </NavLink>
                         <NavLink to="/admin/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Quản lý Ví điện tử">
                             <Wallet size={20} /> <span>Quản lý Ví điện tử</span>
+                        </NavLink>
+                         <NavLink to="/admin/reports" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleMenuClick} data-tooltip="Báo cáo & Thống kê">
+                            <BarChart3 size={20} /> <span>Báo cáo & Thống kê</span>
                         </NavLink>
                     </>
                 )}
@@ -173,9 +169,6 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                         <NavLink to="/seller/orders" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Quản lý đơn hàng" onClick={handleMenuClick}>
                             <ShoppingCart size={20} /> <span>Quản lý đơn hàng</span>
                         </NavLink>
-                        <NavLink to="/seller/inventory" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Quản lý kho" onClick={handleMenuClick}>
-                            <Archive size={20} /> <span>Quản lý kho</span>
-                        </NavLink>
                         <NavLink to="/seller/reviews" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Đánh giá khách hàng" onClick={handleMenuClick}>
                             <Star size={20} /> <span>Đánh giá khách hàng</span>
                         </NavLink>
@@ -185,9 +178,9 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
 
                         {/* Cài đặt gian hàng Dropdown */}
                         <div style={{ marginTop: '0.5rem' }}>
-                            <button 
+                            <button
                                 onClick={() => {
-                                    if(collapsed) setCollapsed(false);
+                                    if (collapsed) setCollapsed(false);
                                     setShopMenuOpen(!shopMenuOpen);
                                 }}
                                 className={`menu-item ${isShopSettingRoute ? 'active' : ''}`}
@@ -200,7 +193,7 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                                 </div>
                                 <ChevronDown size={16} className={`submenu-chevron ${shopMenuOpen ? 'open' : ''}`} />
                             </button>
-                            
+
                             <div className={`submenu-container ${shopMenuOpen ? 'open' : ''}`}>
                                 <NavLink to="/seller/settings/profile" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} style={{ padding: '0.6rem 1rem', fontSize: '0.85rem' }} data-tooltip="Thông tin cửa hàng" onClick={handleMenuClick}>
                                     <User size={16} /> <span>Thông tin cửa hàng</span>
@@ -232,9 +225,9 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                     </div>
                 )}
 
-                <div 
-                    className="admin-user" 
-                    onClick={() => setmenu(!ismenu)} 
+                <div
+                    className="admin-user"
+                    onClick={() => setmenu(!ismenu)}
                     style={{ cursor: 'pointer' }}
                     title={collapsed ? userInfo.name : ""}
                 >
@@ -247,14 +240,14 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                             {userInfo.role}
                         </p>
                     </div>
-                    <ChevronUp 
-                        size={20} 
+                    <ChevronUp
+                        size={20}
                         className="admin-user-chevron"
-                        style={{ 
-                            color: 'rgba(255,255,255,0.5)', 
-                            transform: ismenu ? 'rotate(180deg)' : 'none', 
-                            transition: 'transform 0.3s' 
-                        }} 
+                        style={{
+                            color: 'rgba(255,255,255,0.5)',
+                            transform: ismenu ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.3s'
+                        }}
                     />
                 </div>
             </div>

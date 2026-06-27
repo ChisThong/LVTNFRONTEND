@@ -205,6 +205,7 @@
   display: flex;
   gap: 16px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .sp-select-pill select {
@@ -258,7 +259,7 @@
   border-radius: 24px;
   padding: 24px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+  overflow-x: auto;
   margin-bottom: 24px;
 }
 

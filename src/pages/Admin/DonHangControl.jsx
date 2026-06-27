@@ -752,10 +752,14 @@ function DonHangControl() {
                                                         <tr key={index} style={{ borderBottom: '1px solid var(--border-color)' }}>
                                                             <td style={{ padding: '12px 16px' }}>
                                                                 <img 
-                                                                    src={sanPham.HinhAnh ? `http://127.0.0.1:8000/storage/${sanPham.HinhAnh}` : 'https://via.placeholder.com/60x60?text=SP'} 
+                                                                    src={
+                                                                        sanPham.hinh_anh && sanPham.hinh_anh.length > 0 && sanPham.hinh_anh[0].HinhAnh 
+                                                                          ? (sanPham.hinh_anh[0].HinhAnh.startsWith('http') ? sanPham.hinh_anh[0].HinhAnh : `http://127.0.0.1:8000/storage/${sanPham.hinh_anh[0].HinhAnh}`) 
+                                                                          : 'https://via.placeholder.com/50'
+                                                                    } 
                                                                     alt={sanPham.TenSanPham} 
                                                                     style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-color)' }}
-                                                                    onError={(e) => { e.target.src = "https://via.placeholder.com/60x60?text=Lỗi+Ảnh"; }}
+                                                                    onError={(e) => { e.target.src = "https://via.placeholder.com/50"; }}
                                                                 />
                                                             </td>
                                                             <td style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--text-main)' }}>

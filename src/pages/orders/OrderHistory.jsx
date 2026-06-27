@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
-import { Package, Clock, CheckCircle, Truck, XCircle, Store, ShoppingBag } from 'lucide-react';
+import { Package, Clock, CheckCircle, Truck, XCircle, Store, Star, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatPrice } from '../../api/productPublicApi';
 import '../../styles/orders.css';
@@ -52,7 +52,132 @@ export default function OrderHistory() {
   const navigate = useNavigate();
   const [orders, setOrders]       = useState([]);
   const [loading, setLoading]     = useState(true);
-  const [activeTab, setActiveTab] = useState('all'); // Tab đang chọn
+  const [activeTab, setActiveTab] = useState('all'); 
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [reviewInputs, setReviewInputs] = useState({});
+  const [submittingReview, setSubmittingReview] = useState({});
+
+  const handleOpenReviewModal = (donHangCon) => {
+    setSelectedOrder(donHangCon);
+    const initialInputs = {};
+    donHangCon.chi_tiet?.forEach(ct => {
+      initialInputs[ct.ID_ChiTiet] = {
+        XepLoai: 5,
+        BinhLuan: '',
+        HinhAnh: null,
+        previewUrl: null
+      };
+    });
+    setReviewInputs(initialInputs);
+  };
+
+  const handleRatingChange = (ctId, rating) => {
+    setReviewInputs(prev => ({
+      ...prev,
+      [ctId]: {
+        ...prev[ctId],
+        XepLoai: rating
+      }
+    }));
+  };
+
+  const handleCommentChange = (ctId, text) => {
+    setReviewInputs(prev => ({
+      ...prev,
+      [ctId]: {
+        ...prev[ctId],
+        BinhLuan: text
+      }
+    }));
+  };
+
+  const handleImageChange = (ctId, file) => {
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setReviewInputs(prev => ({
+        ...prev,
+        [ctId]: {
+          ...prev[ctId],
+          HinhAnh: file,
+          previewUrl: previewUrl
+        }
+      }));
+    }
+  };
+
+  const handleCloseModal = () => {
+    Object.values(reviewInputs).forEach(input => {
+      if (input.previewUrl) {
+        URL.revokeObjectURL(input.previewUrl);
+      }
+    });
+    setSelectedOrder(null);
+  };
+
+  const handleSubmitReview = async (ctId, idSanPham) => {
+    const input = reviewInputs[ctId];
+    if (!input) return;
+
+    setSubmittingReview(prev => ({ ...prev, [ctId]: true }));
+    const formData = new FormData();
+    formData.append('ID_ChiTiet', ctId);
+    formData.append('ID_SanPham', idSanPham);
+    formData.append('XepLoai', input.XepLoai);
+    formData.append('BinhLuan', input.BinhLuan);
+    if (input.HinhAnh) {
+      formData.append('HinhAnh', input.HinhAnh);
+    }
+
+    try {
+      toast.loading('Đang gửi đánh giá...', { id: 'submitReview' });
+      const res = await axiosClient.post('/danh-gia', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success(res.data.message || 'Gửi đánh giá thành công!', { id: 'submitReview' });
+      
+      // Cập nhật trạng thái local
+      setSelectedOrder(prevOrder => {
+        if (!prevOrder) return null;
+        return {
+          ...prevOrder,
+          chi_tiet: prevOrder.chi_tiet.map(ct => {
+            if (ct.ID_ChiTiet === ctId) {
+              return {
+                ...ct,
+                danh_gia: res.data.data
+              };
+            }
+            return ct;
+          })
+        };
+      });
+
+      setOrders(prevOrders => {
+        return prevOrders.map(dt => ({
+          ...dt,
+          don_hangs: dt.don_hangs?.map(dh => {
+            if (dh.ID_DonHang === selectedOrder.ID_DonHang) {
+              return {
+                ...dh,
+                chi_tiet: dh.chi_tiet?.map(ct => {
+                  if (ct.ID_ChiTiet === ctId) {
+                    return { ...ct, danh_gia: res.data.data };
+                  }
+                  return ct;
+                })
+              };
+            }
+            return dh;
+          })
+        }));
+      });
+
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Gửi đánh giá thất bại', { id: 'submitReview' });
+    } finally {
+      setSubmittingReview(prev => ({ ...prev, [ctId]: false }));
+    }
+  };
 
   // ── Fetch ──
   const fetchOrders = async () => {
@@ -338,7 +463,11 @@ export default function OrderHistory() {
 
                         {/* Nút Đánh giá — chỉ khi hoàn tất */}
                         {donHangCon.TrangThai === 3 && (
-                          <button className="shopee-btn order-item-btn-review">
+                          <button 
+                            onClick={() => handleOpenReviewModal(donHangCon)}
+                            className="shopee-btn" 
+                            style={{ padding: '8px 16px' }}
+                          >
                             Đánh Giá
                           </button>
                         )}
@@ -352,6 +481,258 @@ export default function OrderHistory() {
         </div>
 
       </div>
+
+      {/* Modal Đánh giá sản phẩm */}
+      {selectedOrder && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            width: '100%',
+            maxWidth: '650px',
+            maxHeight: '85vh',
+            overflowY: 'auto',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: '20px',
+              borderBottom: '1px solid #f0f0f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: '#fff',
+              zIndex: 1
+            }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#111827', fontWeight: 'bold' }}>
+                Đánh giá sản phẩm
+              </h3>
+              <button 
+                onClick={handleCloseModal}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  color: '#9ca3af',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  lineHeight: 1
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Content */}
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ fontSize: '0.9rem', color: '#6b7280', backgroundColor: '#f9fafb', padding: '10px 15px', borderRadius: '8px' }}>
+                Đơn hàng con: <strong style={{ color: '#374151' }}>#{selectedOrder.ID_DonHang}</strong> ({selectedOrder.shop?.TenShop || 'Shop'})
+              </div>
+
+              {selectedOrder.chi_tiet?.map((ct) => {
+                const isRated = !!ct.danh_gia;
+                const input = reviewInputs[ct.ID_ChiTiet] || { XepLoai: 5, BinhLuan: '', HinhAnh: null };
+                const isSubmitting = !!submittingReview[ct.ID_ChiTiet];
+
+                return (
+                  <div key={ct.ID_ChiTiet} style={{
+                    border: '1px solid #f0f0f0',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    backgroundColor: isRated ? '#f9fafb' : '#fff'
+                  }}>
+                    {/* Product Info */}
+                    <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                      <img 
+                        src={getProductImage(ct)} 
+                        onError={(e) => { e.target.src = FALLBACK_IMAGE; }} 
+                        alt="Product" 
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #eee' }} 
+                      />
+                      <div style={{ flex: 1 }}>
+                        <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: '#1f2937' }}>{ct.san_pham?.TenSanPham}</h4>
+                        <div style={{ fontSize: '0.85rem', color: '#9ca3af' }}>Đơn giá: {formatPrice(Number(ct.TongGia) / ct.SoLuong)} | Số lượng: {ct.SoLuong}</div>
+                      </div>
+                    </div>
+
+                    {isRated ? (
+                      /* Rated State */
+                      <div style={{
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        borderRadius: '6px',
+                        padding: '12px',
+                        fontSize: '0.9rem'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px', color: '#166534', fontWeight: 'bold' }}>
+                          <CheckCircle size={16} /> Đã đánh giá
+                        </div>
+                        <div style={{ display: 'flex', gap: '2px', marginBottom: '8px' }}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star 
+                              key={star} 
+                              size={16} 
+                              fill={star <= ct.danh_gia.XepLoai ? "#FFB300" : "none"} 
+                              stroke="#FFB300" 
+                            />
+                          ))}
+                        </div>
+                        <p style={{ margin: 0, color: '#374151', fontStyle: ct.danh_gia.BinhLuan ? 'normal' : 'italic' }}>
+                          {ct.danh_gia.BinhLuan || 'Không có bình luận.'}
+                        </p>
+                        {ct.danh_gia.HinhAnh && (
+                          <div style={{ marginTop: '8px' }}>
+                            <img 
+                              src={`http://127.0.0.1:8000/storage/${ct.danh_gia.HinhAnh}`} 
+                              alt="Review image" 
+                              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }} 
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Rating Form */
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* Rating Selection */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.9rem', color: '#4b5563', fontWeight: 600 }}>Chất lượng sản phẩm:</span>
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star 
+                                key={star} 
+                                size={22} 
+                                fill={star <= input.XepLoai ? "#FFB300" : "none"} 
+                                stroke="#FFB300" 
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleRatingChange(ct.ID_ChiTiet, star)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Comment Input */}
+                        <div>
+                          <textarea 
+                            rows="3" 
+                            placeholder="Hãy chia sẻ nhận xét của bạn về sản phẩm này nhé..."
+                            value={input.BinhLuan}
+                            onChange={(e) => handleCommentChange(ct.ID_ChiTiet, e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '10px',
+                              borderRadius: '6px',
+                              border: '1px solid #d1d5db',
+                              fontSize: '0.9rem',
+                              outline: 'none',
+                              resize: 'none'
+                            }}
+                          />
+                        </div>
+
+                        {/* Image Upload & Submit Row */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              padding: '6px 12px',
+                              backgroundColor: '#f3f4f6',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '4px',
+                              fontSize: '0.85rem',
+                              color: '#374151',
+                              cursor: 'pointer',
+                              fontWeight: 500
+                            }}>
+                              Chọn ảnh thực tế
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={(e) => handleImageChange(ct.ID_ChiTiet, e.target.files[0])}
+                                style={{ display: 'none' }} 
+                              />
+                            </label>
+                            {input.previewUrl && (
+                              <img 
+                                src={input.previewUrl} 
+                                alt="Preview" 
+                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #eee' }} 
+                              />
+                            )}
+                          </div>
+
+                          <button 
+                            onClick={() => handleSubmitReview(ct.ID_ChiTiet, ct.ID_SanPham)}
+                            disabled={isSubmitting}
+                            style={{
+                              padding: '8px 20px',
+                              backgroundColor: 'var(--shopee-orange)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              fontSize: '0.9rem',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              transition: 'opacity 0.2s',
+                              opacity: isSubmitting ? 0.7 : 1
+                            }}
+                          >
+                            {isSubmitting ? 'Đang gửi...' : 'Gửi Đánh Giá'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              padding: '15px 20px',
+              borderTop: '1px solid #f0f0f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              position: 'sticky',
+              bottom: 0,
+              backgroundColor: '#fff',
+              zIndex: 1
+            }}>
+              <button 
+                onClick={handleCloseModal}
+                style={{
+                  padding: '8px 20px',
+                  backgroundColor: '#fff',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  color: '#374151',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

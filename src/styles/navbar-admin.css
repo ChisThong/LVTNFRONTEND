@@ -307,6 +307,15 @@ body {
     z-index: 1001;
 }
 
+.admin-sidebar.collapsed .user-dropdown-menu {
+    width: 220px;
+    left: 12px;
+    right: auto;
+    bottom: calc(100% + 12px);
+    background: #1c2419;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(12px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -601,6 +610,10 @@ body {
     border-bottom: 2px solid var(--border-color);
 }
 
+.admin-table tbody tr {
+    background-color: #ffffff !important;
+}
+
 .admin-table td {
     padding: 1.1rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
@@ -608,10 +621,11 @@ body {
     font-weight: 500;
     color: var(--text-main);
     transition: var(--transition);
+    background-color: #ffffff !important;
 }
 
 .admin-table tr:hover td {
-    background-color: rgba(59, 94, 52, 0.02);
+    background-color: #f4f8f4 !important;
 }
 
 /* --- BADGES --- */
@@ -1060,21 +1074,6 @@ body {
     gap: 10px;
 }
 
-.map-config-layout {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.province-list {
-    width: 300px;
-    flex-shrink: 0;
-}
-
-.map-pins-area {
-    flex-grow: 1;
-}
-
 .order-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1221,16 +1220,6 @@ body {
 
     .dashboard-shortcuts-grid {
         grid-template-columns: 1fr !important;
-    }
-
-    .map-config-layout {
-        flex-direction: column !important;
-        align-items: stretch !important;
-    }
-
-    .province-list {
-        width: 100% !important;
-        margin-bottom: 1rem !important;
     }
 
     .order-info-grid {

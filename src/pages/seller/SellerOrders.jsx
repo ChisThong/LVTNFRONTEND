@@ -128,33 +128,6 @@ export default function SellerOrders() {
 
   return (
     <div className="sp-page-new">
-      
-      {/* ── TOPBAR ── */}
-      <header className="sp-topbar-new">
-        <div className="sp-search-pill">
-          <Search size={18} className="icon" />
-          <input 
-            type="text" 
-            placeholder="Tìm kiếm theo mã đơn, tên khách hàng..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="sp-topbar-actions-new">
-          <Link to="/" className="sp-pill-btn">
-            <Home size={18} /> Về trang chủ
-          </Link>
-          <button className="sp-circle-btn">
-            <Bell size={18} />
-            <span className="sp-noti-dot"></span>
-          </button>
-          <div className="sp-profile-pill">
-            <div className="sp-avatar-circle">{avatarText}</div>
-            <span className="sp-profile-name">{displayName}</span>
-          </div>
-        </div>
-      </header>
-
       {/* ── MAIN CONTENT ── */}
       <div className="sp-content-new">
         <div className="sp-title-row" style={{ marginBottom: '2rem', marginTop: '1rem' }}>
@@ -162,128 +135,143 @@ export default function SellerOrders() {
         </div>
 
       {/* TABS */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #E5E7EB', marginBottom: '1.5rem', overflowX: 'auto' }}>
-        <div style={tabStyle('all')} onClick={() => { setActiveTab('all'); setCurrentPage(1); }}>
-          Tất cả đơn <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount('all')}</span>
+      <div style={{ display: 'flex', borderBottom: '1px solid #E5E7EB', marginBottom: '1.5rem', overflowX: 'auto', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', overflowX: 'auto' }}>
+          <div style={tabStyle('all')} onClick={() => { setActiveTab('all'); setCurrentPage(1); }}>
+            Tất cả đơn <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount('all')}</span>
+          </div>
+          <div style={tabStyle(0)} onClick={() => { setActiveTab(0); setCurrentPage(1); }}>
+            Chờ xác nhận <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount(0)}</span>
+          </div>
+          <div style={tabStyle(1)} onClick={() => { setActiveTab(1); setCurrentPage(1); }}>
+            Đang đóng gói <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount(1)}</span>
+          </div>
+          <div style={tabStyle(2)} onClick={() => { setActiveTab(2); setCurrentPage(1); }}>
+            Đang giao <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount(2)}</span>
+          </div>
+          <div style={tabStyle(3)} onClick={() => { setActiveTab(3); setCurrentPage(1); }}>
+            Hoàn thành
+          </div>
+          <div style={tabStyle(4)} onClick={() => { setActiveTab(4); setCurrentPage(1); }}>
+            Đã hủy
+          </div>
         </div>
-        <div style={tabStyle(0)} onClick={() => { setActiveTab(0); setCurrentPage(1); }}>
-          Chờ xác nhận <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount(0)}</span>
-        </div>
-        <div style={tabStyle(1)} onClick={() => { setActiveTab(1); setCurrentPage(1); }}>
-          Đang đóng gói <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount(1)}</span>
-        </div>
-        <div style={tabStyle(2)} onClick={() => { setActiveTab(2); setCurrentPage(1); }}>
-          Đang giao <span style={{ background: '#F3F4F6', color: '#4B5563', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{getCount(2)}</span>
-        </div>
-        <div style={tabStyle(3)} onClick={() => { setActiveTab(3); setCurrentPage(1); }}>
-          Hoàn thành
-        </div>
-        <div style={tabStyle(4)} onClick={() => { setActiveTab(4); setCurrentPage(1); }}>
-          Đã hủy
+
+        {/* Search Input on the right of tabs */}
+        <div className="sp-search-pill" style={{ margin: '0 0 10px 0', minWidth: '280px' }}>
+          <Search size={18} className="icon" />
+          <input 
+            type="text" 
+            placeholder="Tìm kiếm theo mã đơn, tên khách..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
       {/* TABLE */}
-      <div style={{ background: '#FFF', borderRadius: '12px', border: '1px solid #F3F4F6', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-        
-        {/* Thead */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr 2fr 1fr 1fr 1fr', gap: '1rem', padding: '1rem 1.5rem', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6', borderRadius: '12px 12px 0 0', fontWeight: 'bold', color: '#4B5563', fontSize: '0.85rem' }}>
-          <div>MÃ ĐƠN / NGÀY ĐẶT</div>
-          <div>SẢN PHẨM</div>
-          <div>KHÁCH HÀNG</div>
-          <div>TỔNG TIỀN</div>
-          <div style={{ textAlign: 'center' }}>TRẠNG THÁI</div>
-          <div style={{ textAlign: 'center' }}>HÀNH ĐỘNG</div>
-        </div>
-
-        {/* Tbody */}
-        {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#6B7280' }}>Đang tải dữ liệu...</div>
-        ) : currentItems.length === 0 ? (
-          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#9CA3AF' }}>
-            <p style={{ fontSize: '1.1rem' }}>Không tìm thấy đơn hàng nào phù hợp.</p>
+      <div style={{ overflowX: 'auto', width: '100%', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', background: '#FFF', border: '1px solid #F3F4F6' }}>
+        <div style={{ minWidth: '1000px' }}>
+          
+          {/* Thead */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr 2fr 1fr 1fr 1fr', gap: '1rem', padding: '1rem 1.5rem', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6', borderRadius: '12px 12px 0 0', fontWeight: 'bold', color: '#4B5563', fontSize: '0.85rem' }}>
+            <div>MÃ ĐƠN / NGÀY ĐẶT</div>
+            <div>SẢN PHẨM</div>
+            <div>KHÁCH HÀNG</div>
+            <div>TỔNG TIỀN</div>
+            <div style={{ textAlign: 'center' }}>TRẠNG THÁI</div>
+            <div style={{ textAlign: 'center' }}>HÀNH ĐỘNG</div>
           </div>
-        ) : (
-          <div>
-            {currentItems.map((order, idx) => (
-              <div key={order.ID_DonHang} style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr 2fr 1fr 1fr 1fr', gap: '1rem', padding: '1.5rem', borderBottom: idx < currentItems.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
-                
-                {/* Cột 1: Mã đơn & Ngày đặt */}
-                <div>
-                  <div style={{ fontWeight: '800', color: '#111827', fontSize: '1.05rem', marginBottom: '4px' }}>
-                    #{order.MaDonHangCon || order.ID_DonHang}
-                  </div>
-                  <div style={{ color: '#6B7280', fontSize: '0.85rem' }}>
-                    {formatDate(order.NgayTao || order.created_at)}
-                  </div>
-                </div>
 
-                {/* Cột 2: Sản phẩm */}
-                <div>
-                  {order.chi_tiet?.map((ct, i) => (
-                    <div key={ct.ID_ChiTiet} style={{ marginBottom: i < order.chi_tiet.length - 1 ? '12px' : '0' }}>
-                      <div style={{ fontWeight: 'bold', color: '#374151', fontSize: '0.95rem' }}>{ct.san_pham?.TenSanPham || 'Sản phẩm'}</div>
-                      <div style={{ color: '#6B7280', fontSize: '0.85rem' }}>
-                        Phân loại: {ct.san_pham?.PhanLoai || 'Tiêu chuẩn'} x {ct.SoLuong}
-                      </div>
+          {/* Tbody */}
+          {loading ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#6B7280' }}>Đang tải dữ liệu...</div>
+          ) : currentItems.length === 0 ? (
+            <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#9CA3AF' }}>
+              <p style={{ fontSize: '1.1rem' }}>Không tìm thấy đơn hàng nào phù hợp.</p>
+            </div>
+          ) : (
+            <div>
+              {currentItems.map((order, idx) => (
+                <div key={order.ID_DonHang} style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr 2fr 1fr 1fr 1fr', gap: '1rem', padding: '1.5rem', borderBottom: idx < currentItems.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+                  
+                  {/* Cột 1: Mã đơn & Ngày đặt */}
+                  <div>
+                    <div style={{ fontWeight: '800', color: '#111827', fontSize: '1.05rem', marginBottom: '4px' }}>
+                      #{order.MaDonHangCon || order.ID_DonHang}
                     </div>
-                  ))}
-                </div>
-
-                {/* Cột 3: Khách hàng */}
-                <div>
-                  <div style={{ fontWeight: 'bold', color: '#374151', fontSize: '0.95rem', marginBottom: '4px' }}>
-                    {order.don_hang_tong?.NguoiNhan || order.nguoi_mua?.HoTen || order.nguoi_mua?.name || 'Khách hàng'}
+                    <div style={{ color: '#6B7280', fontSize: '0.85rem' }}>
+                      {formatDate(order.NgayTao || order.created_at)}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', color: '#6B7280', fontSize: '0.85rem', lineHeight: '1.4', marginBottom: '4px' }}>
-                    <Smartphone size={14} style={{ marginTop: '2px', flexShrink: 0 }} /> 
-                    <span>{order.don_hang_tong?.SDTNhan || order.nguoi_mua?.sdt || order.nguoi_mua?.phone || 'Chưa có'}</span>
+
+                  {/* Cột 2: Sản phẩm */}
+                  <div>
+                    {order.chi_tiet?.map((ct, i) => (
+                      <div key={ct.ID_ChiTiet} style={{ marginBottom: i < order.chi_tiet.length - 1 ? '12px' : '0' }}>
+                        <div style={{ fontWeight: 'bold', color: '#374151', fontSize: '0.95rem' }}>{ct.san_pham?.TenSanPham || 'Sản phẩm'}</div>
+                        <div style={{ color: '#6B7280', fontSize: '0.85rem' }}>
+                          Phân loại: {ct.san_pham?.PhanLoai || 'Tiêu chuẩn'} x {ct.SoLuong}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', color: '#6B7280', fontSize: '0.85rem', lineHeight: '1.4' }}>
-                    <MapPin size={14} style={{ marginTop: '2px', flexShrink: 0 }} /> 
-                    <span>{order.don_hang_tong?.DiaChiNhan || order.nguoi_mua?.dia_chi || order.nguoi_mua?.address || 'Chưa có'}</span>
+
+                  {/* Cột 3: Khách hàng */}
+                  <div>
+                    <div style={{ fontWeight: 'bold', color: '#374151', fontSize: '0.95rem', marginBottom: '4px' }}>
+                      {order.don_hang_tong?.NguoiNhan || order.nguoi_mua?.HoTen || order.nguoi_mua?.name || 'Khách hàng'}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', color: '#6B7280', fontSize: '0.85rem', lineHeight: '1.4', marginBottom: '4px' }}>
+                      <Smartphone size={14} style={{ marginTop: '2px', flexShrink: 0 }} /> 
+                      <span>{order.don_hang_tong?.SDTNhan || order.nguoi_mua?.sdt || order.nguoi_mua?.phone || 'Chưa có'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', color: '#6B7280', fontSize: '0.85rem', lineHeight: '1.4' }}>
+                      <MapPin size={14} style={{ marginTop: '2px', flexShrink: 0 }} /> 
+                      <span>{order.don_hang_tong?.DiaChiNhan || order.nguoi_mua?.dia_chi || order.nguoi_mua?.address || 'Chưa có'}</span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Cột 4: Tổng tiền */}
-                <div style={{ fontWeight: '800', color: '#111827', fontSize: '1.05rem' }}>
-                  {formatPrice(order.TongGia + order.PhiVanChuyen)}
-                </div>
+                  {/* Cột 4: Tổng tiền */}
+                  <div style={{ fontWeight: '800', color: '#111827', fontSize: '1.05rem' }}>
+                    {formatPrice(order.TongGia + order.PhiVanChuyen)}
+                  </div>
 
-                {/* Cột 5: Trạng thái */}
-                <div style={{ textAlign: 'center' }}>
-                  {getStatusBadge(Number(order.TrangThai))}
-                </div>
+                  {/* Cột 5: Trạng thái */}
+                  <div style={{ textAlign: 'center' }}>
+                    {getStatusBadge(Number(order.TrangThai))}
+                  </div>
 
-                {/* Cột 6: Hành động */}
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                  {Number(order.TrangThai) === 0 && (
-                    <button onClick={() => handleUpdateStatus(order.ID_DonHang, 1)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
-                      Duyệt đơn
-                    </button>
-                  )}
-                  {Number(order.TrangThai) === 1 && (
-                    <button onClick={() => handleUpdateStatus(order.ID_DonHang, 2)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
-                      Giao cho ĐVVC
-                    </button>
-                  )}
-                  {Number(order.TrangThai) === 2 && (
-                    <button onClick={() => handleUpdateStatus(order.ID_DonHang, 3)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#111827', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
-                      Theo dõi
-                    </button>
-                  )}
-                  {/* Nếu không có action chính, hiện nút xem chi tiết */}
-                  {[3,4].includes(Number(order.TrangThai)) && (
-                     <button style={{ padding: '6px 16px', background: 'transparent', border: 'none', fontWeight: '600', color: '#3B82F6', cursor: 'pointer' }}>
-                       Chi tiết
-                     </button>
-                  )}
-                </div>
+                  {/* Cột 6: Hành động */}
+                  <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                    {Number(order.TrangThai) === 0 && (
+                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 1)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
+                        Duyệt đơn
+                      </button>
+                    )}
+                    {Number(order.TrangThai) === 1 && (
+                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 2)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
+                        Giao cho ĐVVC
+                      </button>
+                    )}
+                    {Number(order.TrangThai) === 2 && (
+                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 3)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#111827', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
+                        Theo dõi
+                      </button>
+                    )}
+                    {/* Nếu không có action chính, hiện nút xem chi tiết */}
+                    {[3,4].includes(Number(order.TrangThai)) && (
+                       <button style={{ padding: '6px 16px', background: 'transparent', border: 'none', fontWeight: '600', color: '#3B82F6', cursor: 'pointer' }}>
+                         Chi tiết
+                       </button>
+                    )}
+                  </div>
 
-              </div>
-            ))}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* PAGINATION */}

@@ -61,7 +61,7 @@ export default function PublicFooter() {
       </div>
 
       <div className="footer-bottom">
-        <p>&copy; 2026 NamBộ Specialties. Thiết kế bởi Antigravity.</p>
+        <p>&copy; 2026 NamBộ Specialties.</p>
       </div>
     </footer>
   );
