@@ -9,7 +9,7 @@ import {
 import '../../styles/seller.css';
 import '../../styles/seller-products.css';
 
-const BASE_URL = 'http://127.0.0.1:8000/storage/';
+const BASE_URL = 'https://lvtnbackend.onrender.com/storage/';
 const DONVI_OPTIONS = ['kg', 'hộp', 'chai', 'gói', 'túi', 'lọ', 'cái', 'bịch', 'lon', 'cặp'];
 
 export default function SellerProductEdit() {

@@ -367,7 +367,6 @@ body {
     max-width: calc(100% - 280px);
     transition: margin-left 0.3s ease, max-width 0.3s ease, var(--transition);
     position: relative;
-    z-index: 100;
 }
 
 .admin-sidebar.collapsed + .admin-main,
@@ -900,6 +899,12 @@ body {
 }
 
 .nam-modal-header {
+    position: sticky;
+    top: -2rem;
+    background: #FFFFFF;
+    z-index: 10;
+    margin-top: -2rem;
+    padding-top: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -928,6 +933,12 @@ body {
 }
 
 .nam-modal-footer {
+    position: sticky;
+    bottom: -2rem;
+    background: #FFFFFF;
+    z-index: 10;
+    margin-bottom: -2rem;
+    padding-bottom: 2rem;
     display: flex;
     justify-content: flex-end;
     gap: 12px;

@@ -19,7 +19,7 @@ const getYouTubeEmbedUrl = (url) => {
     return null;
 };
 
-const IMG_URL = "http://127.0.0.1:8000/storage/";
+const IMG_URL = "https://lvtnbackend.onrender.com/storage/";
 
 export default function BaiVietController() {
     const [page, setpage] = useState(1);

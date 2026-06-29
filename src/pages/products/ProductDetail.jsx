@@ -25,6 +25,7 @@ export default function ProductDetail() {
   const [commentInput, setCommentInput] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [shopStats, setShopStats] = useState({ avg_rating: 5.0, response_rate: 100, products_count: 0 });
 
   const fetchReviews = () => {
     setReviewsLoading(true);
@@ -46,7 +47,7 @@ export default function ProductDetail() {
       const res = await axiosClient.get('/don-hang');
       const orders = res.data?.data?.data || [];
       const completedOrders = orders.filter(o => Number(o.TrangThai) === 3);
-      
+
       let foundItem = null;
       for (const order of completedOrders) {
         const item = order.chi_tiet?.find(det => Number(det.ID_SanPham) === Number(id));
@@ -54,7 +55,7 @@ export default function ProductDetail() {
           const reviewsRes = await getProductReviews(id);
           const currentReviews = reviewsRes.data?.data || [];
           const alreadyReviewed = currentReviews.some(rev => Number(rev.ID_ChiTiet) === Number(item.ID_ChiTiet));
-          
+
           if (!alreadyReviewed) {
             foundItem = item;
             break;
@@ -87,13 +88,30 @@ export default function ProductDetail() {
   }, [id]);
 
   useEffect(() => {
+    const shopId = product?.shop?.ID_Shop || product?.ID_Shop;
+    if (shopId) {
+      axiosClient.get(`/shops/${shopId}/reviews?page=1`)
+        .then(res => {
+          if (res.data) {
+            setShopStats({
+              avg_rating: res.data.avg_rating || 5.0,
+              response_rate: res.data.response_rate || 100,
+              products_count: res.data.products_count || 0
+            });
+          }
+        })
+        .catch(err => console.error("Lỗi khi tải thông số shop:", err));
+    }
+  }, [product?.shop?.ID_Shop, product?.ID_Shop]);
+
+  useEffect(() => {
     if (product?.ID_PhanLoai) {
       getPublicProducts({ ID_PhanLoai: product.ID_PhanLoai, per_page: 5 })
         .then(res => {
           const list = res.data?.data?.data || [];
           setRelatedProducts(list.filter(p => p.ID_SanPham !== product.ID_SanPham).slice(0, 4));
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [product?.ID_PhanLoai, product?.ID_SanPham]);
 
@@ -105,10 +123,10 @@ export default function ProductDetail() {
       existing.qty += qty;
     } else {
       const hinhAnhUrl = product.hinh_anh && product.hinh_anh.length > 0 ? product.hinh_anh[0].HinhAnh : null;
-      cart.push({ 
-        id: product.ID_SanPham, 
-        name: product.TenSanPham, 
-        qty, 
+      cart.push({
+        id: product.ID_SanPham,
+        name: product.TenSanPham,
+        qty,
         price: product.Gia,
         HinhAnh: hinhAnhUrl,
         ID_Shop: product.shop?.ID_Shop || 'shop_0',
@@ -133,7 +151,7 @@ export default function ProductDetail() {
       return;
     }
     setSubmittingReview(true);
-    
+
     const formData = new FormData();
     formData.append('ID_ChiTiet', eligibleItem.ID_ChiTiet);
     formData.append('ID_SanPham', id);
@@ -174,15 +192,15 @@ export default function ProductDetail() {
   const images = product?.hinh_anh || [];
   const mainImageUrl = images.length > 0
     ? (() => {
-        const p = images[activeImg]?.HinhAnh || images[0]?.HinhAnh;
-        return p?.startsWith('http') ? p : `http://127.0.0.1:8000/storage/${p}`;
-      })()
+      const p = images[activeImg]?.HinhAnh || images[0]?.HinhAnh;
+      return p?.startsWith('http') ? p : `https://lvtnbackend.onrender.com/storage/${p}`;
+    })()
     : null;
 
-  const tinhThanh   = product?.tinh_thanh?.TenTinhThanh || product?.tinhThanh?.TenTinhThanh || '—';
-  const phanLoai    = product?.phan_loai?.TenLoai || product?.phanLoai?.TenLoai || '—';
-  const shopName    = product?.shop?.TenShop || '—';
-  
+  const tinhThanh = product?.tinh_thanh?.TenTinhThanh || product?.tinhThanh?.TenTinhThanh || '—';
+  const phanLoai = product?.phan_loai?.TenLoai || product?.phanLoai?.TenLoai || '—';
+  const shopName = product?.shop?.TenShop || '—';
+
   // Dummy shop info for demo mapping
   const shopAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(shopName)}&background=D44E28&color=fff`;
 
@@ -242,16 +260,16 @@ export default function ProductDetail() {
               <div style={{ padding: '50px', color: '#ccc' }}>Chưa có ảnh</div>
             )}
           </div>
-          
+
           {images.length > 0 && (
             <div className="thumbnail-list">
               {images.map((img, idx) => {
                 const thumbUrl = img.HinhAnh?.startsWith('http')
                   ? img.HinhAnh
-                  : `http://127.0.0.1:8000/storage/${img.HinhAnh}`;
+                  : `https://lvtnbackend.onrender.com/storage/${img.HinhAnh}`;
                 return (
-                  <div 
-                    key={img.ID_HinhAnh || idx} 
+                  <div
+                    key={img.ID_HinhAnh || idx}
                     className={`thumbnail-item ${idx === activeImg ? 'active' : ''}`}
                     onClick={() => setActiveImg(idx)}
                   >
@@ -280,9 +298,9 @@ export default function ProductDetail() {
             </div>
             <span style={{ color: 'var(--secondary)', fontWeight: 700, fontSize: '0.85rem' }}>Đã bán 250+</span>
           </div>
-          
+
           <div className="product-price">{formatPrice(product.Gia)}</div>
-          
+
           {product.Tittle && (
             <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>{product.Tittle}</p>
           )}
@@ -308,41 +326,41 @@ export default function ProductDetail() {
 
           <div className="purchase-actions">
             <div className="quantity-selector">
-              <button 
-                className="qty-btn" 
+              <button
+                className="qty-btn"
                 onClick={() => setQty(Math.max(1, qty - 1))}
                 disabled={qty <= 1}
               ><Minus size={18} /></button>
-              <input 
-                type="number" 
-                className="qty-input" 
-                value={qty} 
+              <input
+                type="number"
+                className="qty-input"
+                value={qty}
                 onChange={(e) => {
                   let v = parseInt(e.target.value);
                   if (isNaN(v) || v < 1) v = 1;
                   const max = product.SoLuongTon || 99;
                   if (v > max) v = max;
                   setQty(v);
-                }} 
+                }}
               />
-              <button 
-                className="qty-btn" 
+              <button
+                className="qty-btn"
                 onClick={() => setQty(Math.min(product.SoLuongTon || 99, qty + 1))}
                 disabled={qty >= (product.SoLuongTon || 99)}
               ><Plus size={18} /></button>
             </div>
-            
+
             <div className="action-buttons">
-              <button 
-                className="add-to-cart-large" 
+              <button
+                className="add-to-cart-large"
                 onClick={handleAddToCart}
                 disabled={(product.SoLuongTon || 0) === 0}
               >
                 <ShoppingCart size={20} />
                 {addedToCart ? 'Đã thêm' : 'Thêm vào giỏ hàng'}
               </button>
-              <button 
-                className="buy-now-btn" 
+              <button
+                className="buy-now-btn"
                 onClick={handleBuyNow}
                 disabled={(product.SoLuongTon || 0) === 0}
               >
@@ -369,15 +387,15 @@ export default function ProductDetail() {
         <div className="shop-stats">
           <div className="stat-box">
             <span>Đánh giá</span>
-            <span>4.9/5</span>
+            <span>{shopStats.avg_rating}/5</span>
           </div>
           <div className="stat-box">
             <span>Sản phẩm</span>
-            <span>85</span>
+            <span>{shopStats.products_count}</span>
           </div>
           <div className="stat-box">
             <span>Phản hồi</span>
-            <span>98%</span>
+            <span>{shopStats.response_rate}%</span>
           </div>
         </div>
         <div className="shop-actions">
@@ -393,16 +411,16 @@ export default function ProductDetail() {
       {/* Product Tabs */}
       <section className="product-tabs">
         <div className="tabs-nav">
-          <div 
-            className={`tab-link ${activeTab === 'description' ? 'active' : ''}`} 
+          <div
+            className={`tab-link ${activeTab === 'description' ? 'active' : ''}`}
             onClick={() => setActiveTab('description')}
           >Mô tả chi tiết</div>
-          <div 
-            className={`tab-link ${activeTab === 'reviews' ? 'active' : ''}`} 
+          <div
+            className={`tab-link ${activeTab === 'reviews' ? 'active' : ''}`}
             onClick={() => setActiveTab('reviews')}
           >Đánh giá & Bình luận ({totalReviews})</div>
-          <div 
-            className={`tab-link ${activeTab === 'shipping' ? 'active' : ''}`} 
+          <div
+            className={`tab-link ${activeTab === 'shipping' ? 'active' : ''}`}
             onClick={() => setActiveTab('shipping')}
           >Chính sách vận chuyển</div>
         </div>
@@ -451,10 +469,10 @@ export default function ProductDetail() {
                     </p>
                     <div className="star-rating-input" style={{ display: 'flex', gap: '8px', marginBottom: '1rem', cursor: 'pointer' }}>
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <Star 
-                          key={star} 
-                          size={24} 
-                          fill={star <= ratingInput ? "#FFB300" : "none"} 
+                        <Star
+                          key={star}
+                          size={24}
+                          fill={star <= ratingInput ? "#FFB300" : "none"}
                           stroke="#FFB300"
                           onClick={() => setRatingInput(star)}
                         />
@@ -462,8 +480,8 @@ export default function ProductDetail() {
                     </div>
                     <div className="form-group" style={{ marginBottom: '1rem' }}>
                       <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Bình luận *</label>
-                      <textarea 
-                        rows="4" 
+                      <textarea
+                        rows="4"
                         required
                         value={commentInput}
                         onChange={(e) => setCommentInput(e.target.value)}
@@ -471,23 +489,23 @@ export default function ProductDetail() {
                         style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #ddd' }}
                       ></textarea>
                     </div>
-                    
+
                     <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                       <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Hình ảnh thực tế</label>
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         accept="image/*"
                         onChange={(e) => setImageFile(e.target.files[0] || null)}
                         style={{ display: 'block', width: '100%' }}
                       />
                       {imageFile && (
                         <div style={{ marginTop: '0.75rem', position: 'relative', display: 'inline-block' }}>
-                          <img 
-                            src={URL.createObjectURL(imageFile)} 
-                            alt="Preview" 
-                            style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #ddd' }} 
+                          <img
+                            src={URL.createObjectURL(imageFile)}
+                            alt="Preview"
+                            style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #ddd' }}
                           />
-                          <button 
+                          <button
                             type="button"
                             onClick={() => setImageFile(null)}
                             style={{
@@ -515,8 +533,8 @@ export default function ProductDetail() {
                       )}
                     </div>
 
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="submit-comment"
                       disabled={submittingReview}
                       style={{ padding: '0.75rem 2rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
@@ -537,20 +555,20 @@ export default function ProductDetail() {
                     <div className="review-item" key={rev.ID_DanhGia} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                       <div className="review-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                         <div className="user-info" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <img 
-                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(rev.user?.HoTen || 'K')}&background=random`} 
-                            className="user-avatar" 
-                            alt="User" 
+                          <img
+                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(rev.user?.HoTen || 'K')}&background=random`}
+                            className="user-avatar"
+                            alt="User"
                             style={{ width: '40px', height: '40px', borderRadius: '50%' }}
                           />
                           <div>
                             <div className="user-name" style={{ fontWeight: 'bold', color: 'var(--text-dark)' }}>{rev.user?.HoTen || 'Khách hàng ẩn danh'}</div>
                             <div className="stars" style={{ display: 'flex', gap: '2px' }}>
                               {[1, 2, 3, 4, 5].map((star) => (
-                                <Star 
-                                  key={star} 
-                                  size={14} 
-                                  fill={star <= rev.XepLoai ? "#FFB300" : "none"} 
+                                <Star
+                                  key={star}
+                                  size={14}
+                                  fill={star <= rev.XepLoai ? "#FFB300" : "none"}
                                   stroke="#FFB300"
                                 />
                               ))}
@@ -561,17 +579,17 @@ export default function ProductDetail() {
                           {rev.NgayDanhGia ? new Date(rev.NgayDanhGia).toLocaleDateString('vi-VN') : '—'}
                         </div>
                       </div>
-                      
+
                       <p className="review-content" style={{ margin: '0.5rem 0', color: 'var(--text-dark)', lineHeight: 1.5 }}>
                         {rev.BinhLuan || 'Không có bình luận.'}
                       </p>
 
                       {rev.HinhAnh && (
                         <div style={{ marginTop: '0.5rem' }}>
-                          <img 
-                            src={rev.HinhAnh.startsWith('http') ? rev.HinhAnh : `http://127.0.0.1:8000/storage/${rev.HinhAnh}`} 
-                            alt="Hình ảnh thực tế từ khách hàng" 
-                            style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-color)' }} 
+                          <img
+                            src={rev.HinhAnh.startsWith('http') ? rev.HinhAnh : `https://lvtnbackend.onrender.com/storage/${rev.HinhAnh}`}
+                            alt="Hình ảnh thực tế từ khách hàng"
+                            style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         </div>
@@ -621,14 +639,14 @@ export default function ProductDetail() {
             <h2 style={{ fontSize: '2rem', color: 'var(--text-dark)' }}>Sản phẩm liên quan</h2>
             <p style={{ color: 'var(--text-muted)' }}>Có thể bạn cũng thích những đặc sản này</p>
           </div>
-          
+
           {/* Note: In a real scenario we'd reuse <ProductCard /> here if it matches the layout or make a simplified grid */}
           <div className="products-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
             {relatedProducts.map(rel => {
-              const relImg = rel.hinh_anh && rel.hinh_anh.length > 0 
-                ? (rel.hinh_anh[0].HinhAnh.startsWith('http') ? rel.hinh_anh[0].HinhAnh : `http://127.0.0.1:8000/storage/${rel.hinh_anh[0].HinhAnh}`)
+              const relImg = rel.hinh_anh && rel.hinh_anh.length > 0
+                ? (rel.hinh_anh[0].HinhAnh.startsWith('http') ? rel.hinh_anh[0].HinhAnh : `https://lvtnbackend.onrender.com/storage/${rel.hinh_anh[0].HinhAnh}`)
                 : null;
-              
+
               return (
                 <div key={rel.ID_SanPham} className="product-card" onClick={() => navigate(`/products/${rel.ID_SanPham}`)} style={{ cursor: 'pointer' }}>
                   <div className="product-img-wrapper">

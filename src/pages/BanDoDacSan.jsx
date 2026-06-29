@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Search, Filter, Layers, Box, Globe, RotateCw, X, ChevronRight, ShoppingCart, Info } from 'lucide-react';
+import { Filter, Layers, Box, Globe, RotateCw, X, User, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../api/axiosClient';
 import bannerBg from '../assets/bannermap.webp';
 import '../styles/map.css';
+import '../styles/baiviet.css';
 
 import ranhGioiData from '../../RanhGioi.json';
 
@@ -105,40 +104,14 @@ const FRIENDLY_NAMES = {
   "An Giang": "Tỉnh An Giang"
 };
 
-const NORMAL_PROVINCES = {
-  "TP. Hồ Chí Minh": { geojsonNames: ["HồChíMinh"], color: "#ff4d4d", center: { lat: 10.776, lng: 106.701 } },
-  "Thành phố Hồ Chí Minh": { geojsonNames: ["HồChíMinh"], color: "#ff4d4d", center: { lat: 10.776, lng: 106.701 } },
-  "Bà Rịa - Vũng Tàu": { geojsonNames: ["BàRịa-VũngTàu"], color: "#ff9f43", center: { lat: 10.496, lng: 107.170 } },
-  "Bình Dương": { geojsonNames: ["BìnhDương"], color: "#10b981", center: { lat: 10.980, lng: 106.651 } },
-  "Bình Phước": { geojsonNames: ["BìnhPhước"], color: "#00d2d3", center: { lat: 11.532, lng: 106.884 } },
-  "Đồng Nai": { geojsonNames: ["ĐồngNai"], color: "#5f27cd", center: { lat: 10.957, lng: 106.842 } },
-  "Long An": { geojsonNames: ["LongAn"], color: "#ff9ff3", center: { lat: 10.538, lng: 106.413 } },
-  "Tây Ninh": { geojsonNames: ["TâyNinh"], color: "#2e86de", center: { lat: 11.362, lng: 106.126 } },
-  "Tiền Giang": { geojsonNames: ["TiềnGiang"], color: "#ee5253", center: { lat: 10.449, lng: 106.341 } },
-  "Đồng Tháp": { geojsonNames: ["ĐồngTháp"], color: "#ff4d4d", center: { lat: 10.435, lng: 105.632 } },
-  "Kiên Giang": { geojsonNames: ["KiênGiang"], color: "#ff9f43", center: { lat: 9.982, lng: 105.124 } },
-  "An Giang": { geojsonNames: ["AnGiang"], color: "#10b981", center: { lat: 10.372, lng: 105.437 } },
-  "Bến Tre": { geojsonNames: ["BếnTre"], color: "#00d2d3", center: { lat: 10.243, lng: 106.375 } },
-  "Trà Vinh": { geojsonNames: ["TràVinh"], color: "#5f27cd", center: { lat: 9.948, lng: 106.340 } },
-  "Vĩnh Long": { geojsonNames: ["VĩnhLong"], color: "#ff9ff3", center: { lat: 10.252, lng: 105.972 } },
-  "Cần Thơ": { geojsonNames: ["CầnThơ"], color: "#2e86de", center: { lat: 10.036, lng: 105.787 } },
-  "TP. Cần Thơ": { geojsonNames: ["CầnThơ"], color: "#2e86de", center: { lat: 10.036, lng: 105.787 } },
-  "Sóc Trăng": { geojsonNames: ["SócTrăng"], color: "#ee5253", center: { lat: 9.602, lng: 105.973 } },
-  "Hậu Giang": { geojsonNames: ["HậuGiang"], color: "#ff4d4d", center: { lat: 9.784, lng: 105.470 } },
-  "Bạc Liêu": { geojsonNames: ["BạcLiêu"], color: "#ff9f43", center: { lat: 9.294, lng: 105.727 } },
-  "Cà Mau": { geojsonNames: ["CàMau"], color: "#10b981", center: { lat: 9.176, lng: 105.152 } }
-};
 
 
 export default function BanDoDacSan() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const rotationRequestRef = useRef(null);
-  const threeCanvasRef = useRef(null);
-  const threeRendererRef = useRef(null);
-  const threeSceneRef = useRef(null);
 
-  // States
+  // Trạng thái
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [selectedProvince, setSelectedProvince] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,14 +120,93 @@ export default function BanDoDacSan() {
   const [isSatellite, setIsSatellite] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   
-  // Toast notifications
+  // Thông báo Toast
   const [toast, setToast] = useState({ active: false, title: '', desc: '' });
   
-  // 3D Showroom Modal
+  // Modal Showroom 3D
   const [showShowroom, setShowShowroom] = useState(false);
   const [showroomProduct, setShowroomProduct] = useState(null);
 
-  // Fetch data from backend
+  // Trạng thái Modal chi tiết câu chuyện
+  const [selectedStory, setSelectedStory] = useState(null);
+  const [loadingStory, setLoadingStory] = useState(false);
+
+  const handleOpenStory = async (pin) => {
+    setLoadingStory(true);
+    try {
+      // Gọi API công khai lấy toàn bộ câu chuyện sản vật của tỉnh
+      const response = await axiosClient.get(`/Cauchuyensanvat/${pin.ID_TinhThanh}`);
+      const blogsList = response.data?.data || [];
+      
+      // Tìm bài viết có tiêu đề chứa tên đặc sản
+      const matchingBlog = blogsList.find(blog => {
+        const blogTitle = blog.tittel.toLowerCase();
+        const specialtyTitle = pin.title.toLowerCase();
+        return blogTitle.includes(specialtyTitle) || specialtyTitle.includes(blogTitle);
+      });
+
+      if (matchingBlog) {
+        setSelectedStory(matchingBlog);
+      } else {
+        setSelectedStory({
+          tittel: `Giới thiệu về ${pin.title}`,
+          noidung: `<div style="padding: 15px; background: #fffbeb; border-radius: 12px; border-left: 4px solid #d97706; margin-bottom: 20px; font-size: 0.9rem; color: #d97706;">
+                      <strong style="display: block; margin-bottom: 4px;">Sản vật này chưa có câu chuyện chi tiết!</strong>
+                      Dưới đây là thông tin mô tả sơ lược của sản vật trên bản đồ.
+                    </div>
+                    <p style="line-height: 1.8; color: #334155;">${pin.desc || 'Đang cập nhật thông tin mô tả cho đặc sản này...'}</p>`,
+          hinhanh: pin.thumb.replace('https://lvtnbackend.onrender.com/storage/', ''),
+          user: { HoTen: 'Ban quản trị' },
+          ngaydang: 'Gần đây'
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching story:", error);
+      setSelectedStory({
+        tittel: `Câu chuyện về ${pin.title}`,
+        noidung: pin.desc || 'Đang cập nhật nội dung câu chuyện cho đặc sản này...',
+        hinhanh: pin.thumb.replace('https://lvtnbackend.onrender.com/storage/', ''),
+        user: { HoTen: 'Ban quản trị' },
+        ngaydang: 'Gần đây'
+      });
+    } finally {
+      setLoadingStory(false);
+    }
+  };
+
+  // Trạng thái và trình xử lý kéo thả của CSS 3D Carousel
+  const [rotationAngle, setRotationAngle] = useState(0);
+  const [zoomScale, setZoomScale] = useState(1);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startAngleRef = useRef(0);
+
+  const handleMouseDown = (e) => {
+    isDraggingRef.current = true;
+    startXRef.current = e.clientX || e.touches?.[0]?.clientX || 0;
+    startAngleRef.current = rotationAngle;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDraggingRef.current) return;
+    const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
+    const deltaX = clientX - startXRef.current;
+    setRotationAngle(startAngleRef.current + deltaX * 0.01);
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+  };
+
+  const handleWheel = (e) => {
+    setZoomScale(prev => {
+      const next = prev - e.deltaY * 0.001;
+      return Math.min(Math.max(0.5, next), 2.0);
+    });
+  };
+
+
+  // Lấy dữ liệu từ máy chủ (backend)
   const { data: rawMapsData } = useQuery({
     queryKey: ['publicMaps'],
     queryFn: async () => {
@@ -181,24 +233,25 @@ export default function BanDoDacSan() {
     staleTime: 30000,
   });
 
-  const pins = rawMapsData || [];
-
-  // Transform backend pins to frontend model
+  // Chuyển đổi dữ liệu ghim từ backend sang model giao diện (frontend)
   const specialtyPins = useMemo(() => {
+    const pins = rawMapsData || [];
     return pins.map(item => {
       const provinceName = item.tinh_thanh?.TenTinhThanh || '';
       return {
         id: item.ID,
+        ID_TinhThanh: item.ID_TinhThanh,
         lat: parseFloat(item.ViDo) || 0,
         lng: parseFloat(item.KinhDo) || 0,
         title: item.TenDacSan || '',
         desc: item.MoTa || '',
         category: item.PhanLoai || '',
         location: provinceName,
-        thumb: item.HinhAnh ? `http://127.0.0.1:8000/storage/${item.HinhAnh}` : "https://via.placeholder.com/300x200?text=No+Image"
+        detailedLocation: [item.ap?.Ten_ap, item.xa?.Ten_xa].filter(Boolean).join(', ') || provinceName,
+        thumb: item.HinhAnh ? `https://lvtnbackend.onrender.com/storage/${item.HinhAnh}` : "https://via.placeholder.com/300x200?text=No+Image"
       };
     });
-  }, [pins]);
+  }, [rawMapsData]);
 
   // Compute dynamic province flags
   const provinceFlags = useMemo(() => {
@@ -233,7 +286,38 @@ export default function BanDoDacSan() {
     });
   }, [specialtyPins, selectedCategory, selectedProvince, searchQuery]);
 
-  // Show toast notification
+  // Compute province specialties for 3D showroom
+  const provinceSpecialties = useMemo(() => {
+    if (!showroomProduct) return [];
+    if (showroomProduct.isProvince) {
+      return specialtyPins.filter(pin => {
+        const pinLoc = pin.location.toLowerCase().replace(/\s+/g, '');
+        const provName = showroomProduct.province.toLowerCase().replace(/\s+/g, '');
+        return pinLoc.includes(provName) || provName.includes(pinLoc);
+      });
+    }
+    return [showroomProduct];
+  }, [showroomProduct, specialtyPins]);
+
+  // Tự động xoay chậm CSS 3D Carousel khi người dùng không kéo thả
+  useEffect(() => {
+    if (!showShowroom || provinceSpecialties.length <= 1) return;
+
+    let reqId;
+    const animate = () => {
+      if (!isDraggingRef.current) {
+        setRotationAngle(prev => prev + 0.0035);
+      }
+      reqId = requestAnimationFrame(animate);
+    };
+    reqId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(reqId);
+    };
+  }, [showShowroom, provinceSpecialties]);
+
+  // Hiển thị thông báo Toast
   const triggerToast = (title, desc) => {
     setToast({ active: true, title, desc });
     setTimeout(() => {
@@ -241,7 +325,7 @@ export default function BanDoDacSan() {
     }, 3500);
   };
 
-  // Initialize Map
+  // Khởi tạo bản đồ
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -258,7 +342,7 @@ export default function BanDoDacSan() {
     mapRef.current = map;
 
     map.on('load', () => {
-      // Add Satellite Imagery Source
+      // Thêm nguồn hình ảnh vệ tinh
       map.addSource('esri-satellite', {
         type: 'raster',
         tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
@@ -420,8 +504,24 @@ export default function BanDoDacSan() {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         setSelectedProvince(flag.province);
-        map.flyTo({ center: [flag.lng, flag.lat], zoom: 9.5, duration: 1500 });
-        triggerToast(flag.province, `Đang hiển thị danh mục sản vật tại ${flag.province}.`);
+        setIs3DMode(false);
+        map.flyTo({ 
+          center: [flag.lng, flag.lat], 
+          zoom: 9.5, 
+          pitch: 0,
+          bearing: 0,
+          duration: 1500 
+        });
+        triggerToast(flag.province, `Đang hiển thị danh mục sản vật tại ${flag.province} dưới dạng 2D.`);
+        
+        // Open showroom for this province
+        setShowroomProduct({
+          title: flag.province,
+          location: 'Đặc sản',
+          isProvince: true,
+          province: flag.province
+        });
+        setShowShowroom(true);
       });
 
       new maplibregl.Marker({ element: el, anchor: 'bottom' })
@@ -445,7 +545,7 @@ export default function BanDoDacSan() {
           </div>
           <div class="marker-title-slide">
             <span class="marker-title-text">${pin.title}</span>
-            <span class="marker-location-text">${pin.location}</span>
+            <span class="marker-location-text">${pin.detailedLocation}</span>
           </div>
         </div>
       `;
@@ -468,7 +568,7 @@ export default function BanDoDacSan() {
     const map = mapRef.current;
     if (!map) return;
 
-    const rotateCamera = (timestamp) => {
+    const rotateCamera = () => {
       if (!isRotating) return;
       // rotate at 1.5 degrees per frame
       map.rotateTo((map.getBearing() + 0.1) % 360, { duration: 0 });
@@ -476,7 +576,6 @@ export default function BanDoDacSan() {
     };
 
     if (isRotating) {
-      triggerToast("Chế độ xoay", "Bản đồ đang tự động quay quanh góc nhìn.");
       rotationRequestRef.current = requestAnimationFrame(rotateCamera);
     } else {
       if (rotationRequestRef.current) {
@@ -511,7 +610,13 @@ export default function BanDoDacSan() {
   };
 
   const toggleRotation = () => {
-    setIsRotating(prev => !prev);
+    setIsRotating(prev => {
+      const next = !prev;
+      if (next) {
+        triggerToast("Chế độ xoay", "Bản đồ đang tự động quay quanh góc nhìn.");
+      }
+      return next;
+    });
   };
 
   // Close Popup
@@ -519,122 +624,14 @@ export default function BanDoDacSan() {
     setActivePin(null);
   };
 
-  // Initialize and run Three.js Showroom
-  useEffect(() => {
-    if (!showShowroom || !threeCanvasRef.current) return;
 
-    const container = threeCanvasRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
 
-    // Create scene, camera, renderer
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111827);
-    threeSceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 2, 5);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.innerHTML = '';
-    container.appendChild(renderer.domElement);
-    threeRendererRef.current = renderer;
-
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-
-    const dirLight = new THREE.DirectionalLight(0xfff3e0, 1.2);
-    dirLight.position.set(5, 10, 7);
-    scene.add(dirLight);
-
-    const pointLight = new THREE.PointLight(0x10b981, 1, 10);
-    pointLight.position.set(-2, 2, 2);
-    scene.add(pointLight);
-
-    // Grid Helper
-    const gridHelper = new THREE.GridHelper(10, 20, 0x10b981, 0x374151);
-    gridHelper.position.y = -1;
-    scene.add(gridHelper);
-
-    // Create a beautiful rotating geometry to represent the specialty
-    let mesh;
-    if (showroomProduct?.category === 'Trái cây') {
-      // Orange/Mango sphere model
-      const geometry = new THREE.DodecahedronGeometry(1.2, 1);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0xf59e0b,
-        roughness: 0.1,
-        metalness: 0.1,
-        flatShading: true
-      });
-      mesh = new THREE.Mesh(geometry, material);
-    } else if (showroomProduct?.category === 'Bánh kẹo') {
-      // Cylinder/Jar shape
-      const geometry = new THREE.CylinderGeometry(0.8, 0.8, 1.8, 16);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0x10b981,
-        roughness: 0.2,
-        metalness: 0.3
-      });
-      mesh = new THREE.Mesh(geometry, material);
-    } else {
-      // Box representing specialty packages
-      const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0xa3432d,
-        roughness: 0.4,
-        metalness: 0.1
-      });
-      mesh = new THREE.Mesh(geometry, material);
-    }
-
-    mesh.position.y = 0.2;
-    scene.add(mesh);
-
-    // Orbit Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-    // Animation Loop
-    let reqId;
-    const animate = () => {
-      reqId = requestAnimationFrame(animate);
-      mesh.rotation.y += 0.01;
-      mesh.rotation.x += 0.005;
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    // Resize Handler
-    const handleResize = () => {
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      cancelAnimationFrame(reqId);
-      window.removeEventListener('resize', handleResize);
-      renderer.dispose();
-    };
-  }, [showShowroom, showroomProduct]);
-
-  // Open Showroom
-  const openPinShowroom = () => {
-    setShowroomProduct(activePin);
-    setShowShowroom(true);
-  };
 
   const closeShowroom = () => {
     setShowShowroom(false);
+    setRotationAngle(0);
+    setZoomScale(1);
   };
 
   return (
@@ -787,12 +784,18 @@ export default function BanDoDacSan() {
           <>
             <img src={activePin.thumb} id="popup-img" className="popup-img" alt={activePin.title} />
             <div className="popup-content">
-              <span id="popup-location" className="location">{activePin.location}</span>
+              <span id="popup-location" className="location">{activePin.detailedLocation}</span>
               <h3 id="popup-title">{activePin.title}</h3>
               <p id="popup-desc">{activePin.desc}</p>
               <div className="popup-actions">
                 <button className="btn-buy" onClick={() => alert('Đã thêm vào giỏ hàng!')}>MUA NGAY</button>
-                <button className="btn-story" onClick={() => window.location.href = `/stories?search=${encodeURIComponent(activePin.title)}`}>CÂU CHUYỆN</button>
+                <button 
+                  className="btn-story" 
+                  disabled={loadingStory} 
+                  onClick={() => handleOpenStory(activePin)}
+                >
+                  {loadingStory ? 'ĐANG TẢI...' : 'CÂU CHUYỆN'}
+                </button>
               </div>
             </div>
           </>
@@ -810,8 +813,76 @@ export default function BanDoDacSan() {
             <button className="close-showroom" onClick={closeShowroom}>
               <X size={24} />
             </button>
-            <div id="three-canvas" ref={threeCanvasRef}></div>
+            
+            <div 
+              className="css-3d-scene" 
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchMove={handleMouseMove}
+              onTouchEnd={handleMouseUp}
+              onWheel={handleWheel}
+            >
+              <div 
+                className="css-3d-carousel"
+                style={{
+                  transform: `translateZ(-200px) rotateY(${rotationAngle}rad) scale(${zoomScale})`,
+                }}
+              >
+                {provinceSpecialties.map((pin, i) => {
+                  const angle = (i / provinceSpecialties.length) * Math.PI * 2;
+                  const radius = provinceSpecialties.length > 1 ? 280 : 0;
+                  return (
+                    <div 
+                      key={pin.id || i}
+                      className="css-3d-card"
+                      style={{
+                        transform: `rotateY(${angle}rad) translateZ(${radius}px)`,
+                      }}
+                    >
+                      <img src={pin.thumb} alt={pin.title} />
+                      <div className="card-info">
+                        <h3>{pin.title}</h3>
+                        <p>{pin.detailedLocation}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="showroom-instruction">Kéo để xoay • Cuộn để phóng to</div>
+          </div>
+        </div>
+      )}
+      {/* Story Detail Modal */}
+      {selectedStory && (
+        <div className="blog-modal-overlay" style={{ display: 'flex' }} onClick={() => setSelectedStory(null)}>
+          <div className="blog-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="blog-modal-header">
+              <img 
+                className="blog-modal-banner" 
+                src={selectedStory.hinhanh ? (selectedStory.hinhanh.startsWith('http') ? selectedStory.hinhanh : `https://lvtnbackend.onrender.com/storage/${selectedStory.hinhanh}`) : 'https://via.placeholder.com/800x450?text=Cau+Chuyen'} 
+                alt={selectedStory.tittel} 
+              />
+              <button className="blog-modal-close" onClick={() => setSelectedStory(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="blog-modal-body" style={{ color: '#1e293b' }}>
+              <div className="blog-modal-meta" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', fontSize: '0.85rem', color: '#64748b', marginBottom: '15px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <User size={16} /> Tác giả: {selectedStory.user?.HoTen || 'Ban quản trị'}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={16} /> Đăng ngày: {selectedStory.ngaydang || 'Gần đây'}
+                </span>
+              </div>
+              <h3 className="blog-modal-title" style={{ fontSize: '1.75rem', fontWeight: '800', margin: '0 0 15px 0', color: '#0f172a' }}>{selectedStory.tittel}</h3>
+              <div className="blog-modal-content" style={{ fontSize: '1rem', lineHeight: '1.7', color: '#334155' }} dangerouslySetInnerHTML={{ __html: selectedStory.noidung }} />
+            </div>
           </div>
         </div>
       )}

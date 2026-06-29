@@ -3,7 +3,7 @@ import axiosClient from '../../api/axiosClient';
 import { Search, Eye, Trash2, Check, X, Package, ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react';
 import '../../styles/navbar-admin.css';
 
-const BASE_URL = 'http://127.0.0.1:8000/storage/';
+const BASE_URL = 'https://lvtnbackend.onrender.com/storage/';
 
 const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);

@@ -42,7 +42,7 @@ function CauChuyenSanVat() {
         title: item.Tieude || item.TenTinhThanh,
         description: item.MoTa || '',
         image: item.HinhAnh 
-            ? (item.HinhAnh.startsWith('http') ? item.HinhAnh : `http://127.0.0.1:8000/storage/${item.HinhAnh}`)
+            ? (item.HinhAnh.startsWith('http') ? item.HinhAnh : `https://lvtnbackend.onrender.com/storage/${item.HinhAnh}`)
             : 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=1400&q=80',
         link: `/tinh-thanh/${item.ID_TinhThanh}/blogs`
     }));
@@ -187,7 +187,7 @@ function CauChuyenSanVat() {
                             <div className="blog-feat-img-wrapper">
                                 <img 
                                     className="blog-feat-img" 
-                                    src={randomBlogs[0].hinhanh ? `http://127.0.0.1:8000/storage/${randomBlogs[0].hinhanh}` : 'https://via.placeholder.com/800x450?text=San+Vat+Mien+Tay'} 
+                                    src={randomBlogs[0].hinhanh ? `https://lvtnbackend.onrender.com/storage/${randomBlogs[0].hinhanh}` : 'https://via.placeholder.com/800x450?text=San+Vat+Mien+Tay'} 
                                     alt={randomBlogs[0].tittel} 
                                 />
                             </div>
@@ -228,7 +228,7 @@ function CauChuyenSanVat() {
                                 >
                                     <img 
                                         className="blog-simple-img" 
-                                        src={blog.hinhanh ? `http://127.0.0.1:8000/storage/${blog.hinhanh}` : 'https://via.placeholder.com/150?text=San+Vat'} 
+                                        src={blog.hinhanh ? `https://lvtnbackend.onrender.com/storage/${blog.hinhanh}` : 'https://via.placeholder.com/150?text=San+Vat'} 
                                         alt={blog.tittel} 
                                     />
                                     <div className="blog-simple-content">
@@ -271,7 +271,7 @@ function CauChuyenSanVat() {
                             <div className="blog-feat-img-wrapper">
                                 <img 
                                     className="blog-feat-img" 
-                                    src={tinTucList[0].hinhanh ? `http://127.0.0.1:8000/storage/${tinTucList[0].hinhanh}` : 'https://via.placeholder.com/800x450?text=Tin+Tuc+Mien+Tay'} 
+                                    src={tinTucList[0].hinhanh ? `https://lvtnbackend.onrender.com/storage/${tinTucList[0].hinhanh}` : 'https://via.placeholder.com/800x450?text=Tin+Tuc+Mien+Tay'} 
                                     alt={tinTucList[0].tittel} 
                                 />
                             </div>
@@ -312,7 +312,7 @@ function CauChuyenSanVat() {
                                 >
                                     <img 
                                         className="blog-simple-img" 
-                                        src={news.hinhanh ? `http://127.0.0.1:8000/storage/${news.hinhanh}` : 'https://via.placeholder.com/150?text=Tin+Tuc'} 
+                                        src={news.hinhanh ? `https://lvtnbackend.onrender.com/storage/${news.hinhanh}` : 'https://via.placeholder.com/150?text=Tin+Tuc'} 
                                         alt={news.tittel} 
                                     />
                                     <div className="blog-simple-content">
@@ -367,7 +367,7 @@ function CauChuyenSanVat() {
                         <div className="blog-modal-header">
                             <img 
                                 className="blog-modal-banner" 
-                                src={selectedBlog.hinhanh ? `http://127.0.0.1:8000/storage/${selectedBlog.hinhanh}` : 'https://via.placeholder.com/800x450?text=San+Vat+Mien+Tay'} 
+                                src={selectedBlog.hinhanh ? `https://lvtnbackend.onrender.com/storage/${selectedBlog.hinhanh}` : 'https://via.placeholder.com/800x450?text=San+Vat+Mien+Tay'} 
                                 alt={selectedBlog.tittel} 
                             />
                             <button className="blog-modal-close" onClick={() => setSelectedBlog(null)}>

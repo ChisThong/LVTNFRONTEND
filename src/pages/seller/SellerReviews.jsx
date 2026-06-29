@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Search, Home, Bell, Star, MessageSquare, Check, X, Clock } from 'lucide-react';
+import { Search, Star, MessageSquare, Check, X, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useSellerReviews, useReplyReview } from '../../api/reviewApi';
 import { getMyShop } from '../../api/shopApi';
 import '../../styles/seller-products.css';
 
-const BACKEND_URL = "http://127.0.0.1:8000/storage/";
+const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
 
 const getReviewImage = (path) => {
   if (!path) return null;
@@ -29,8 +28,6 @@ export default function SellerReviews() {
   // Modal xem ảnh lớn
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
 
   // Lấy thông tin shop sử dụng useQuery
   const { data: shop } = useQuery({
@@ -41,15 +38,13 @@ export default function SellerReviews() {
         if (res.data?.success) {
           return res.data.data;
         }
-      } catch (err) {
+      } catch {
         toast.error('Lỗi khi tải thông tin cửa hàng.');
       }
       return null;
     }
   });
 
-  const avatarText = shop?.TenShop ? shop.TenShop.substring(0, 2).toUpperCase() : 'SH';
-  const displayName = shop?.TenShop || 'Gian hàng';
 
   // Lấy danh sách đánh giá sử dụng useQuery
   const { data: reviewsResponse, isLoading: loading } = useSellerReviews(shop?.ID_Shop, currentPage);
