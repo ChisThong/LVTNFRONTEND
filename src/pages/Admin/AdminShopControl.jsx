@@ -404,15 +404,8 @@ function AdminShopControl() {
                 MODAL: Từ chối
             ───────────────────────────────────────────────────────────────── */}
             {rejectModalOpen && createPortal(
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <div style={{
-                        background: '#fff', padding: '2rem', borderRadius: '16px',
-                        width: '100%', maxWidth: '450px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
-                    }}>
+                <div className="nam-modal-overlay" onClick={closeRejectModal}>
+                    <div className="nam-modal-content" style={{ maxWidth: '450px' }} onClick={e => e.stopPropagation()}>
                         <h3 style={{ marginTop: 0, marginBottom: '1.25rem', color: '#1C1917', fontSize: '1.25rem', fontWeight: 800 }}>Từ chối gian hàng</h3>
                         <form onSubmit={handleRejectSubmit}>
                             <div style={{ marginBottom: '1.5rem' }}>
@@ -468,16 +461,8 @@ function AdminShopControl() {
                 MODAL: Chi tiết gian hàng
             ───────────────────────────────────────────────────────────────── */}
             {viewModalOpen && viewShopData && createPortal(
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <div style={{
-                        background: '#fff', padding: '2rem', borderRadius: '16px',
-                        width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto',
-                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
-                    }}>
+                <div className="nam-modal-overlay" onClick={closeViewModal}>
+                    <div className="nam-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #EAE3DA', paddingBottom: '1rem' }}>
                             <h3 style={{ margin: 0, color: '#1C1917', fontSize: '1.4rem', fontWeight: 800 }}>Chi tiết gian hàng</h3>
                             <button onClick={closeViewModal} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#8C7B6D' }}>
@@ -580,24 +565,8 @@ function AdminShopControl() {
                 MODAL: Danh sách sản phẩm của shop
             ───────────────────────────────────────────────────────────────── */}
             {productsModalOpen && createPortal(
-                <div
-                    style={{
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.55)', zIndex: 9999,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: '1rem',
-                    }}
-                    onClick={closeProductsModal}
-                >
-                    <div
-                        style={{
-                            background: '#fff', borderRadius: '18px',
-                            width: '100%', maxWidth: '860px', maxHeight: '90vh',
-                            overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.18)',
-                            display: 'flex', flexDirection: 'column',
-                        }}
-                        onClick={e => e.stopPropagation()}
-                    >
+                <div className="nam-modal-overlay" onClick={closeProductsModal}>
+                    <div className="nam-modal-content" style={{ maxWidth: '860px', padding: 0 }} onClick={e => e.stopPropagation()}>
                         {/* Modal Header */}
                         <div style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
