@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import axiosClient from '../../api/axiosClient';
 import { Search, Eye, Trash2, Check, X, Package, ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react';
 import '../../styles/navbar-admin.css';
@@ -402,7 +403,7 @@ function AdminShopControl() {
             {/* ─────────────────────────────────────────────────────────────────
                 MODAL: Từ chối
             ───────────────────────────────────────────────────────────────── */}
-            {rejectModalOpen && (
+            {rejectModalOpen && createPortal(
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     background: 'rgba(0,0,0,0.5)', zIndex: 9999,
@@ -459,13 +460,14 @@ function AdminShopControl() {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* ─────────────────────────────────────────────────────────────────
                 MODAL: Chi tiết gian hàng
             ───────────────────────────────────────────────────────────────── */}
-            {viewModalOpen && viewShopData && (
+            {viewModalOpen && viewShopData && createPortal(
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     background: 'rgba(0,0,0,0.5)', zIndex: 9999,
@@ -570,13 +572,14 @@ function AdminShopControl() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* ─────────────────────────────────────────────────────────────────
                 MODAL: Danh sách sản phẩm của shop
             ───────────────────────────────────────────────────────────────── */}
-            {productsModalOpen && (
+            {productsModalOpen && createPortal(
                 <div
                     style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -751,7 +754,8 @@ function AdminShopControl() {
                             </div>
                         )}
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
