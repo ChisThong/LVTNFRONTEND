@@ -214,12 +214,50 @@ export default function PublicNavbar() {
             <span>sản vật</span>
           </NavLink>
           
+          {/* Mobile-only user options */}
+          {user ? (
+            <>
+              <div className="mobile-only-link" style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
+              <div className="mobile-only-link" style={{ color: '#D4A373', fontWeight: 'bold', padding: '4px 0', fontSize: '0.95rem' }}>
+                Chào, {user.HoTen || 'Thành viên'}
+                {wallet && (
+                  <div style={{ fontSize: '0.85rem', color: '#FFF', fontWeight: 'normal', marginTop: '2px' }}>
+                    Số dư: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.balance || 0)}
+                  </div>
+                )}
+              </div>
+              <Link to={(user?.shop || user?.role?.ID_role === 3) ? "/seller/wallet" : "/wallet"} className="mobile-only-link" onClick={() => setMobileMenuOpen(false)}>
+                💰 Ví của tôi
+              </Link>
+              <Link to="/wallet/deposit" className="mobile-only-link" onClick={() => setMobileMenuOpen(false)}>
+                ➕ Nạp tiền VNPay
+              </Link>
+              <Link to="/account" className="mobile-only-link" onClick={() => setMobileMenuOpen(false)}>
+                <IconUser /> Tài khoản
+              </Link>
+              <Link to="/orders" className="mobile-only-link" onClick={() => setMobileMenuOpen(false)}>
+                <IconBox /> Đơn mua
+              </Link>
+              <button 
+                onClick={() => { handleLogout(); setMobileMenuOpen(false); }} 
+                className="mobile-only-link" 
+                style={{ background: 'none', border: 'none', color: '#EF4444', fontWeight: 'bold', cursor: 'pointer', padding: '10px 0', width: '100%', textAlign: 'center' }}
+              >
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="mobile-only-link" onClick={() => setMobileMenuOpen(false)} style={{ color: '#D4A373', fontWeight: 'bold' }}>
+              Đăng nhập
+            </Link>
+          )}
+
           {/* Seller channel link visible only on Mobile within menu list */}
           <Link 
             to={user?.shop ? "/seller/dashboard" : "/seller/register"} 
             className="mobile-only-link" 
             onClick={() => setMobileMenuOpen(false)}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center', fontWeight: 'bold', color: '#D4A373' }}
           >
             <span>{user?.shop ? "Quản lý gian hàng" : "Kênh người bán"}</span>
           </Link>
@@ -249,9 +287,9 @@ export default function PublicNavbar() {
             <span className="cart-count">{cartCount}</span>
           </Link>
 
-          {/* User dropdown */}
+          {/* User dropdown (Desktop only) */}
           {user ? (
-            <div className="nav-dropdown" ref={dropdownRef}>
+            <div className="nav-dropdown desktop-only" ref={dropdownRef}>
               <button
                 className="dropdown-toggle"
                 onClick={() => setUserMenuOpen(prev => !prev)}
@@ -288,16 +326,16 @@ export default function PublicNavbar() {
               </div>
             </div>
           ) : (
-            <Link to="/login" className="login-btn">Đăng nhập</Link>
+            <Link to="/login" className="login-btn desktop-only">Đăng nhập</Link>
           )}
 
-          {/* Seller button */}
+          {/* Seller button (Desktop only) */}
           {user?.shop ? (
-            <Link to="/seller/dashboard" className="seller-btn">
+            <Link to="/seller/dashboard" className="seller-btn desktop-only">
               <span>Quản lý</span><span>gian hàng</span>
             </Link>
           ) : (
-            <Link to="/seller/register" className="seller-btn">
+            <Link to="/seller/register" className="seller-btn desktop-only">
               <span>Kênh</span><span>người bán</span>
             </Link>
           )}
