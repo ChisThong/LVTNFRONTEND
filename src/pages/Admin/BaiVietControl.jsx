@@ -672,7 +672,8 @@ export default function BaiVietController() {
                             <button type="button" className="btn-action btn-primary" onClick={() => setisopenchitiet(false)}>Đóng chi tiết</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     )
