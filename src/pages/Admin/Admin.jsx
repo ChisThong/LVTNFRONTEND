@@ -89,6 +89,26 @@ function Admin() {
                 const dbActivities = res.data.data.activities;
                 setActivities(dbActivities);
                 localStorage.setItem('admin_activities', JSON.stringify(dbActivities));
+
+                // Tính toán số thông báo chưa đọc thực tế từ DB
+                const lastSeenId = localStorage.getItem('admin_last_seen_activity_id');
+                if (lastSeenId && dbActivities.length > 0) {
+                    const lastSeenIndex = dbActivities.findIndex(act => act.id === lastSeenId);
+                    if (lastSeenIndex !== -1) {
+                        const newUnread = lastSeenIndex;
+                        setUnreadCount(newUnread);
+                        localStorage.setItem('admin_unread_count', newUnread.toString());
+                    } else {
+                        // Nếu ID đã xem quá cũ không còn trong danh sách 30 tin nhắn gần nhất
+                        setUnreadCount(0);
+                        localStorage.setItem('admin_unread_count', '0');
+                    }
+                } else if (!lastSeenId && dbActivities.length > 0) {
+                    // Lần đầu vào trang, coi như đã xem tin nhắn mới nhất hiện tại
+                    localStorage.setItem('admin_last_seen_activity_id', dbActivities[0].id);
+                    setUnreadCount(0);
+                    localStorage.setItem('admin_unread_count', '0');
+                }
             }
         } catch (err) {
             console.error("Error fetching activities:", err);
@@ -239,6 +259,9 @@ function Admin() {
     const handleClearUnread = () => {
         setUnreadCount(0);
         localStorage.setItem('admin_unread_count', '0');
+        if (activities.length > 0) {
+            localStorage.setItem('admin_last_seen_activity_id', activities[0].id);
+        }
     };
 
     // Map location pathname to readable title
