@@ -198,9 +198,9 @@ export default function ShopDetail() {
 
                   {/* Big CTA Buttons */}
                   <div className="headline-actions">
-                    <button className="btn-chat-premium" onClick={() => alert(`Đang mở cổng chat với ${shop.TenShop}...`)}>
-                      <MessageCircle /> Chat tư vấn
-                    </button>
+                     <button className="btn-chat-premium" onClick={() => window.openChatWithShop && window.openChatWithShop(shop.ID_Shop, shop.TenShop)}>
+                       <MessageCircle /> Chat tư vấn
+                     </button>
                     <button
                       className={`btn-follow-premium ${followed ? 'followed' : ''}`}
                       onClick={() => setFollowed(!followed)}

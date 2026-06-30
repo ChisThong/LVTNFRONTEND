@@ -31,6 +31,7 @@ import SellerProductEdit from './pages/seller/SellerProductEdit';
 import SellerOrders from './pages/seller/SellerOrders';
 import SellerReviews from './pages/seller/SellerReviews';
 import SellerBaoCaoThongKe from './pages/seller/SellerBaoCaoThongKe';
+import SellerChat from './pages/seller/SellerChat';
 
 // ── Wallet Pages ────────────────────────────────────────────
 import UserWallet from './pages/wallet/UserWallet';
@@ -132,6 +133,7 @@ function App() {
               <Route path="orders" element={<SellerOrders />} />
               <Route path="revenue" element={<SellerBaoCaoThongKe />} />
               <Route path="reviews" element={<SellerReviews />} />
+              <Route path="chat" element={<SellerChat />} />
               <Route path="wallet" element={<SellerWallet />} />
               <Route path="wallet/transactions" element={<WalletTransactions backPath="/seller/wallet" />} />
             </Route>

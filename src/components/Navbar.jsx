@@ -2,14 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import logoImg from '../assets/logo.webp';
-
-/* SVG Icons */
-const IconSearch = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-);
+import{MessageCircleMore} from 'lucide-react';
 
 const IconCart = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -84,6 +77,34 @@ export default function Navbar() {
     window.addEventListener('auth-change', fetchUser);
     return () => window.removeEventListener('auth-change', fetchUser);
   }, []);
+
+  // ── Sync Unread Chat Count ──────────────────────────────────
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+  const fetchUnreadCount = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setUnreadChatCount(0);
+      return;
+    }
+    axiosClient.get('/chat/so-tin-chua-doc')
+      .then(res => {
+        if (res.data?.success) {
+          setUnreadChatCount(res.data.tong_chua_doc || 0);
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    window.addEventListener('chat-unread-change', fetchUnreadCount);
+    window.addEventListener('auth-change', fetchUnreadCount);
+    return () => {
+      window.removeEventListener('chat-unread-change', fetchUnreadCount);
+      window.removeEventListener('auth-change', fetchUnreadCount);
+    };
+  }, [user]);
 
   // ── Close dropdown khi click bên ngoài ────────────────────────────────────
   useEffect(() => {
@@ -163,14 +184,24 @@ export default function Navbar() {
 
         {/* Nav actions */}
         <div className="nav-actions">
-          <button className="search-btn" aria-label="Tìm kiếm">
-            <IconSearch />
+          <button 
+            className="search-btn" 
+            aria-label="Tin nhắn"
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => window.openChatWidget && window.openChatWidget()}
+          >
+            <MessageCircleMore />
+            {unreadChatCount > 0 && (
+              <span className="cart-count" style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#EF4444' }}>
+                {unreadChatCount}
+              </span>
+            )}
           </button>
 
           <Link
             to="/cart"
             className="cart-btn"
-            style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+            style={{ textDecoration: 'none', color: 'white', display: 'flex', alignItems: 'center' }}
             aria-label="Giỏ hàng"
           >
             <IconCart />

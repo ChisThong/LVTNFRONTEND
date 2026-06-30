@@ -8,8 +8,6 @@ import bannerBg from '../assets/bannermap.webp';
 import '../styles/map.css';
 import '../styles/baiviet.css';
 
-import ranhGioiData from '../../RanhGioi.json';
-
 // Coordinated lookups for Southern Vietnam provinces
 const PROVINCE_COORDINATES = {
   "TP. Hồ Chí Minh": { lat: 10.776, lng: 106.701 },
@@ -120,6 +118,16 @@ export default function BanDoDacSan() {
   const [isSatellite, setIsSatellite] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   
+  const [ranhGioiData, setRanhGioiData] = useState(null);
+
+  // Load RanhGioi.json asynchronously from public folder
+  useEffect(() => {
+    fetch('/RanhGioi.json')
+      .then(res => res.json())
+      .then(data => setRanhGioiData(data))
+      .catch(err => console.error("Error loading boundary data:", err));
+  }, []);
+
   // Thông báo Toast
   const [toast, setToast] = useState({ active: false, title: '', desc: '' });
   
@@ -395,6 +403,7 @@ export default function BanDoDacSan() {
     const updateBoundaries = () => {
       const source = map.getSource('province-boundaries');
       if (!source) return;
+      if (!ranhGioiData) return;
 
       let features = [];
 
@@ -443,7 +452,7 @@ export default function BanDoDacSan() {
     } else {
       map.once('load', updateBoundaries);
     }
-  }, [selectedProvince]);
+  }, [selectedProvince, ranhGioiData]);
 
   // Update Satellite Layer
   useEffect(() => {

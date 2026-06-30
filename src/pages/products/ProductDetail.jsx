@@ -399,7 +399,7 @@ export default function ProductDetail() {
           </div>
         </div>
         <div className="shop-actions">
-          <button className="btn-chat" onClick={() => alert(`Đang kết nối chat với ${shopName}!`)}>
+          <button className="btn-chat" onClick={() => window.openChatWithShop && window.openChatWithShop(product.shop?.ID_Shop, shopName)}>
             <MessageCircle size={18} /> Chat ngay
           </button>
           <button className="btn-shop-outline" onClick={() => navigate(`/shops/${product.shop?.ID_Shop}`)}>

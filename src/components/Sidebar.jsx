@@ -1,12 +1,12 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import logoImg from '../assets/logo.webp';
 import '../styles/navbar-admin.css';
 import {
     LayoutDashboard, Store, ShoppingBag, Package, Map, FileText, BarChart3,
     ChevronUp, LogOut, Settings, Home, User, Menu,
-    ShoppingCart, Archive, Star, ChevronDown, Wallet
+    ShoppingCart, Star, ChevronDown, Wallet, MessageCircle
 } from 'lucide-react';
 
 function Sidebar({ role, mobileOpen, setMobileOpen }) {
@@ -78,6 +78,34 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
             navigate('/login');
         }
     };
+
+    // ── Sync Unread Chat Count ──────────────────────────────────
+    const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+    const fetchUnreadCount = () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setUnreadChatCount(0);
+            return;
+        }
+        axiosClient.get('/chat/so-tin-chua-doc')
+            .then(res => {
+                if (res.data?.success) {
+                    setUnreadChatCount(res.data.tong_chua_doc || 0);
+                }
+            })
+            .catch(() => {});
+    };
+
+    useEffect(() => {
+        fetchUnreadCount();
+        window.addEventListener('chat-unread-change', fetchUnreadCount);
+        window.addEventListener('auth-change', fetchUnreadCount);
+        return () => {
+            window.removeEventListener('chat-unread-change', fetchUnreadCount);
+            window.removeEventListener('auth-change', fetchUnreadCount);
+        };
+    }, [role]);
 
     return (
         <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
@@ -159,6 +187,32 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
                     <>
                         <NavLink to="/seller/dashboard" end className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Tổng quan" onClick={handleMenuClick}>
                             <Store size={20} /> <span>Tổng quan</span>
+                        </NavLink>
+                        <NavLink to="/seller/chat" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Tin nhắn" onClick={handleMenuClick} style={{ position: 'relative' }}>
+                            <MessageCircle size={20} /> <span>Tin nhắn</span>
+                            {unreadChatCount > 0 && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: collapsed ? '4px' : '50%',
+                                    right: collapsed ? '4px' : '15px',
+                                    transform: collapsed ? 'none' : 'translateY(-50%)',
+                                    background: '#EF4444',
+                                    color: '#ffffff',
+                                    borderRadius: '10px',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 800,
+                                    padding: '2px 5px',
+                                    minWidth: '16px',
+                                    height: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                                    zIndex: 10
+                                }}>
+                                    {unreadChatCount}
+                                </div>
+                            )}
                         </NavLink>
                         <NavLink to="/seller/wallet" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} data-tooltip="Ví điện tử của Shop" onClick={handleMenuClick}>
                             <Wallet size={20} /> <span>Ví điện tử</span>

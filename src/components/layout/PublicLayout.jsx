@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import PublicNavbar from './PublicNavbar';
 import PublicFooter from './PublicFooter';
+import ChatFloatingWidget from '../chat/ChatFloatingWidget';
 import axiosClient from '../../api/axiosClient';
 
 /* ═══════════════════════════════════════════════════════════
@@ -37,6 +38,7 @@ export default function PublicLayout() {
         <Outlet context={{ categories, provinces, loadingPublicData }} />
       </div>
       <PublicFooter />
+      <ChatFloatingWidget />
     </div>
   );
 }
