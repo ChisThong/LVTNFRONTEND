@@ -3,6 +3,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
 import { useWallet } from '../../context/WalletContext';
 import logoImg from '../../assets/logo.webp';
+import { MessageCircleMore } from 'lucide-react';
 import '../../styles/home.css';
 
 /* ── SVG Icons ──────────────────────────────────────────────── */
@@ -89,6 +90,34 @@ export default function PublicNavbar() {
     window.addEventListener('cart-change', updateCartCount);
     return () => window.removeEventListener('cart-change', updateCartCount);
   }, []);
+
+  // ── Sync Unread Chat Count ──────────────────────────────────
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+  const fetchUnreadCount = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setUnreadChatCount(0);
+      return;
+    }
+    axiosClient.get('/chat/so-tin-chua-doc')
+      .then(res => {
+        if (res.data?.success) {
+          setUnreadChatCount(res.data.tong_chua_doc || 0);
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    window.addEventListener('chat-unread-change', fetchUnreadCount);
+    window.addEventListener('auth-change', fetchUnreadCount);
+    return () => {
+      window.removeEventListener('chat-unread-change', fetchUnreadCount);
+      window.removeEventListener('auth-change', fetchUnreadCount);
+    };
+  }, [user]);
 
   // ── Fetch current user + seed wallet từ /me (1 request duy nhất) ──────
   useEffect(() => {
@@ -184,16 +213,36 @@ export default function PublicNavbar() {
             <span>Câu chuyện</span>
             <span>sản vật</span>
           </NavLink>
+          
+          {/* Seller channel link visible only on Mobile within menu list */}
+          <Link 
+            to={user?.shop ? "/seller/dashboard" : "/seller/register"} 
+            className="mobile-only-link" 
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, textAlign: 'center' }}
+          >
+            <span>{user?.shop ? "Quản lý gian hàng" : "Kênh người bán"}</span>
+          </Link>
         </div>
 
         {/* Actions */}
         <div className="nav-actions">
-          <button className="search-btn" aria-label="Tìm kiếm">
-            <IconSearch />
+          <button 
+            className="search-btn" 
+            aria-label="Tin nhắn"
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => window.openChatWidget && window.openChatWidget()}
+          >
+            <MessageCircleMore size={20} />
+            {unreadChatCount > 0 && (
+              <span className="cart-count" style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#EF4444' }}>
+                {unreadChatCount}
+              </span>
+            )}
           </button>
 
           <Link to="/cart" className="cart-btn"
-            style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+            style={{ textDecoration: 'none', color: 'white', display: 'flex', alignItems: 'center' }}
             aria-label="Giỏ hàng"
           >
             <IconCart />

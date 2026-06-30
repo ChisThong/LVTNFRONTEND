@@ -1040,3 +1040,14 @@ body {
 .region-info-premium {
   z-index: 2;
 }
+
+/* Mobile-only Link Helper */
+.mobile-only-link {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only-link {
+    display: block !important;
+  }
+}
