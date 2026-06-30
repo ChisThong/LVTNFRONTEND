@@ -904,7 +904,7 @@ body {
 }
 
 /* Public Header and Page Mobile Responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .mobile-toggle-btn {
         display: flex !important;
         align-items: center;
@@ -1046,7 +1046,7 @@ body {
   display: none !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .mobile-only-link {
     display: block !important;
   }
