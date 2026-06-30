@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import { 
@@ -767,24 +768,23 @@ function DonHangControl() {
                                                                 {sanPham.DonViTinh && <small style={{ display: 'block', color: 'var(--text-muted)', fontWeight: 'normal' }}>ĐVT: {sanPham.DonViTinh}</small>}
                                                             </td>
                                                             <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--text-main)' }}>
-                                                                {formatPrice(price)}
-                                                            </td>
-                                                            <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-main)', fontWeight: 600 }}>
-                                                                {quantity}
-                                                            </td>
-                                                            <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-main)' }}>
-                                                                {formatPrice(total)}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                                        Không có sản phẩm nào trong chi tiết đơn hàng này.
+                                            {orderDetail.chi_tiet?.map((item) => (
+                                                <tr key={item.ID_ChiTietDonHang} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                                    <td style={{ padding: '12px 24px' }}>
+                                                        <img 
+                                                            src={item.san_pham?.HinhAnh ? `${IMG_URL}${item.san_pham.HinhAnh}` : '/placeholder-product.png'} 
+                                                            alt={item.san_pham?.TenSanPham} 
+                                                            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }}
+                                                        />
+                                                    </td>
+                                                    <td style={{ padding: '12px 24px', fontWeight: 600 }}>{item.san_pham?.TenSanPham || 'Sản phẩm đã bị xóa'}</td>
+                                                    <td style={{ padding: '12px 24px', textAlign: 'right' }}>{formatPrice(Number(item.DonGia) || 0)}</td>
+                                                    <td style={{ padding: '12px 24px', textAlign: 'center', fontWeight: 700 }}>{item.SoLuong}</td>
+                                                    <td style={{ padding: '12px 24px', textAlign: 'right', fontWeight: 700, color: 'var(--text-main)' }}>
+                                                        {formatPrice((Number(item.DonGia) || 0) * (item.SoLuong || 0))}
                                                     </td>
                                                 </tr>
-                                            )}
+                                            ))}
                                         </tbody>
                                     </table>
 
@@ -836,7 +836,8 @@ function DonHangControl() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

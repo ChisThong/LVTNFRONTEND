@@ -1,5 +1,6 @@
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
+import { createPortal } from "react-dom"
 import { Search, Eye, Edit, Trash2, Plus, Save, X, Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createBaiViet, deleteBaiViet, getBaiViet, updateBaiViet } from "../../api/blogAPI";
 import { getTinhThanh } from "../../api/productPublicApi";
@@ -339,7 +340,7 @@ export default function BaiVietController() {
             </div>
 
             {/* Modal Thêm bài viết */}
-            {isopenThem && (
+            {isopenThem && createPortal(
                 <div className="nam-modal-overlay">
                     <div className="nam-modal-content order-modal-content">
                         <div className="nam-modal-header">
@@ -470,11 +471,12 @@ export default function BaiVietController() {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal Sửa bài viết */}
-            {isopenSua && (
+            {isopenSua && createPortal(
                 <div className="nam-modal-overlay">
                     <div className="nam-modal-content order-modal-content">
                         <div className="nam-modal-header">
@@ -604,11 +606,12 @@ export default function BaiVietController() {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal Xem chi tiết bài viết */}
-            {isopenchitiet && datachitiet && (
+            {isopenchitiet && datachitiet && createPortal(
                 <div className="nam-modal-overlay">
                     <div className="nam-modal-content order-modal-content">
                         <div className="nam-modal-header">
