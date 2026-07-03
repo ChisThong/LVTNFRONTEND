@@ -234,6 +234,9 @@ export default function Login() {
         localStorage.setItem('token', access_token);
         localStorage.setItem('user', JSON.stringify(user));
 
+        // Phát sự kiện để đồng bộ hóa ngay lập tức Header / PublicNavbar mà không cần F5
+        window.dispatchEvent(new Event('auth-change'));
+
         // Delay nhỏ để toast kịp render trước khi route thay đổi
         setTimeout(() => navigateByRole(user, navigate), 700);
 
