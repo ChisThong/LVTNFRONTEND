@@ -294,15 +294,34 @@ export default function PublicNavbar() {
                 className="dropdown-toggle"
                 onClick={() => setUserMenuOpen(prev => !prev)}
                 aria-expanded={userMenuOpen}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                {wallet && (
-                  <span
-                    style={{ color: 'var(--shopee-orange)', fontWeight: 'bold', marginRight: '8px', cursor: 'pointer' }}
-                    title={`Số dư khả dụng: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.balance || 0)}\nĐóng băng: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.frozen_balance || 0)}`}
-                  >
-                    💰 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.balance || 0)}
+                {walletLoading ? (
+                  <span className="navbar-wallet-spinner" title="Đang tải số dư...">
+                    <span className="auth-spinner auth-spinner--sm" style={{ borderTopColor: 'var(--shopee-orange)' }}></span>
                   </span>
+                ) : (
+                  wallet && (
+                    <span
+                      style={{ color: 'var(--shopee-orange)', fontWeight: 'bold', cursor: 'pointer' }}
+                      title={`Số dư khả dụng: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.balance || 0)}\nĐóng băng: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.frozen_balance || 0)}`}
+                    >
+                      💰 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wallet?.balance || 0)}
+                    </span>
+                  )
                 )}
+                
+                {/* ── Avatar Circle Layout ── */}
+                <div className="navbar-avatar-container">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="Avatar" className="navbar-avatar-img" />
+                  ) : (
+                    <div className="navbar-avatar-fallback">
+                      {user?.HoTen ? user.HoTen.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
+                </div>
+
                 <span>Chào, {user?.HoTen?.split(' ').pop() || 'Tài khoản'}</span>
                 <IconChevronDown />
               </button>

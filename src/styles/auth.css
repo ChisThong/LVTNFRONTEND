@@ -423,37 +423,55 @@
 }
 
 /* ── Social buttons ── */
-.auth-social-row {
+.auth-social-single {
   display: flex;
-  gap: 0.75rem;
+  justify-content: center;
   margin-bottom: 1.75rem;
+  width: 100%;
 }
 
-.auth-social-btn {
-  flex: 1;
+/* ============================================================
+   GOOGLE BUTTON FULL WIDTH – Căn giữa, sang trọng, nổi bật
+   ============================================================ */
+.auth-google-btn-full {
+  width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.72rem 0.75rem;
-  border: 1.5px solid var(--auth-border);
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  border: 1.5px solid #dadce0;
   border-radius: 14px;
   background: var(--auth-white);
-  font-size: 0.83rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
   color: var(--auth-text);
   cursor: pointer;
   transition: var(--auth-transition);
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
 }
-.auth-social-btn:hover {
-  border-color: var(--auth-gold);
-  background: #FDF8F2;
+.auth-google-btn-full:hover:not(:disabled) {
+  border-color: #4285F4;
+  background: #f8f9ff;
+  box-shadow: 0 4px 16px rgba(66, 133, 244, 0.15);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212,163,115,0.15);
-  text-decoration: none;
 }
-.auth-social-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.auth-google-btn-full:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+.auth-google-btn-full:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+.auth-google-btn-full svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 
 /* ── Switch / Admin links ── */
 .auth-switch-row {
@@ -522,6 +540,117 @@
   .auth-field { margin-bottom: 0.9rem; }
   .auth-input-wrap input { padding: 0.8rem 1rem 0.8rem 2.7rem; }
   .auth-submit-btn { padding: 0.9rem; border-radius: 12px; }
-  .auth-social-btn { border-radius: 12px; }
-  .auth-social-row { gap: 0.6rem; }
+  .auth-google-btn-full { padding: 0.8rem; border-radius: 12px; font-size: 0.85rem; }
+}
+
+
+/* ============================================================
+   LOADING SPINNER – dùng trong submit button & google button
+   ============================================================ */
+.auth-btn-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.auth-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: auth-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+.auth-spinner--sm {
+  width: 13px;
+  height: 13px;
+  border-color: rgba(74, 103, 65, 0.3);
+  border-top-color: var(--auth-green);
+}
+
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   BANNED TOAST – Thông báo tài khoản bị khóa (custom toast)
+   Màu đỏ đậm, có icon 🔒, animation slide-in từ trên xuống
+   ============================================================ */
+.auth-banned-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: #1a0000;
+  border: 1.5px solid #c62828;
+  border-left: 5px solid #e53935;
+  border-radius: 16px;
+  padding: 1rem 1.1rem 1rem 1rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow:
+    0 8px 32px rgba(198, 40, 40, 0.35),
+    0 2px 8px rgba(0,0,0,0.4);
+  color: #ffcdd2;
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-banned-toast--in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.auth-banned-toast--out {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.96);
+}
+
+.auth-banned-toast__icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  filter: drop-shadow(0 0 6px rgba(229, 57, 53, 0.7));
+}
+
+.auth-banned-toast__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.auth-banned-toast__body strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #ef9a9a;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.01em;
+}
+
+.auth-banned-toast__body p {
+  font-size: 0.82rem;
+  color: #ffcdd2;
+  line-height: 1.55;
+  margin: 0;
+  word-break: break-word;
+}
+
+.auth-banned-toast__close {
+  background: transparent;
+  border: none;
+  color: #ef9a9a;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.1rem 0.2rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color 0.2s, background 0.2s;
+  line-height: 1;
+  margin-top: 0.05rem;
+}
+.auth-banned-toast__close:hover {
+  color: #fff;
+  background: rgba(229, 57, 53, 0.25);
 }

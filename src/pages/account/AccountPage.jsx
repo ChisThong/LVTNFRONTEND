@@ -87,12 +87,30 @@ export default function AccountPage() {
 
   if (!user) {
     return (
-      <div className="loading-screen account-loading-screen">
-        <div className="spinner" />
-        <p className="account-loading-text">Đang tải thông tin tài khoản...</p>
+      <div className="account-page">
+        <div className="account-container account-container--skeleton">
+          <div className="account-sidebar account-sidebar--skeleton">
+            <div className="skeleton-avatar" />
+            <div className="skeleton-line" style={{ width: '60%', margin: '1rem auto' }} />
+            <div className="skeleton-line" style={{ width: '80%', margin: '0 auto 1.5rem' }} />
+            <div className="skeleton-line" style={{ height: '40px', marginBottom: '0.5rem' }} />
+            <div className="skeleton-line" style={{ height: '40px' }} />
+          </div>
+          <div className="account-content account-content--skeleton">
+            <div className="skeleton-line" style={{ width: '40%', height: '32px', marginBottom: '1rem' }} />
+            <div className="skeleton-line" style={{ width: '60%', height: '18px', marginBottom: '2.5rem' }} />
+            <div className="skeleton-line" style={{ height: '50px', marginBottom: '1.2rem' }} />
+            <div className="skeleton-line" style={{ height: '50px', marginBottom: '1.2rem' }} />
+            <div className="skeleton-line" style={{ height: '50px', marginBottom: '1.2rem' }} />
+            <div className="skeleton-line" style={{ width: '150px', height: '45px' }} />
+          </div>
+        </div>
       </div>
     );
   }
+
+  // Google/Social Login check
+  const isSocialUser = user.is_social_login || user.has_google;
 
   return (
     <div className="account-page">
@@ -101,21 +119,37 @@ export default function AccountPage() {
         {/* Sidebar */}
         <div className="account-sidebar">
           <div className="account-sidebar-header">
+            {/* ── Avatar Circle Layout ── */}
+            <div className="account-avatar-wrapper">
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.HoTen} className="account-avatar-img" />
+              ) : (
+                <div className="account-avatar-fallback">
+                  {user.HoTen ? user.HoTen.charAt(0).toUpperCase() : 'U'}
+                </div>
+              )}
+            </div>
             <h3 className="account-sidebar-name">{user.HoTen}</h3>
             <span className="account-sidebar-email">{user.email}</span>
+            {isSocialUser && <span className="account-badge-google">Google Linked</span>}
           </div>
+          
           <button 
             className={`account-tab-item ${activeTab === 'profile' ? 'active' : ''}`} 
             onClick={() => setActiveTab('profile')}
           >
-            Hồ sơ của tôi
+            👤 Hồ sơ của tôi
           </button>
-          <button 
-            className={`account-tab-item ${activeTab === 'password' ? 'active' : ''}`} 
-            onClick={() => setActiveTab('password')}
-          >
-            Đổi mật khẩu
-          </button>
+
+          {/* Ẩn hoàn toàn nút "Đổi mật khẩu" nếu là Google user */}
+          {!isSocialUser && (
+            <button 
+              className={`account-tab-item ${activeTab === 'password' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('password')}
+            >
+              🔑 Đổi mật khẩu
+            </button>
+          )}
         </div>
 
         {/* Content */}
@@ -134,7 +168,16 @@ export default function AccountPage() {
               <form onSubmit={handleUpdateProfile} className="account-form">
                 <div className="account-form-group">
                   <label className="account-form-label">Tên đăng nhập / Email</label>
-                  <input type="text" value={user.email} disabled className="account-form-input" />
+                  <div className="account-input-disabled-wrap">
+                    <input 
+                      type="text" 
+                      value={user.email} 
+                      readOnly 
+                      className="account-form-input account-form-input--disabled" 
+                      title="Email là duy nhất và không thể thay đổi."
+                    />
+                    {isSocialUser && <span className="google-lock-icon" title="Đã xác thực qua Google">🔒</span>}
+                  </div>
                 </div>
                 <div className="account-form-group">
                   <label className="account-form-label">Họ Tên</label>
@@ -155,7 +198,7 @@ export default function AccountPage() {
             </div>
           )}
 
-          {activeTab === 'password' && (
+          {activeTab === 'password' && !isSocialUser && (
             <div>
               <h2 className="account-section-title">Đổi Mật Khẩu</h2>
               <p className="account-section-subtitle">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác</p>
