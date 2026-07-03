@@ -5,7 +5,7 @@ import { formatPrice } from '../../api/productPublicApi';
 import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
 
-const BACKEND_URL = "http://localhost:8000/storage/";
+const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150";
 
 const getProductImage = (item) => {

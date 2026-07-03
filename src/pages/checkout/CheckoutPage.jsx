@@ -6,7 +6,7 @@ import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
 import { useWallet } from '../../context/WalletContext';
 
-const BACKEND_URL = "http://localhost:8000/storage/";
+const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();

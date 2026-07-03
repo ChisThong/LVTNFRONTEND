@@ -118,10 +118,39 @@ function SellerLayout() {
   };
 
   // Pusher setup when shop is loaded
+  // Fetch activities from DB to initialize
+  const fetchActivities = async () => {
+    if (!shop?.ID_Shop) return;
+    try {
+      const res = await axiosClient.get('/seller/activities');
+      if (res.data?.success) {
+        const dbActivities = res.data.data ?? [];
+        setActivities(dbActivities);
+        localStorage.setItem(`seller_activities_${shop.ID_Shop}`, JSON.stringify(dbActivities));
+
+        // Calculate unread count based on last seen activity ID
+        const lastSeenId = localStorage.getItem(`seller_last_seen_activity_id_${shop.ID_Shop}`);
+        if (lastSeenId && dbActivities.length > 0) {
+          const lastSeenIndex = dbActivities.findIndex(act => act.id === lastSeenId);
+          if (lastSeenIndex === -1) {
+            setUnreadCount(dbActivities.length);
+          } else {
+            setUnreadCount(lastSeenIndex);
+          }
+        } else if (!lastSeenId && dbActivities.length > 0) {
+          setUnreadCount(dbActivities.length);
+          localStorage.setItem(`seller_last_seen_activity_id_${shop.ID_Shop}`, dbActivities[0].id);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching activities:", err);
+    }
+  };
+
   useEffect(() => {
     if (!shop?.ID_Shop) return;
 
-    // Load initial values from localStorage for this shop
+    // Load initial values from localStorage for fallback
     const savedActivities = localStorage.getItem(`seller_activities_${shop.ID_Shop}`);
     if (savedActivities) {
       setActivities(JSON.parse(savedActivities));
@@ -129,12 +158,8 @@ function SellerLayout() {
       setActivities([]);
     }
 
-    const savedUnread = localStorage.getItem(`seller_unread_count_${shop.ID_Shop}`);
-    if (savedUnread) {
-      setUnreadCount(parseInt(savedUnread, 10));
-    } else {
-      setUnreadCount(0);
-    }
+    // Fetch fresh activities from DB
+    fetchActivities();
 
     console.log("Connecting Pusher to Seller channel for shop:", shop.ID_Shop);
     const pusher = new Pusher('74b5dea7d94f427dbf7b', {
@@ -153,7 +178,7 @@ function SellerLayout() {
       const timeISO = activityData.thoigian || new Date().toISOString();
 
       const newAct = {
-        id: Math.random().toString(),
+        id: activityData.id || ('pusher_' + Math.random().toString()),
         tieude: activityData.tieude,
         thoigian: timeISO,
         trangthai: activityData.trangthai || 'Mới',
@@ -169,11 +194,7 @@ function SellerLayout() {
       });
 
       // 2. Increment unread count
-      setUnreadCount(prev => {
-        const nextCount = prev + 1;
-        localStorage.setItem(`seller_unread_count_${shop.ID_Shop}`, nextCount.toString());
-        return nextCount;
-      });
+      setUnreadCount(prev => prev + 1);
 
       // 3. Trigger Toast notification matching Messenger-like styling
       toast.custom((t) => (
@@ -270,7 +291,9 @@ function SellerLayout() {
   const handleClearUnread = () => {
     if (shop?.ID_Shop) {
       setUnreadCount(0);
-      localStorage.setItem(`seller_unread_count_${shop.ID_Shop}`, '0');
+      if (activities.length > 0) {
+        localStorage.setItem(`seller_last_seen_activity_id_${shop.ID_Shop}`, activities[0].id);
+      }
     }
   };
 

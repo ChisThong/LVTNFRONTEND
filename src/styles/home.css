@@ -904,7 +904,7 @@ body {
 }
 
 /* Public Header and Page Mobile Responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .mobile-toggle-btn {
         display: flex !important;
         align-items: center;
@@ -1039,4 +1039,18 @@ body {
 
 .region-info-premium {
   z-index: 2;
+}
+
+/* Mobile-only Link Helper */
+.mobile-only-link {
+  display: none !important;
+}
+
+@media (max-width: 1200px) {
+  .mobile-only-link {
+    display: block !important;
+  }
+  .desktop-only {
+    display: none !important;
+  }
 }

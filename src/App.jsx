@@ -16,6 +16,7 @@ import CartPage from './pages/cart/CartPage';
 import ProductList from './pages/products/ProductList';
 import ProductDetail from './pages/products/ProductDetail';
 import ShopDetail from './pages/shops/ShopDetail';
+import About from './pages/About';
 import AccountPage from './pages/account/AccountPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -30,6 +31,7 @@ import SellerProductEdit from './pages/seller/SellerProductEdit';
 import SellerOrders from './pages/seller/SellerOrders';
 import SellerReviews from './pages/seller/SellerReviews';
 import SellerBaoCaoThongKe from './pages/seller/SellerBaoCaoThongKe';
+import SellerChat from './pages/seller/SellerChat';
 
 // ── Wallet Pages ────────────────────────────────────────────
 import UserWallet from './pages/wallet/UserWallet';
@@ -37,7 +39,7 @@ import SellerWallet from './pages/wallet/SellerWallet';
 import DepositPage from './pages/wallet/DepositPage';
 import WalletTransactions from './pages/wallet/WalletTransactions'
 import VNPayReturnPage from './pages/checkout/VNPayReturnPage';
-import AdminWalletDashboard from './pages/admin/AdminWalletDashboard';
+import AdminWalletDashboard from './pages/Admin/AdminWalletDashboard';
 import CheckoutPage from './pages/checkout/CheckoutPage';
 import OrderHistory from './pages/orders/OrderHistory';
 
@@ -71,7 +73,7 @@ function App() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/cart" element={<CartPage />} />
-            <Route path="/about" element={<div style={{ padding: '10rem 5%', minHeight: '80vh' }}><h1>Giới thiệu (Đang phát triển)</h1></div>} />
+            <Route path="/about" element={<About />} />
             <Route path="/products" element={<ProductList />} />
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/shops/:id" element={<ShopDetail />} />
@@ -131,6 +133,7 @@ function App() {
               <Route path="orders" element={<SellerOrders />} />
               <Route path="revenue" element={<SellerBaoCaoThongKe />} />
               <Route path="reviews" element={<SellerReviews />} />
+              <Route path="chat" element={<SellerChat />} />
               <Route path="wallet" element={<SellerWallet />} />
               <Route path="wallet/transactions" element={<WalletTransactions backPath="/seller/wallet" />} />
             </Route>

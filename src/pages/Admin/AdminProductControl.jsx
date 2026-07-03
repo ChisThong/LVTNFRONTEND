@@ -346,7 +346,7 @@ export default function AdminProductControl() {
                       <div className="shop-info-cell">
                         <img 
                           src={product.hinh_anh && product.hinh_anh.length > 0 && product.hinh_anh[0].HinhAnh 
-                            ? (product.hinh_anh[0].HinhAnh.startsWith('http') ? product.hinh_anh[0].HinhAnh : `http://127.0.0.1:8000/storage/${product.hinh_anh[0].HinhAnh}`) 
+                            ? (product.hinh_anh[0].HinhAnh.startsWith('http') ? product.hinh_anh[0].HinhAnh : `https://lvtnbackend.onrender.com/storage/${product.hinh_anh[0].HinhAnh}`) 
                             : 'https://via.placeholder.com/50'} 
                           alt="product"
                           style={{borderRadius: '8px'}}
@@ -456,7 +456,7 @@ export default function AdminProductControl() {
                     selectedProduct.hinh_anh && selectedProduct.hinh_anh.length > 0
                       ? (selectedProduct.hinh_anh[0].HinhAnh.startsWith('http')
                           ? selectedProduct.hinh_anh[0].HinhAnh
-                          : `http://127.0.0.1:8000/storage/${selectedProduct.hinh_anh[0].HinhAnh}`)
+                          : `https://lvtnbackend.onrender.com/storage/${selectedProduct.hinh_anh[0].HinhAnh}`)
                       : 'https://via.placeholder.com/300'
                   }
                   alt={selectedProduct.TenSanPham}
@@ -467,7 +467,7 @@ export default function AdminProductControl() {
                       <img
                         key={idx}
                         className="pdetail-thumb"
-                        src={ha.HinhAnh.startsWith('http') ? ha.HinhAnh : `http://127.0.0.1:8000/storage/${ha.HinhAnh}`}
+                        src={ha.HinhAnh.startsWith('http') ? ha.HinhAnh : `https://lvtnbackend.onrender.com/storage/${ha.HinhAnh}`}
                         alt={`thumb-${idx}`}
                       />
                     ))}

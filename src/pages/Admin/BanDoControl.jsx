@@ -328,7 +328,7 @@ function BanDoControl() {
                                                 {mapData.map((data, index) => (
                                                     <tr key={data.ID || data.id || data.ID_map || index}>
                                                         <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                            <img src={data.HinhAnh ? `http://127.0.0.1:8000/storage/${data.HinhAnh}` : "https://via.placeholder.com/80x60?text=No+Image"} alt={data.TenDacSan} style={{ width: '70px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                            <img src={data.HinhAnh ? `https://lvtnbackend.onrender.com/storage/${data.HinhAnh}` : "https://via.placeholder.com/80x60?text=No+Image"} alt={data.TenDacSan} style={{ width: '70px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
                                                             <div>
                                                                 <div style={{ fontWeight: 650, color: 'var(--text-main)' }}>{data.TenDacSan || data.TenDiaDiem}</div>
                                                                 <span style={{ fontSize: '0.72rem', color: '#2563EB', backgroundColor: '#EFF6FF', padding: '2px 6px', borderRadius: '4px' }}>{data.PhanLoai || 'Đặc sản'}</span>

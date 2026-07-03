@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import { 
@@ -623,7 +624,7 @@ function DonHangControl() {
             </div>
 
             {/* Modal Chi tiết đơn hàng */}
-            {detailModalOpen && (
+            {detailModalOpen && createPortal(
                 <div className="nam-modal-overlay">
                     <div className="nam-modal-content" style={{ maxWidth: '850px' }}>
                         <div className="nam-modal-header">
@@ -754,7 +755,7 @@ function DonHangControl() {
                                                                 <img 
                                                                     src={
                                                                         sanPham.hinh_anh && sanPham.hinh_anh.length > 0 && sanPham.hinh_anh[0].HinhAnh 
-                                                                          ? (sanPham.hinh_anh[0].HinhAnh.startsWith('http') ? sanPham.hinh_anh[0].HinhAnh : `http://127.0.0.1:8000/storage/${sanPham.hinh_anh[0].HinhAnh}`) 
+                                                                          ? (sanPham.hinh_anh[0].HinhAnh.startsWith('http') ? sanPham.hinh_anh[0].HinhAnh : `https://lvtnbackend.onrender.com/storage/${sanPham.hinh_anh[0].HinhAnh}`) 
                                                                           : 'https://via.placeholder.com/50'
                                                                     } 
                                                                     alt={sanPham.TenSanPham} 
@@ -836,7 +837,8 @@ function DonHangControl() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

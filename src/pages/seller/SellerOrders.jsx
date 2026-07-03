@@ -6,7 +6,7 @@ import { Phone, Smartphone, MapPin, Search, Bell, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import '../../styles/seller-products.css';
 
-const BACKEND_URL = "http://localhost:8000/storage/";
+const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
 
 const getProductImage = (item) => {
     let imgName = null;

@@ -39,13 +39,13 @@ export const getTinhThanh = () => {
 /**
  * Helper: lấy URL ảnh đầu tiên của sản phẩm
  * Backend lưu path dạng: "products/xxx.jpg"
- * → storage public: http://127.0.0.1:8000/storage/products/xxx.jpg
+ * → storage public: https://lvtnbackend.onrender.com/storage/products/xxx.jpg
  */
 export const getProductImageUrl = (product) => {
   if (product?.hinh_anh && product.hinh_anh.length > 0) {
     const path = product.hinh_anh[0].HinhAnh;
     if (path.startsWith('http')) return path;
-    return `http://127.0.0.1:8000/storage/${path}`;
+    return `https://lvtnbackend.onrender.com/storage/${path}`;
   }
   return null;
 };

@@ -4,7 +4,7 @@ import Navbar from '../../components/Navbar';
 import { updateShop } from '../../api/shopApi';
 import '../../styles/seller.css';
 
-const BASE_URL = 'http://127.0.0.1:8000/storage/';
+const BASE_URL = 'https://lvtnbackend.onrender.com/storage/';
 
 const IconShop  = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 const IconMap   = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;

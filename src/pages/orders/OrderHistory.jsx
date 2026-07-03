@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { formatPrice } from '../../api/productPublicApi';
 import '../../styles/orders.css';
 
-const BACKEND_URL = "http://localhost:8000/storage/";
+const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150";
 
 // ── Mapping trạng thái DB (số) ↔ tab key (chuỗi) ─────────────────────────────
@@ -600,7 +600,7 @@ export default function OrderHistory() {
                         {ct.danh_gia.HinhAnh && (
                           <div style={{ marginTop: '8px' }}>
                             <img 
-                              src={`http://127.0.0.1:8000/storage/${ct.danh_gia.HinhAnh}`} 
+                              src={`https://lvtnbackend.onrender.com/storage/${ct.danh_gia.HinhAnh}`} 
                               alt="Review image" 
                               style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }} 
                             />

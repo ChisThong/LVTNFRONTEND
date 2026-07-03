@@ -95,7 +95,7 @@ export default function BaiVietTinhThanh() {
                                 <div className="blog-feat-img-wrapper">
                                     <img 
                                         className="blog-feat-img" 
-                                        src={blog.hinhanh ? `http://127.0.0.1:8000/storage/${blog.hinhanh}` : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'60\' viewBox=\'0 0 80 60\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f3f4f6\'/><text x=\'50%25\' y=\'50%25\' fill=\'%239ca3af\' font-size=\'10\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>No Image</text></svg>'} 
+                                        src={blog.hinhanh ? `https://lvtnbackend.onrender.com/storage/${blog.hinhanh}` : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'60\' viewBox=\'0 0 80 60\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f3f4f6\'/><text x=\'50%25\' y=\'50%25\' fill=\'%239ca3af\' font-size=\'10\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>No Image</text></svg>'} 
                                         alt={blog.tittel} 
                                     />
                                 </div>
@@ -135,7 +135,7 @@ export default function BaiVietTinhThanh() {
                                 <div className="blog-feat-img-wrapper">
                                     <img 
                                         className="blog-feat-img" 
-                                        src={blog.hinhanh ? `http://127.0.0.1:8000/storage/${blog.hinhanh}` : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'60\' viewBox=\'0 0 80 60\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f3f4f6\'/><text x=\'50%25\' y=\'50%25\' fill=\'%239ca3af\' font-size=\'10\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>No Image</text></svg>'} 
+                                        src={blog.hinhanh ? `https://lvtnbackend.onrender.com/storage/${blog.hinhanh}` : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'60\' viewBox=\'0 0 80 60\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f3f4f6\'/><text x=\'50%25\' y=\'50%25\' fill=\'%239ca3af\' font-size=\'10\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>No Image</text></svg>'} 
                                         alt={blog.tittel} 
                                     />
                                 </div>
@@ -166,7 +166,7 @@ export default function BaiVietTinhThanh() {
                         <div className="blog-modal-header">
                             <img 
                                 className="blog-modal-banner" 
-                                src={selectedBlog.hinhanh ? `http://127.0.0.1:8000/storage/${selectedBlog.hinhanh}` : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'60\' viewBox=\'0 0 80 60\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f3f4f6\'/><text x=\'50%25\' y=\'50%25\' fill=\'%239ca3af\' font-size=\'10\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>No Image</text></svg>'} 
+                                src={selectedBlog.hinhanh ? `https://lvtnbackend.onrender.com/storage/${selectedBlog.hinhanh}` : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'60\' viewBox=\'0 0 80 60\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f3f4f6\'/><text x=\'50%25\' y=\'50%25\' fill=\'%239ca3af\' font-size=\'10\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>No Image</text></svg>'} 
                                 alt={selectedBlog.tittel} 
                             />
                             <button className="blog-modal-close" onClick={() => setSelectedBlog(null)}>
