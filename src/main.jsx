@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
 })
 
 // Google Client ID lấy từ .env.local (VITE_ prefix để Vite expose)
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your-google-client-id.apps.googleusercontent.com';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
