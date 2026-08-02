@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Package, Search, Eye, EyeOff, Store, Check, X, Trash2, RefreshCcw } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 import '../../styles/admin-product.css';
+import { handleImageError } from '../../api/config';
+
+const BACKEND_STORAGE = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
 
 export default function AdminProductControl() {
   const [products, setProducts] = useState([]);
@@ -238,14 +241,17 @@ export default function AdminProductControl() {
 
       <div className="filter-section">
         <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', flexWrap: 'wrap' }}>
-          <form className="search-bar" onSubmit={handleSearch} style={{ flex: 1, margin: 0, minWidth: '300px' }}>
-            <Search size={20} color="#7A6652" />
+          <form className="search-bar" onSubmit={handleSearch} style={{ flex: 1, margin: 0, minWidth: '300px', display: 'flex', alignItems: 'center' }}>
+            <Search size={20} color="#7A6652" style={{ cursor: 'pointer' }} onClick={handleSearch} />
             <input 
               type="text" 
               placeholder="Tìm kiếm theo tên sản phẩm..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+            <button type="submit" style={{ border: 'none', background: 'var(--sidebar-active)', color: '#FFF', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, flexShrink: 0 }}>
+              Tìm kiếm
+            </button>
           </form>
           <select 
             className="admin-form-control" 
@@ -346,10 +352,11 @@ export default function AdminProductControl() {
                       <div className="shop-info-cell">
                         <img 
                           src={product.hinh_anh && product.hinh_anh.length > 0 && product.hinh_anh[0].HinhAnh 
-                            ? (product.hinh_anh[0].HinhAnh.startsWith('http') ? product.hinh_anh[0].HinhAnh : `https://lvtnbackend.onrender.com/storage/${product.hinh_anh[0].HinhAnh}`) 
+                            ? (product.hinh_anh[0].HinhAnh.startsWith('http') ? product.hinh_anh[0].HinhAnh : `${BACKEND_STORAGE}/${product.hinh_anh[0].HinhAnh}`) 
                             : 'https://via.placeholder.com/50'} 
                           alt="product"
                           style={{borderRadius: '8px'}}
+                          onError={handleImageError}
                         />
                         <span className="product-name-col" style={{ fontWeight: 600, color: '#1A2616' }}>{product.TenSanPham}</span>
                       </div>
@@ -456,10 +463,11 @@ export default function AdminProductControl() {
                     selectedProduct.hinh_anh && selectedProduct.hinh_anh.length > 0
                       ? (selectedProduct.hinh_anh[0].HinhAnh.startsWith('http')
                           ? selectedProduct.hinh_anh[0].HinhAnh
-                          : `https://lvtnbackend.onrender.com/storage/${selectedProduct.hinh_anh[0].HinhAnh}`)
+                          : `${BACKEND_STORAGE}/${selectedProduct.hinh_anh[0].HinhAnh}`)
                       : 'https://via.placeholder.com/300'
                   }
                   alt={selectedProduct.TenSanPham}
+                  onError={handleImageError}
                 />
                 {selectedProduct.hinh_anh && selectedProduct.hinh_anh.length > 1 && (
                   <div className="pdetail-thumbs">
@@ -467,8 +475,9 @@ export default function AdminProductControl() {
                       <img
                         key={idx}
                         className="pdetail-thumb"
-                        src={ha.HinhAnh.startsWith('http') ? ha.HinhAnh : `https://lvtnbackend.onrender.com/storage/${ha.HinhAnh}`}
+                        src={ha.HinhAnh.startsWith('http') ? ha.HinhAnh : `${BACKEND_STORAGE}/${ha.HinhAnh}`}
                         alt={`thumb-${idx}`}
+                        onError={handleImageError}
                       />
                     ))}
                   </div>
@@ -572,10 +581,14 @@ export default function AdminProductControl() {
       {/* Modal nhập lý do từ chối sản phẩm */}
       {rejectReasonModalOpen && (
         <div className="modal-overlay" onClick={() => setRejectReasonModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: '500px'}}>
-            <h3 style={{marginTop: 0, color: '#1C1917', fontSize: '1.25rem'}}>Lý do từ chối sản phẩm</h3>
-            <p style={{fontSize: '0.9rem', color: '#555', marginBottom: '12px'}}>
-              Vui lòng nhập lý do từ chối <strong>{productToReject?.TenSanPham}</strong> để người bán biết và khắc phục.
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{
+            maxWidth: '500px', width: '100%',
+            background: '#fff', borderRadius: '16px',
+            padding: '28px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{marginTop: 0, color: '#111827', fontSize: '1.25rem', fontWeight: 700}}>Lý do từ chối sản phẩm</h3>
+            <p style={{fontSize: '0.9rem', color: '#374151', marginBottom: '12px', lineHeight: '1.6'}}>
+              Vui lòng nhập lý do từ chối <strong style={{color: '#111827'}}>{productToReject?.TenSanPham}</strong> để người bán biết và khắc phục.
             </p>
             <textarea
               value={rejectReason}
@@ -583,21 +596,23 @@ export default function AdminProductControl() {
               placeholder="Nhập lý do (ví dụ: Sai danh mục, thông tin sai lệch...)"
               rows={4}
               style={{
-                width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd',
-                fontFamily: 'inherit', fontSize: '0.95rem', resize: 'vertical'
+                width: '100%', padding: '12px', borderRadius: '8px',
+                border: '1.5px solid #d1d5db', fontFamily: 'inherit',
+                fontSize: '0.95rem', resize: 'vertical', color: '#111827',
+                boxSizing: 'border-box', outline: 'none'
               }}
               autoFocus
             />
             <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px'}}>
               <button 
                 onClick={() => setRejectReasonModalOpen(false)}
-                style={{padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#eee', cursor: 'pointer', fontWeight: 600}}
+                style={{padding: '9px 20px', borderRadius: '8px', border: '1.5px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: 600, color: '#374151', fontSize: '0.95rem'}}
               >
                 Hủy
               </button>
               <button 
                 onClick={submitRejectProduct}
-                style={{padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#991B1B', color: '#fff', cursor: 'pointer', fontWeight: 600}}
+                style={{padding: '9px 20px', borderRadius: '8px', border: 'none', background: '#991B1B', color: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem'}}
               >
                 Xác nhận từ chối
               </button>
@@ -609,11 +624,15 @@ export default function AdminProductControl() {
       {/* Modal lý do Admin ẩn sản phẩm */}
       {visibilityModalOpen && productToToggle && (
         <div className="modal-overlay" onClick={() => setVisibilityModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: '500px'}}>
-            <h3 style={{marginTop: 0, color: '#1C1917', fontSize: '1.25rem'}}>Admin ẩn sản phẩm</h3>
-            <p style={{fontSize: '0.9rem', color: '#555', marginBottom: '12px'}}>
-              Nhập lý do ẩn sản phẩm <strong>{productToToggle?.TenSanPham}</strong> khỏi website.
-              <br/><em style={{color:'#888'}}>Seller sẽ thấy thông báo "Sản phẩm đang bị Admin ẩn".</em>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{
+            maxWidth: '500px', width: '100%',
+            background: '#fff', borderRadius: '16px',
+            padding: '28px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{marginTop: 0, color: '#111827', fontSize: '1.25rem', fontWeight: 700}}>Admin ẩn sản phẩm</h3>
+            <p style={{fontSize: '0.9rem', color: '#374151', marginBottom: '12px', lineHeight: '1.6'}}>
+              Nhập lý do ẩn sản phẩm <strong style={{color: '#111827'}}>{productToToggle?.TenSanPham}</strong> khỏi website.
+              <br/><em style={{color: '#6B7280', fontStyle: 'italic'}}>Seller sẽ thấy thông báo "Sản phẩm đang bị Admin ẩn".</em>
             </p>
             <textarea
               value={visibilityReason}
@@ -621,21 +640,23 @@ export default function AdminProductControl() {
               placeholder="Nhập lý do (ví dụ: Sản phẩm vi phạm chính sách, hình ảnh không phù hợp...)"
               rows={4}
               style={{
-                width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd',
-                fontFamily: 'inherit', fontSize: '0.95rem', resize: 'vertical', boxSizing: 'border-box'
+                width: '100%', padding: '12px', borderRadius: '8px',
+                border: '1.5px solid #d1d5db', fontFamily: 'inherit',
+                fontSize: '0.95rem', resize: 'vertical', color: '#111827',
+                boxSizing: 'border-box', outline: 'none'
               }}
               autoFocus
             />
             <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px'}}>
               <button
                 onClick={() => setVisibilityModalOpen(false)}
-                style={{padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#eee', cursor: 'pointer', fontWeight: 600}}
+                style={{padding: '9px 20px', borderRadius: '8px', border: '1.5px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: 600, color: '#374151', fontSize: '0.95rem'}}
               >
                 Hủy
               </button>
               <button
                 onClick={submitToggleVisibility}
-                style={{padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#1D4ED8', color: '#fff', cursor: 'pointer', fontWeight: 600}}
+                style={{padding: '9px 20px', borderRadius: '8px', border: 'none', background: '#1D4ED8', color: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem'}}
               >
                 Xác nhận ẩn
               </button>

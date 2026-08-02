@@ -8,11 +8,15 @@ import {
   ThumbsUp, Truck, Plus, Check
 } from 'lucide-react';
 import { getPublicShopDetail, formatPrice, getPublicShopReviews } from '../../api/productPublicApi';
+import { useCart } from '../../context/CartContext';
 import './ShopDetail.css';
+
+const BACKEND_STORAGE = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
 
 export default function ShopDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,29 +86,17 @@ export default function ShopDetail() {
     }
   }, [id, activeTab, reviewsPage]);
 
-  const handleAddToCart = (e, product) => {
+  const handleAddToCart = async (e, product) => {
     e.stopPropagation();
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find(i => i.id === product.ID_SanPham);
-
-    if (existing) {
-      existing.qty += 1;
-    } else {
-      const hinhAnhUrl = product.hinh_anh && product.hinh_anh.length > 0 ? product.hinh_anh[0].HinhAnh : null;
-      cart.push({
-        id: product.ID_SanPham,
-        name: product.TenSanPham,
-        qty: 1,
-        price: product.Gia,
-        HinhAnh: hinhAnhUrl,
-        ID_Shop: shop?.ID_Shop || product.ID_Shop || 'shop_0',
-        TenShop: shop?.TenShop || 'Gian hàng đặc sản'
-      });
+    try {
+      await addToCart({
+        ...product,
+        ID_Shop: shop?.ID_Shop || product.ID_Shop,
+        shop: { TenShop: shop?.TenShop }
+      }, 1);
+    } catch (err) {
+      console.error('Không thể thêm vào giỏ:', err.message);
     }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent('cart-change'));
-
     setAddingToCart(prev => ({ ...prev, [product.ID_SanPham]: true }));
     setTimeout(() => {
       setAddingToCart(prev => ({ ...prev, [product.ID_SanPham]: false }));
@@ -137,11 +129,11 @@ export default function ShopDetail() {
 
   const avatarUrl = shop.logo?.startsWith('http')
     ? shop.logo
-    : (shop.logo ? `https://lvtnbackend.onrender.com/storage/${shop.logo}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(shop.TenShop)}&background=D44E28&color=fff&size=128`);
+    : (shop.logo ? `${BACKEND_STORAGE}/${shop.logo}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(shop.TenShop)}&background=D44E28&color=fff&size=128`);
 
   const bannerUrl = shop.baner?.startsWith('http')
     ? shop.baner
-    : (shop.baner ? `https://lvtnbackend.onrender.com/storage/${shop.baner}` : 'https://sinhcafe.com/images/ben-tre-night-market-2.png');
+    : (shop.baner ? `${BACKEND_STORAGE}/${shop.baner}` : 'https://sinhcafe.com/images/ben-tre-night-market-2.png');
 
   const products = shop.products || [];
 
@@ -268,7 +260,7 @@ export default function ShopDetail() {
               <div className="shop-product-grid">
                 {products.length > 0 ? products.map(product => {
                   const productImg = product.hinh_anh && product.hinh_anh.length > 0
-                    ? (product.hinh_anh[0].HinhAnh.startsWith('http') ? product.hinh_anh[0].HinhAnh : `https://lvtnbackend.onrender.com/storage/${product.hinh_anh[0].HinhAnh}`)
+                    ? (product.hinh_anh[0].HinhAnh.startsWith('http') ? product.hinh_anh[0].HinhAnh : `${BACKEND_STORAGE}/${product.hinh_anh[0].HinhAnh}`)
                     : 'https://via.placeholder.com/400x300?text=No+Image';
 
                   return (

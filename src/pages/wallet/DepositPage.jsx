@@ -63,7 +63,6 @@ function DepositPage() {
               Số tiền cần nạp (VNĐ)
             </label>
             <div className="wallet-deposit-amount-wrapper">
-              <span className="wallet-deposit-currency-symbol">₫</span>
               <input
                 type="number"
                 className="admin-form-control wallet-deposit-input"
@@ -73,6 +72,7 @@ function DepositPage() {
                 min="10000"
                 max="50000000"
               />
+              <span className="wallet-deposit-currency-symbol">₫</span>
             </div>
             {amount && parseInt(amount) >= 10000 && (
               <p className="wallet-deposit-success-hint">

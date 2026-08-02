@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
 import { useWallet } from '../../context/WalletContext';
+import { useCart } from '../../context/CartContext';
 import logoImg from '../../assets/logo.webp';
 import { MessageCircleMore } from 'lucide-react';
 import '../../styles/home.css';
@@ -58,37 +59,27 @@ const IconClose = () => (
    ═══════════════════════════════════════════════════════════ */
 export default function PublicNavbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      // Chỉ dùng cached user nếu vẫn còn token hợp lệ
+      if (stored && localStorage.getItem('token')) return JSON.parse(stored);
+    } catch { /* ignore */ }
+    return null;
+  });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   const { wallet, setWallet, walletLoading, fetchWallet } = useWallet();
+  const { cartCount } = useCart();
 
   // ── Scroll effect ────────────────────────────────────────
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // ── Sync Cart Count ──────────────────────────────────────
-  useEffect(() => {
-    const updateCartCount = () => {
-      try {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const total = cart.reduce((sum, item) => sum + (item.SoLuong || item.qty || 1), 0);
-        setCartCount(total);
-      } catch (e) {
-        setCartCount(0);
-      }
-    };
-
-    updateCartCount();
-    window.addEventListener('cart-change', updateCartCount);
-    return () => window.removeEventListener('cart-change', updateCartCount);
   }, []);
 
   // ── Sync Unread Chat Count ──────────────────────────────────
@@ -133,6 +124,8 @@ export default function PublicNavbar() {
           const data = res.data?.data;
           if (data) {
             setUser(data);
+            // ✅ Luôn cập nhật localStorage để lần render sau không bị flash
+            localStorage.setItem('user', JSON.stringify(data));
             // ✅ Seed wallet từ dữ liệu đã gộp trong /me — không cần request /wallet riêng
             if (data.wallet) {
               setWallet(data.wallet);
@@ -144,6 +137,7 @@ export default function PublicNavbar() {
         })
         .catch(() => {
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
           setUser(null);
         });
     };
@@ -165,15 +159,15 @@ export default function PublicNavbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Logout ───────────────────────────────────────────────
-  const handleLogout = async () => {
-    try { await axiosClient.post('/auth/logout'); } catch (e) { console.error(e); }
-    finally {
-      localStorage.removeItem('token');
-      setUser(null);
-      setUserMenuOpen(false);
-      navigate('/');
-    }
+  // ── Logout ────────────────────────────
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('wallet');
+    setUser(null);
+    setUserMenuOpen(false);
+    navigate('/');
+    axiosClient.post('/auth/logout').catch(() => {});
   };
 
   // NavLink class helper

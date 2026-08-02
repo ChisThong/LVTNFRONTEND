@@ -6,7 +6,7 @@ import { useSellerReviews, useReplyReview } from '../../api/reviewApi';
 import { getMyShop } from '../../api/shopApi';
 import '../../styles/seller-products.css';
 
-const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
+const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/`;
 
 const getReviewImage = (path) => {
   if (!path) return null;

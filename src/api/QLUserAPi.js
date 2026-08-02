@@ -6,6 +6,3 @@ export const getAlluser=(params={})=>{
 export const Lockuser=(id)=>{
     return axiosClient.put(`/admin/Nguoidung/${id}/ChangeClock`)
 }
-export const Capquyenadmin=(id)=>{
-    return axiosClient.put(`/admin/Nguoidung/capquyen/${id}`);
-}

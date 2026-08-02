@@ -4,6 +4,7 @@ import ProductCard from '../../components/products/ProductCard';
 import {
   getPublicProducts,
 } from '../../api/productPublicApi';
+import { useCart } from '../../context/CartContext';
 import './ProductList.css';
 
 /* ── Icon SVG ── */
@@ -57,6 +58,7 @@ function FilterGroup({ title, children, defaultOpen = true }) {
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { categories, provinces } = useOutletContext();
+  const { addToCart } = useCart();
 
   // ── State ──────────────────────────────────────────────────
   const [products, setProducts]       = useState([]);
@@ -141,29 +143,14 @@ export default function ProductList() {
     setSearchParams({});
   };
 
-  // ── Cart helper ─────────────────────────────────────────────
-  const handleAddToCart = (product) => {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find(i => i.id === product.ID_SanPham);
-    
-    if (existing) {
-      existing.qty += 1;
-    } else {
-      const hinhAnhUrl = product.hinh_anh && product.hinh_anh.length > 0 ? product.hinh_anh[0].HinhAnh : null;
-      cart.push({ 
-        id: product.ID_SanPham, 
-        name: product.TenSanPham, 
-        qty: 1, 
-        price: product.Gia,
-        HinhAnh: hinhAnhUrl,
-        ID_Shop: product.shop?.ID_Shop || product.ID_Shop || 'shop_0',
-        TenShop: product.shop?.TenShop || 'Gian hàng đặc sản'
-      });
+  // ── Cart helper ───────────────────────────────────────────────────
+  const handleAddToCart = async (product) => {
+    try {
+      await addToCart(product, 1);
+      showToast(`Đã thêm “${product.TenSanPham}” vào giỏ hàng!`);
+    } catch (err) {
+      showToast(err.message || 'Không thể thêm vào giỏ hàng.');
     }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent('cart-change'));
-    showToast(`Đã thêm "${product.TenSanPham}" vào giỏ hàng!`);
   };
 
   const showToast = (msg) => {

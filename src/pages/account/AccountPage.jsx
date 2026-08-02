@@ -109,8 +109,10 @@ export default function AccountPage() {
     );
   }
 
-  // Google/Social Login check
-  const isSocialUser = user.is_social_login || user.has_google;
+  // is_social_login = true → tài khoản có liên kết Google
+  const isSocialUser    = user.is_social_login === true;   // dùng cho icon 🔒 và badge
+  const showPasswordTab = true;                             // luôn hiện tab — backend tự xử lý lỗi phân biệt
+  const isGoogleLinked  = !!user.has_google;               // hiển thị badge Google Linked
 
   return (
     <div className="account-page">
@@ -131,7 +133,7 @@ export default function AccountPage() {
             </div>
             <h3 className="account-sidebar-name">{user.HoTen}</h3>
             <span className="account-sidebar-email">{user.email}</span>
-            {isSocialUser && <span className="account-badge-google">Google Linked</span>}
+            {isGoogleLinked && <span className="account-badge-google">Google Linked</span>}
           </div>
           
           <button 
@@ -141,8 +143,8 @@ export default function AccountPage() {
             👤 Hồ sơ của tôi
           </button>
 
-          {/* Ẩn hoàn toàn nút "Đổi mật khẩu" nếu là Google user */}
-          {!isSocialUser && (
+          {/* Ẩn nút "Đổi mật khẩu" nếu user không có password (thuần Google) */}
+          {showPasswordTab && (
             <button 
               className={`account-tab-item ${activeTab === 'password' ? 'active' : ''}`} 
               onClick={() => setActiveTab('password')}
@@ -198,7 +200,7 @@ export default function AccountPage() {
             </div>
           )}
 
-          {activeTab === 'password' && !isSocialUser && (
+          {activeTab === 'password' && showPasswordTab && (
             <div>
               <h2 className="account-section-title">Đổi Mật Khẩu</h2>
               <p className="account-section-subtitle">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác</p>

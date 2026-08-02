@@ -5,7 +5,7 @@ import { Plus, Edit2, AlertCircle, Trash2, Search, RotateCcw, Eye, EyeOff, Bell,
 import '../../styles/seller.css';
 import '../../styles/seller-products.css';
 
-const BASE_URL = 'https://lvtnbackend.onrender.com/storage/';
+const BASE_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/`;
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -185,15 +185,19 @@ export default function SellerProducts() {
 
         {/* Filters */}
         <div className="sp-filters-row">
-          <div className="sp-search-pill" style={{ flex: 1, minWidth: '220px', margin: 0 }}>
+          <form className="sp-search-pill" onSubmit={(e) => e.preventDefault()} style={{ flex: 1, minWidth: '220px', margin: 0, display: 'flex', alignItems: 'center' }}>
             <Search size={18} className="icon" />
             <input 
               type="text" 
               placeholder="Tìm kiếm sản phẩm..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
             />
-          </div>
+            <button type="submit" style={{ border: 'none', background: '#2C3A29', color: '#FFF', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, marginLeft: '6px' }}>
+              Tìm kiếm
+            </button>
+          </form>
 
           <div className="sp-select-pill">
             <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>

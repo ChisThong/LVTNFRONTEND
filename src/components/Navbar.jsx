@@ -43,7 +43,14 @@ const IconBox = () => (
 
 export default function Navbar() {
   const [scrolled, setScrolled]       = useState(false);
-  const [user, setUser]               = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      // Chỉ dùng cached user nếu vẫn còn token hợp lệ
+      if (stored && localStorage.getItem('token')) return JSON.parse(stored);
+    } catch { /* ignore */ }
+    return null;
+  });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const dropdownRef                   = useRef(null);
   const navigate                      = useNavigate();
@@ -62,10 +69,15 @@ export default function Navbar() {
       if (token) {
         axiosClient.get('/me')
           .then(res => {
-            if (res.data && res.data.data) setUser(res.data.data);
+            if (res.data && res.data.data) {
+              setUser(res.data.data);
+              // ✅ Luôn cập nhật localStorage để lần render sau không bị flash
+              localStorage.setItem('user', JSON.stringify(res.data.data));
+            }
           })
           .catch(() => {
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             setUser(null);
           });
       } else {
@@ -118,17 +130,16 @@ export default function Navbar() {
   }, []);
 
   // ── Logout ─────────────────────────────────────────────────────────────────
-  const handleLogout = async () => {
-    try {
-      await axiosClient.post('/auth/logout');
-    } catch (e) {
-      console.error(e);
-    } finally {
-      localStorage.removeItem('token');
-      setUser(null);
-      setUserMenuOpen(false);
-      navigate('/');
-    }
+  const handleLogout = () => {
+    // Xóa token, user, wallet và navigate ngay lập tức — không chờ API
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('wallet');
+    setUser(null);
+    setUserMenuOpen(false);
+    navigate('/');
+    // Gọi API backend sau (fire-and-forget) để xóa token phía server
+    axiosClient.post('/auth/logout').catch(() => {});
   };
 
   // ── NavLink class helper — dùng function để React Router tự xử lý active ──

@@ -4,8 +4,23 @@ import walletApi from '../api/walletApi';
 const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
-  const [wallet, setWallet] = useState(null);
-  const [walletLoading, setWalletLoading] = useState(true);
+  const [wallet, setWalletState] = useState(() => {
+    try {
+      const stored = localStorage.getItem('wallet');
+      if (stored && localStorage.getItem('token')) return JSON.parse(stored);
+    } catch { /* ignore */ }
+    return null;
+  });
+  const [walletLoading, setWalletLoading] = useState(!wallet);
+
+  const setWallet = (newWallet) => {
+    setWalletState(newWallet);
+    if (newWallet) {
+      localStorage.setItem('wallet', JSON.stringify(newWallet));
+    } else {
+      localStorage.removeItem('wallet');
+    }
+  };
 
   const fetchWallet = async () => {
     try {
@@ -35,6 +50,7 @@ export function WalletProvider({ children }) {
         fetchWallet();
       } else {
         setWallet(null);
+        localStorage.removeItem('wallet');
       }
     };
 

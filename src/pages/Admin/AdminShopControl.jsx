@@ -4,7 +4,7 @@ import axiosClient from '../../api/axiosClient';
 import { Search, Eye, Trash2, Check, X, Package, ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react';
 import '../../styles/navbar-admin.css';
 
-const BASE_URL = 'https://lvtnbackend.onrender.com/storage/';
+const BASE_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/`;
 
 const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -241,16 +241,20 @@ function AdminShopControl() {
             </div>
 
             <div className="admin-filters" style={{ background: 'transparent', padding: 0, boxShadow: 'none' }}>
-                <div className="search-box" style={{ background: '#F4EFEA', border: 'none', borderRadius: '8px', maxWidth: '400px' }}>
-                    <Search size={20} color="#8C7B6D" />
+                <form className="search-box" onSubmit={(e) => { e.preventDefault(); setSearchInput(searchInput); }} style={{ background: '#F4EFEA', border: 'none', borderRadius: '8px', maxWidth: '400px', display: 'flex', alignItems: 'center' }}>
+                    <Search size={20} color="#8C7B6D" style={{ cursor: 'pointer' }} onClick={() => setSearchInput(searchInput)} />
                     <input 
                         type="text" 
                         placeholder="Tìm kiếm gian hàng..." 
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
                         style={{ color: '#4A3B32', fontWeight: 500 }}
                     />
-                </div>
+                    <button type="submit" style={{ border: 'none', background: 'var(--sidebar-active)', color: '#FFF', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
+                        Tìm kiếm
+                    </button>
+                </form>
 
                 <div className="filter-group">
                     {[

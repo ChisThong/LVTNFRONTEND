@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Lock, Unlock, Mail, Phone, Users, Shield, UserCheck, ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import { Capquyenadmin, getAlluser, Lockuser } from '../../api/QLUserAPi';
+import { getAlluser, Lockuser } from '../../api/QLUserAPi';
 
 export default function NguoiDungControl() {
     const [page, setpage] = useState(1);
@@ -76,26 +76,6 @@ export default function NguoiDungControl() {
             console.error(error);
         }
     });
-
-    // Mutation: Cấp quyền quản trị viên (Admin)
-    const CapquyenAdmin = useMutation({
-        mutationFn: (id) => Capquyenadmin(id),
-        onSuccess: (response) => {
-            alert(response?.data?.message);
-            queryClient.invalidateQueries(['user']);
-        },
-        onError: (error) => {
-            alert("Cấp quyền admin thất bại!!");
-            console.error(error);
-        }
-    });
-
-    const handleCapQuyen = (q) => {
-        const c = window.confirm(`Bạn có chắc muốn cấp quyền Admin cho tài khoản này không?`);
-        if (c) {
-            CapquyenAdmin.mutate(q)
-        }
-    }
 
     return (
         <div className="view-section">
@@ -246,15 +226,6 @@ export default function NguoiDungControl() {
                                             >
                                                 {u.TrangThai == 1 ? <Lock size={16} /> : <Unlock size={16} />}
                                             </button>
-                                            {u.ID_role !== 1 && u.ID_role !== 3 && (
-                                                <button 
-                                                    type="button" 
-                                                    className="btn-action btn-primary" 
-                                                    onClick={() => handleCapQuyen(u.ID_User)}
-                                                >
-                                                    Cấp Admin
-                                                </button>
-                                            )}
                                         </div>
                                     </td>
                                 </tr>

@@ -58,11 +58,13 @@ import BanDoDacSan from './pages/BanDoDacSan';
 import BaoCaoThongKe from './pages/Admin/BaoCaoThongKe';
 
 import { WalletProvider } from './context/WalletContext';
+import { CartProvider } from './context/CartContext';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <WalletProvider>
+      <CartProvider>
       <BrowserRouter>
         <Toaster position="top-center" reverseOrder={false} />
         <Routes>
@@ -164,6 +166,7 @@ function App() {
 
         </Routes>
       </BrowserRouter>
+      </CartProvider>
     </WalletProvider>
   );
 }
