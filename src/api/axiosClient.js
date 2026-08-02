@@ -7,8 +7,6 @@ const axiosClient = axios.create({
     Accept: 'application/json',
   },
 });
-
-// Tự động gắn Bearer token từ localStorage vào mỗi request
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

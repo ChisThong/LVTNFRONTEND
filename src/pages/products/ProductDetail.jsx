@@ -626,8 +626,6 @@ export default function ProductDetail() {
               <li>Toàn quốc: 3-5 ngày làm việc.</li>
             </ul>
             <br />
-            <h4>Phí vận chuyển:</h4>
-            <p>Đồng giá 30.000đ cho đơn hàng dưới 500.000đ. Miễn phí vận chuyển cho đơn hàng từ 500.000đ trở lên.</p>
           </div>
         </div>
       </section>
