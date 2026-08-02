@@ -283,16 +283,6 @@ export default function Register() {
           {/* Divider */}
           <div className="auth-divider">Hoặc đăng ký nhanh với</div>
 
-          {/* Social */}
-          <div className="auth-social-row">
-            <button type="button" className="auth-social-btn">
-              <IconGoogle /> Google
-            </button>
-            <button type="button" className="auth-social-btn">
-              <IconFacebook /> Facebook
-            </button>
-          </div>
-
           {/* Switch */}
           <p className="auth-switch-row">
             Đã có tài khoản?{' '}
