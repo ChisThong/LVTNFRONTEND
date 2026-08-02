@@ -20,7 +20,7 @@ const getYouTubeEmbedUrl = (url) => {
     return null;
 };
 
-const IMG_URL = "https://lvtnbackend.onrender.com/storage/";
+const IMG_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/`;
 
 export default function BaiVietController() {
     const [page, setpage] = useState(1);

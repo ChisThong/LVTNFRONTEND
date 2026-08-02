@@ -608,17 +608,19 @@
 
 .wallet-deposit-currency-symbol {
   position: absolute;
-  left: 1rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   font-weight: bold;
   color: var(--wallet-orange);
   font-size: 1.3rem;
+  pointer-events: none;
 }
 
 .wallet-deposit-input {
   width: 100%;
-  padding-left: 2.5rem;
+  padding-left: 1rem;
+  padding-right: 2.5rem;
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--wallet-orange);

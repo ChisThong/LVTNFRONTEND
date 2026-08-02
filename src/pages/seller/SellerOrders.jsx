@@ -6,22 +6,29 @@ import { Phone, Smartphone, MapPin, Search, Bell, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import '../../styles/seller-products.css';
 
-const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
+const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/`;
 
 const getProductImage = (item) => {
+    if (!item) return 'https://via.placeholder.com/60';
     let imgName = null;
-    if (item && typeof item.HinhAnh === 'string') imgName = item.HinhAnh;
-    else if (item && typeof item.hinhanh === 'string') imgName = item.hinhanh;
-    else if (item && Array.isArray(item.hinh_anh) && item.hinh_anh.length > 0) {
+    if (Array.isArray(item.hinh_anh) && item.hinh_anh.length > 0) {
         imgName = item.hinh_anh[0].HinhAnh || item.hinh_anh[0].hinhanh;
+    } else if (Array.isArray(item.hinhanh) && item.hinhanh.length > 0) {
+        imgName = item.hinhanh[0].HinhAnh || item.hinhanh[0].hinhanh;
+    } else if (typeof item.HinhAnh === 'string') {
+        imgName = item.HinhAnh;
+    } else if (typeof item.hinhanh === 'string') {
+        imgName = item.hinhanh;
     }
+    
     if (!imgName) return 'https://via.placeholder.com/60';
-    return imgName.startsWith('http') ? imgName : `${BACKEND_URL}${imgName}`;
+    return imgName.startsWith('http') ? imgName : `${BACKEND_URL}${imgName.startsWith('/') ? imgName.substring(1) : imgName}`;
 };
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   
   // States cho Tabs & Search
   const [activeTab, setActiveTab] = useState('all'); // 'all', 0, 1, 2, 3, 4
@@ -158,15 +165,19 @@ export default function SellerOrders() {
         </div>
 
         {/* Search Input on the right of tabs */}
-        <div className="sp-search-pill" style={{ margin: '0 0 10px 0', minWidth: '280px' }}>
+        <form className="sp-search-pill" onSubmit={(e) => e.preventDefault()} style={{ margin: '0 0 10px 0', minWidth: '280px', display: 'flex', alignItems: 'center' }}>
           <Search size={18} className="icon" />
           <input 
             type="text" 
             placeholder="Tìm kiếm theo mã đơn, tên khách..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
           />
-        </div>
+          <button type="submit" style={{ border: 'none', background: '#2C3A29', color: '#FFF', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, marginLeft: '6px' }}>
+            Tìm kiếm
+          </button>
+        </form>
       </div>
 
       {/* TABLE */}
@@ -208,10 +219,18 @@ export default function SellerOrders() {
                   {/* Cột 2: Sản phẩm */}
                   <div>
                     {order.chi_tiet?.map((ct, i) => (
-                      <div key={ct.ID_ChiTiet} style={{ marginBottom: i < order.chi_tiet.length - 1 ? '12px' : '0' }}>
-                        <div style={{ fontWeight: 'bold', color: '#374151', fontSize: '0.95rem' }}>{ct.san_pham?.TenSanPham || 'Sản phẩm'}</div>
-                        <div style={{ color: '#6B7280', fontSize: '0.85rem' }}>
-                          Phân loại: {ct.san_pham?.PhanLoai || 'Tiêu chuẩn'} x {ct.SoLuong}
+                      <div key={ct.ID_ChiTiet} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: i < order.chi_tiet.length - 1 ? '12px' : '0' }}>
+                        <img 
+                          src={getProductImage(ct.san_pham)} 
+                          alt={ct.san_pham?.TenSanPham}
+                          style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #E5E7EB', flexShrink: 0 }}
+                          onError={(e) => { e.target.src = "https://via.placeholder.com/50"; }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 'bold', color: '#374151', fontSize: '0.95rem' }}>{ct.san_pham?.TenSanPham || 'Sản phẩm'}</div>
+                          <div style={{ color: '#6B7280', fontSize: '0.85rem' }}>
+                            x {ct.SoLuong} | {formatPrice(ct.DonGia || (ct.TongGia / ct.SoLuong))}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -259,12 +278,13 @@ export default function SellerOrders() {
                         Theo dõi
                       </button>
                     )}
-                    {/* Nếu không có action chính, hiện nút xem chi tiết */}
-                    {[3,4].includes(Number(order.TrangThai)) && (
-                       <button style={{ padding: '6px 16px', background: 'transparent', border: 'none', fontWeight: '600', color: '#3B82F6', cursor: 'pointer' }}>
-                         Chi tiết
-                       </button>
-                    )}
+                    {/* Nút Chi tiết */}
+                    <button 
+                      onClick={() => setSelectedOrder(order)}
+                      style={{ padding: '6px 16px', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#2563EB', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}
+                    >
+                      Chi tiết
+                    </button>
                   </div>
 
                 </div>
@@ -299,7 +319,7 @@ export default function SellerOrders() {
                   background: currentPage === page ? '#111827' : '#FFF',
                   border: currentPage === page ? '1px solid #111827' : '1px solid transparent',
                   borderRadius: '8px',
-                  fontWeight: 'bold',
+                  fontWeight: '600',
                   color: currentPage === page ? '#FFF' : '#374151',
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -316,6 +336,127 @@ export default function SellerOrders() {
             >
               Trang sau
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CHI TIẾT ĐƠN HÀNG DÀNH CHO SELLER */}
+      {selectedOrder && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(3px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFF',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '650px',
+            maxHeight: '85vh',
+            overflowY: 'auto',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Header Modal */}
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: '1px solid #E5E7EB',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky', top: 0, background: '#FFF', zIndex: 10
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#111827', fontWeight: 800 }}>
+                  Chi tiết đơn hàng #{selectedOrder.MaDonHangCon || selectedOrder.ID_DonHang}
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#6B7280' }}>
+                  Ngày đặt: {selectedOrder.NgayTao || selectedOrder.created_at || 'Mới đặt'}
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedOrder(null)}
+                style={{ background: '#F3F4F6', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontSize: '1.2rem', color: '#4B5563', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Body Modal */}
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Thông tin giao hàng */}
+              <div style={{ background: '#F9FAFB', padding: '16px', borderRadius: '12px', border: '1px solid #F3F4F6' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', color: '#111827', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  📌 Thông tin người nhận
+                </h4>
+                <div style={{ fontSize: '0.9rem', color: '#374151', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div><strong>Họ tên:</strong> {selectedOrder.don_hang_tong?.NguoiNhan || selectedOrder.nguoi_mua?.HoTen || selectedOrder.nguoi_mua?.name || 'Khách hàng'}</div>
+                  <div><strong>Số điện thoại:</strong> {selectedOrder.don_hang_tong?.SDTNhan || selectedOrder.nguoi_mua?.sdt || selectedOrder.nguoi_mua?.phone || 'Chưa có'}</div>
+                  <div><strong>Địa chỉ giao:</strong> {selectedOrder.don_hang_tong?.DiaChiNhan || selectedOrder.nguoi_mua?.diachi || selectedOrder.nguoi_mua?.address || 'Chưa có'}</div>
+                  <div><strong>Ghi chú:</strong> {selectedOrder.GhiChu || 'Không có ghi chú'}</div>
+                </div>
+              </div>
+
+              {/* Danh sách sản phẩm */}
+              <div>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', color: '#111827', fontWeight: 700 }}>
+                  📦 Danh sách sản phẩm
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {selectedOrder.chi_tiet?.map((ct) => (
+                    <div key={ct.ID_ChiTiet} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px dashed #E5E7EB' }}>
+                      <img 
+                        src={getProductImage(ct.san_pham)} 
+                        alt={ct.san_pham?.TenSanPham} 
+                        style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #E5E7EB' }} 
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9rem' }}>{ct.san_pham?.TenSanPham}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '2px' }}>
+                          Số lượng: x{ct.SoLuong} | Đơn giá: {formatPrice(ct.DonGia || (ct.TongGia / ct.SoLuong))}
+                        </div>
+                      </div>
+                      <div style={{ fontWeight: 700, color: '#111827', fontSize: '0.95rem' }}>
+                        {formatPrice(ct.TongGia)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tổng thanh toán */}
+              <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4B5563' }}>
+                  <span>Phương thức thanh toán:</span>
+                  <span style={{ fontWeight: 600, color: '#111827' }}>{selectedOrder.don_hang_tong?.PhuongThucThanhToan || 'COD'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4B5563' }}>
+                  <span>Phí vận chuyển:</span>
+                  <span style={{ fontWeight: 600, color: '#111827' }}>{formatPrice(selectedOrder.PhiVanChuyen || 0)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', marginTop: '4px' }}>
+                  <span style={{ fontWeight: 700, color: '#111827' }}>Tổng thanh toán:</span>
+                  <strong style={{ color: '#2563EB', fontSize: '1.15rem' }}>{formatPrice(selectedOrder.TongGia + (selectedOrder.PhiVanChuyen || 0))}</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Modal */}
+            <div style={{ padding: '16px 24px', borderTop: '1px solid #E5E7EB', display: 'flex', justifyContent: 'flex-end', background: '#FAFAFA', borderRadius: '0 0 16px 16px' }}>
+              <button 
+                onClick={() => setSelectedOrder(null)}
+                style={{ padding: '8px 20px', background: '#374151', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -28,8 +28,11 @@ const IconLock = () => (
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </svg>
 );
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> main
 export default function Register() {
   const navigate = useNavigate();
 
@@ -267,10 +270,13 @@ export default function Register() {
               {loading ? 'Đang đăng ký...' : 'ĐĂNG KÝ TÀI KHOẢN'}
             </button>
           </form>
+<<<<<<< HEAD
+=======
 
           {/* Divider */}
           <div className="auth-divider">Hoặc đăng ký nhanh với</div>
 
+>>>>>>> main
           {/* Switch */}
           <p className="auth-switch-row">
             Đã có tài khoản?{' '}

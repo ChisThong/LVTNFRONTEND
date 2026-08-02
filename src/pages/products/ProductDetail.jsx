@@ -3,11 +3,15 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Star, StarHalf, Minus, Plus, ShoppingCart, CheckCircle, MapPin, MessageCircle, Store } from 'lucide-react';
 import { getPublicProductDetail, getPublicProducts, formatPrice, getProductReviews, createProductReview } from '../../api/productPublicApi';
 import axiosClient from '../../api/axiosClient';
+import { useCart } from '../../context/CartContext';
 import './ProductDetail.css';
+
+const BACKEND_STORAGE = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -115,32 +119,19 @@ export default function ProductDetail() {
     }
   }, [product?.ID_PhanLoai, product?.ID_SanPham]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find(i => i.id === product.ID_SanPham);
-    if (existing) {
-      existing.qty += qty;
-    } else {
-      const hinhAnhUrl = product.hinh_anh && product.hinh_anh.length > 0 ? product.hinh_anh[0].HinhAnh : null;
-      cart.push({
-        id: product.ID_SanPham,
-        name: product.TenSanPham,
-        qty,
-        price: product.Gia,
-        HinhAnh: hinhAnhUrl,
-        ID_Shop: product.shop?.ID_Shop || 'shop_0',
-        TenShop: product.shop?.TenShop || 'Gian hàng đặc sản'
-      });
+    try {
+      await addToCart(product, qty);
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2000);
+    } catch (err) {
+      alert(err.message || 'Không thể thêm vào giỏ hàng.');
     }
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent('cart-change'));
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
+  const handleBuyNow = async () => {
+    await handleAddToCart();
     navigate('/checkout');
   };
 
@@ -193,7 +184,7 @@ export default function ProductDetail() {
   const mainImageUrl = images.length > 0
     ? (() => {
       const p = images[activeImg]?.HinhAnh || images[0]?.HinhAnh;
-      return p?.startsWith('http') ? p : `https://lvtnbackend.onrender.com/storage/${p}`;
+      return p?.startsWith('http') ? p : `${BACKEND_STORAGE}/${p}`;
     })()
     : null;
 
@@ -266,7 +257,7 @@ export default function ProductDetail() {
               {images.map((img, idx) => {
                 const thumbUrl = img.HinhAnh?.startsWith('http')
                   ? img.HinhAnh
-                  : `https://lvtnbackend.onrender.com/storage/${img.HinhAnh}`;
+                  : `${BACKEND_STORAGE}/${img.HinhAnh}`;
                 return (
                   <div
                     key={img.ID_HinhAnh || idx}
@@ -587,7 +578,7 @@ export default function ProductDetail() {
                       {rev.HinhAnh && (
                         <div style={{ marginTop: '0.5rem' }}>
                           <img
-                            src={rev.HinhAnh.startsWith('http') ? rev.HinhAnh : `https://lvtnbackend.onrender.com/storage/${rev.HinhAnh}`}
+                            src={rev.HinhAnh.startsWith('http') ? rev.HinhAnh : `${BACKEND_STORAGE}/${rev.HinhAnh}`}
                             alt="Hình ảnh thực tế từ khách hàng"
                             style={{ maxWidth: '120px', maxHeight: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
                             onError={(e) => { e.target.style.display = 'none'; }}
@@ -642,7 +633,7 @@ export default function ProductDetail() {
           <div className="products-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
             {relatedProducts.map(rel => {
               const relImg = rel.hinh_anh && rel.hinh_anh.length > 0
-                ? (rel.hinh_anh[0].HinhAnh.startsWith('http') ? rel.hinh_anh[0].HinhAnh : `https://lvtnbackend.onrender.com/storage/${rel.hinh_anh[0].HinhAnh}`)
+                ? (rel.hinh_anh[0].HinhAnh.startsWith('http') ? rel.hinh_anh[0].HinhAnh : `${BACKEND_STORAGE}/${rel.hinh_anh[0].HinhAnh}`)
                 : null;
 
               return (

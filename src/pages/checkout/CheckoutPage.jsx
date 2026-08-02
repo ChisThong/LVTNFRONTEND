@@ -5,12 +5,14 @@ import { formatPrice } from '../../api/productPublicApi';
 import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
 import { useWallet } from '../../context/WalletContext';
+import { useCart } from '../../context/CartContext';
 
-const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
+const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/`;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { wallet, fetchWallet } = useWallet();
+  const { clearCart, cartItems: contextCartItems } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cartItems, setCartItems] = useState([]);
 
@@ -23,14 +25,14 @@ export default function CheckoutPage() {
   const walletBalance = parseFloat(wallet?.balance || 0);
 
   useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCartItems(items);
+    // Dùng từ CartContext (đã load từ API hoặc localStorage)
+    setCartItems(contextCartItems);
 
     // Refresh ví để đảm bảo số dư mới nhất
     if (fetchWallet) {
       fetchWallet();
     }
-  }, []);
+  }, [contextCartItems]);
 
   const totalAmount = cartItems.reduce((acc, item) => acc + ( (item.price || item.Gia) * (item.qty || item.SoLuong) ), 0);
 
@@ -79,9 +81,8 @@ export default function CheckoutPage() {
       const response = await axiosClient.post('/don-hang', payload);
 
       if (response.data?.success) {
-        // Xóa giỏ hàng
-        localStorage.removeItem('cart');
-        window.dispatchEvent(new CustomEvent('cart-change'));
+        // Xóa giỏ hàng (server + localStorage)
+        await clearCart();
 
         toast.success('Tạo đơn hàng thành công!', { id: 'checkout' });
 

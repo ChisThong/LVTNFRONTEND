@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import { getStorageUrl } from './config';
 
 /**
  * GET /api/products  — Public, không cần token
@@ -39,13 +40,11 @@ export const getTinhThanh = () => {
 /**
  * Helper: lấy URL ảnh đầu tiên của sản phẩm
  * Backend lưu path dạng: "products/xxx.jpg"
- * → storage public: https://lvtnbackend.onrender.com/storage/products/xxx.jpg
+ * → Dùng VITE_BACKEND_URL từ .env để tạo URL đầy đủ
  */
 export const getProductImageUrl = (product) => {
   if (product?.hinh_anh && product.hinh_anh.length > 0) {
-    const path = product.hinh_anh[0].HinhAnh;
-    if (path.startsWith('http')) return path;
-    return `https://lvtnbackend.onrender.com/storage/${path}`;
+    return getStorageUrl(product.hinh_anh[0].HinhAnh);
   }
   return null;
 };

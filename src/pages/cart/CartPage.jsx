@@ -4,8 +4,9 @@ import { ChevronRight, Trash2, Minus, Plus, ShoppingCart, Store, MapPin, Clipboa
 import { formatPrice } from '../../api/productPublicApi';
 import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
+import { useCart } from '../../context/CartContext';
 
-const BACKEND_URL = "https://lvtnbackend.onrender.com/storage/";
+const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150";
 
 const getProductImage = (item) => {
@@ -37,23 +38,10 @@ const getProductImage = (item) => {
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState([]);
+  const { cartItems, loading, addToCart, updateQty, removeItem } = useCart();
   const [suggestedProducts, setSuggestedProducts] = useState([]);
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const normalizedCart = storedCart.map(item => ({
-      ID_SanPham: item.ID_SanPham || item.id,
-      TenSanPham: item.TenSanPham || item.name,
-      Gia: item.Gia || item.price,
-      SoLuong: item.SoLuong || item.qty,
-      HinhAnh: item.HinhAnh || null,
-      ID_Shop: item.ID_Shop || 'shop_0',
-      TenShop: item.TenShop || 'Gian hàng đặc sản',
-      ...item
-    }));
-    setCartItems(normalizedCart);
-    
     fetchSuggestedProducts();
   }, []);
 
@@ -68,60 +56,29 @@ export default function CartPage() {
     }
   };
 
-  const handleAddToCart = (product) => {
-    const existingIndex = cartItems.findIndex(item => item.ID_SanPham === product.ID_SanPham);
-    let newCart;
-    if (existingIndex >= 0) {
-      newCart = [...cartItems];
-      newCart[existingIndex].SoLuong += 1;
-    } else {
-      newCart = [...cartItems, {
-        ID_SanPham: product.ID_SanPham,
-        TenSanPham: product.TenSanPham,
-        Gia: product.Gia,
-        SoLuong: 1,
-        HinhAnh: product.hinh_anh && product.hinh_anh.length > 0 ? product.hinh_anh[0].HinhAnh : null,
-        ID_Shop: product.ID_Shop,
-        TenShop: product.shop ? product.shop.TenShop : 'Gian hàng đặc sản'
-      }];
+  const handleAddToCart = async (product) => {
+    try {
+      await addToCart(product, 1);
+      toast.success(`Đã thêm ${product.TenSanPham} vào giỏ!`);
+    } catch (err) {
+      toast.error(err.message || 'Không thể thêm vào giỏ hàng.');
     }
-    saveCart(newCart);
-    toast.success(`Đã thêm ${product.TenSanPham} vào giỏ!`);
   };
 
-  const saveCart = (newCart) => {
-    setCartItems(newCart);
-    const savedFormat = newCart.map(item => ({
-      id: item.ID_SanPham,
-      name: item.TenSanPham,
-      price: item.Gia,
-      qty: item.SoLuong,
-      ID_SanPham: item.ID_SanPham,
-      TenSanPham: item.TenSanPham,
-      Gia: item.Gia,
-      SoLuong: item.SoLuong,
-      HinhAnh: item.HinhAnh,
-      ID_Shop: item.ID_Shop,
-      TenShop: item.TenShop
-    }));
-    localStorage.setItem('cart', JSON.stringify(savedFormat));
-    window.dispatchEvent(new CustomEvent('cart-change'));
+  const updateQuantity = async (id, delta) => {
+    const item = cartItems.find(i => i.ID_SanPham === id);
+    if (!item) return;
+    const newQty = Math.max(1, item.SoLuong + delta);
+    try {
+      await updateQty(id, newQty);
+    } catch (err) {
+      toast.error(err.message || 'Không thể cập nhật số lượng.');
+    }
   };
 
-  const updateQuantity = (id, delta) => {
-    const newCart = cartItems.map(item => {
-      if (item.ID_SanPham === id) {
-        const newQty = Math.max(1, item.SoLuong + delta);
-        return { ...item, SoLuong: newQty };
-      }
-      return item;
-    });
-    saveCart(newCart);
-  };
-
-  const removeItem = (id) => {
-    const newCart = cartItems.filter(item => item.ID_SanPham !== id);
-    saveCart(newCart);
+  const handleRemoveItem = async (id) => {
+    await removeItem(id);
+    toast.success('Đã xóa sản phẩm khỏi giỏ hàng.');
   };
 
   const handleCheckout = () => {
@@ -284,7 +241,7 @@ export default function CartPage() {
                                     </button>
                                   </div>
                                   <button
-                                    onClick={() => removeItem(item.ID_SanPham)}
+                                    onClick={() => handleRemoveItem(item.ID_SanPham)}
                                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A89E92', padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'all 0.2s' }}
                                     title="Xóa sản phẩm"
                                     onMouseOver={(e) => { e.currentTarget.style.background = '#FEE2E2'; e.currentTarget.style.color = '#DC2626'; }}

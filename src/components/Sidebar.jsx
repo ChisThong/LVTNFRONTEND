@@ -65,18 +65,12 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
         return { name: role === 'admin' ? 'Admin' : 'Người bán', role: 'Đang tải...' };
     });
 
-    const handleLogout = async () => {
-        try {
-            if (role === 'admin') {
-                await axiosClient.post('/logout');
-            }
-        } catch (error) {
-            console.error("Lỗi đăng xuất:", error);
-        } finally {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            navigate('/login');
-        }
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+        // Gọi API xóa token phía server sau (fire-and-forget)
+        axiosClient.post('/auth/logout').catch(() => {});
     };
 
     // ── Sync Unread Chat Count ──────────────────────────────────

@@ -5,6 +5,8 @@ import Swal from 'sweetalert2';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
 import axiosClient from '../../api/axiosClient'; 
 
+const BACKEND_STORAGE = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
+
 function BanDoControl() {
     const queryClient = useQueryClient(); 
     const [viewMode, setViewMode] = useState('list');
@@ -237,15 +239,19 @@ function BanDoControl() {
             {viewMode === 'list' && (
                 <div id="admin-regions" className="view-section">
                     <div className="admin-filters">
-                        <div className="search-box">
+                        <form className="search-box" onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Search size={18} color="#6B7280" />
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm điểm ghim (đặc sản)..."
                                 value={searchMap} 
                                 onChange={(e) => { setSearchMap(e.target.value); setPage(1); }}
+                                onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
                             />
-                        </div>
+                            <button type="submit" style={{ border: 'none', background: 'var(--sidebar-active)', color: '#FFF', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, flexShrink: 0 }}>
+                                Tìm kiếm
+                            </button>
+                        </form>
                         <button className="btn-action btn-primary" onClick={handleOpenAdd} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Plus size={16} /> Thêm điểm ghim mới
                         </button>
@@ -328,7 +334,7 @@ function BanDoControl() {
                                                 {mapData.map((data, index) => (
                                                     <tr key={data.ID || data.id || data.ID_map || index}>
                                                         <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                            <img src={data.HinhAnh ? `https://lvtnbackend.onrender.com/storage/${data.HinhAnh}` : "https://via.placeholder.com/80x60?text=No+Image"} alt={data.TenDacSan} style={{ width: '70px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                            <img src={data.HinhAnh ? `${BACKEND_STORAGE}/${data.HinhAnh}` : "https://via.placeholder.com/80x60?text=No+Image"} alt={data.TenDacSan} style={{ width: '70px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
                                                             <div>
                                                                 <div style={{ fontWeight: 650, color: 'var(--text-main)' }}>{data.TenDacSan || data.TenDiaDiem}</div>
                                                                 <span style={{ fontSize: '0.72rem', color: '#2563EB', backgroundColor: '#EFF6FF', padding: '2px 6px', borderRadius: '4px' }}>{data.PhanLoai || 'Đặc sản'}</span>
