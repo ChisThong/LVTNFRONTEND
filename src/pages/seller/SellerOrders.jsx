@@ -262,26 +262,26 @@ export default function SellerOrders() {
                   </div>
 
                   {/* Cột 6: Hành động */}
-                  <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
                     {Number(order.TrangThai) === 0 && (
-                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 1)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
+                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 1)} style={{ padding: '6px 14px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', minWidth: '100px' }}>
                         Duyệt đơn
                       </button>
                     )}
                     {Number(order.TrangThai) === 1 && (
-                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 2)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
+                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 2)} style={{ padding: '6px 14px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#374151', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', minWidth: '100px' }}>
                         Giao cho ĐVVC
                       </button>
                     )}
                     {Number(order.TrangThai) === 2 && (
-                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 3)} style={{ padding: '6px 16px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#111827', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}>
+                      <button onClick={() => handleUpdateStatus(order.ID_DonHang, 3)} style={{ padding: '6px 14px', background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#111827', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', minWidth: '100px' }}>
                         Theo dõi
                       </button>
                     )}
                     {/* Nút Chi tiết */}
                     <button 
                       onClick={() => setSelectedOrder(order)}
-                      style={{ padding: '6px 16px', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#2563EB', cursor: 'pointer', transition: 'all 0.2s', width: '110px' }}
+                      style={{ padding: '6px 14px', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', color: '#2563EB', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', minWidth: '100px' }}
                     >
                       Chi tiết
                     </button>

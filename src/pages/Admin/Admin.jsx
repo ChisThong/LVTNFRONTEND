@@ -338,13 +338,13 @@ function Admin() {
 
             {/* Floating Notification Bell for Desktop Admin Panel */}
             <div className="desktop-notification-container" style={{
-                position: 'fixed',
-                top: '20px',
-                right: '30px',
-                zIndex: 999,
+                position: 'absolute',
+                top: '24px',
+                right: '28px',
+                zIndex: 100,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '15px'
+                gap: '12px'
             }}>
                 <button 
                     className="filter-btn" 
@@ -355,14 +355,16 @@ function Admin() {
                     style={{ 
                         display: 'flex', 
                         alignItems: 'center', 
-                        gap: '8px', 
-                        padding: '0.5rem 1rem', 
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                        gap: '6px', 
+                        padding: '5px 14px', 
+                        height: '34px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                         borderRadius: '20px',
                         background: '#ffffff',
-                        border: '1px solid rgba(212, 163, 115, 0.25)',
+                        border: '1px solid #E5E7EB',
                         position: 'relative',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap'
                     }}
                 >
                     <Bell size={18} color="#d4a373" />

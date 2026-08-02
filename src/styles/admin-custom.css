@@ -298,3 +298,187 @@
   max-width: 850px;
   width: 90%;
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   ADMIN UNIFIED DESIGN SYSTEM — Tối ưu kích thước & Đồng bộ hóa
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* Unified Admin Toolbar & Filter Section */
+.admin-toolbar, .filter-section, .admin-filters {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: wrap !alignment;
+  margin-bottom: 1.25rem !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Standardized Search Box */
+.admin-search-box, .search-box, .search-bar {
+  display: flex !important;
+  align-items: center !important;
+  height: 38px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 8px !important;
+  padding: 0 10px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-search-box:focus-within, .search-box:focus-within, .search-bar:focus-within {
+  border-color: #ee4d2d !important;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1) !important;
+}
+
+.admin-search-box input, .search-box input, .search-bar input {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  padding: 0 8px !important;
+  font-size: 0.85rem !important;
+  color: #374151 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.admin-search-box button, .search-box button, .search-bar button {
+  height: 28px !important;
+  padding: 0 12px !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  background: #ee4d2d !important;
+  color: #FFF !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+/* Standard Selects & Inputs in Admin */
+.admin-select, select.admin-select-input {
+  height: 38px !important;
+  padding: 0 12px !important;
+  font-size: 0.85rem !important;
+  color: #374151 !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 8px !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+
+/* Pill Tabs / Status Filters */
+.admin-tab-group, .filter-group, .filter-tabs {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+
+.admin-tab-btn, .filter-btn, .tab-btn {
+  height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 20px !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  background: #F3F4F6 !important;
+  color: #4B5563 !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+.admin-tab-btn:hover, .filter-btn:hover, .tab-btn:hover {
+  background: #E5E7EB !important;
+  color: #111827 !important;
+}
+
+.admin-tab-btn.active, .filter-btn.active, .tab-btn.active {
+  background: #ee4d2d !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(238, 77, 45, 0.25) !important;
+}
+
+/* Standardized Admin Table Layout */
+.admin-card-table, .table-container, .admin-table-wrapper {
+  background: #FFFFFF !important;
+  border-radius: 12px !important;
+  border: 1px solid #E5E7EB !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+  overflow: hidden !important;
+}
+
+.admin-table, table.admin-custom-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  text-align: left !important;
+}
+
+.admin-table th, table.admin-custom-table th {
+  padding: 12px 16px !important;
+  background: #FAFAFA !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  color: #6B7280 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-bottom: 1px solid #E5E7EB !important;
+}
+
+.admin-table td, table.admin-custom-table td {
+  padding: 12px 16px !important;
+  font-size: 0.88rem !important;
+  color: #1F2937 !important;
+  border-bottom: 1px solid #F3F4F6 !important;
+  vertical-align: middle !important;
+}
+
+.admin-table tr:last-child td, table.admin-custom-table tr:last-child td {
+  border-bottom: none !important;
+}
+
+.admin-table tr:hover td, table.admin-custom-table tr:hover td {
+  background-color: #FAFAFA !important;
+}
+
+/* Action Icon Buttons in Table */
+.action-btn-group, .action-buttons {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.btn-action-icon, .btn-action {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #E5E7EB !important;
+  background: #FFFFFF !important;
+  color: #4B5563 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-action-icon:hover, .btn-action:hover {
+  background: #F3F4F6 !important;
+  color: #111827 !important;
+  border-color: #D1D5DB !important;
+}
+
+.btn-action-icon.view:hover { color: #2563EB !important; background: #EFF6FF !important; border-color: #BFDBFE !important; }
+.btn-action-icon.edit:hover { color: #D97706 !important; background: #FFFBEB !important; border-color: #FDE68A !important; }
+.btn-action-icon.delete:hover { color: #DC2626 !important; background: #FEF2F2 !important; border-color: #FECACA !important; }
+.btn-action-icon.approve:hover { color: #059669 !important; background: #ECFDF5 !important; border-color: #A7F3D0 !important; }

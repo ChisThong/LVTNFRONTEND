@@ -232,11 +232,9 @@ export default function AdminProductControl() {
 
   return (
     <div className="admin-product-page">
-      <div className="page-header">
-        <div className="header-content">
-          <h1><Package size={28} style={{marginRight: '12px'}}/> Quản lý sản phẩm</h1>
-          <p>Kiểm soát toàn bộ sản phẩm của gian hàng trên hệ thống NamBộ CENTRAL</p>
-        </div>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h2 className="admin-title">Quản lý sản phẩm</h2>
+        <p className="admin-header-subtitle">Kiểm soát toàn bộ sản phẩm của gian hàng trên hệ thống NamBộ CENTRAL</p>
       </div>
 
       <div className="filter-section">

@@ -300,8 +300,9 @@ function AdminWalletDashboard() {
   });
 
   const inputStyle = {
-    padding: '0.5rem 0.9rem', border: '1px solid #e2e8f0', borderRadius: '8px',
-    fontSize: '0.875rem', outline: 'none', background: '#fff', color: '#1e293b',
+    height: '38px', padding: '0 0.9rem', border: '1px solid #E5E7EB', borderRadius: '8px',
+    fontSize: '0.85rem', outline: 'none', background: '#fff', color: '#374151',
+    boxSizing: 'border-box', boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
   };
 
   if (loading) return (
@@ -328,20 +329,20 @@ function AdminWalletDashboard() {
       `}</style>
 
       {/* ── Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem', paddingRight: '140px' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800, color: '#1e293b' }}>
-            🏦 Quản lý Ví điện tử
+          <h2 className="admin-title">
+            Quản lý Ví điện tử
           </h2>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.875rem' }}>
+          <p className="admin-header-subtitle">
             Tổng quan tài chính & lịch sử giao dịch toàn hệ thống
           </p>
         </div>
         <button onClick={handleRefresh} style={{
-          display: 'flex', alignItems: 'center', gap: '6px',
-          background: '#1e293b', color: '#fff', border: 'none',
-          padding: '0.6rem 1.2rem', borderRadius: '10px', cursor: 'pointer',
-          fontSize: '0.875rem', fontWeight: 600
+          display: 'inline-flex', alignItems: 'center', gap: '6px',
+          background: '#ee4d2d', color: '#fff', border: 'none',
+          height: '38px', padding: '0 16px', borderRadius: '8px', cursor: 'pointer',
+          fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', boxShadow: '0 2px 8px rgba(238, 77, 45, 0.25)'
         }}>
           <RefreshCw size={15} /> Làm mới
         </button>
@@ -349,8 +350,8 @@ function AdminWalletDashboard() {
 
       {/* ── Tabs ── */}
       <div style={{
-        display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px',
-        borderRadius: '10px', marginBottom: '2rem', width: 'fit-content'
+        display: 'flex', gap: '6px', background: '#F3F4F6', padding: '4px',
+        borderRadius: '10px', marginBottom: '1.5rem', width: 'fit-content'
       }}>
         {[
           { key: 'overview', label: '📊 Tổng quan' },
@@ -370,11 +371,11 @@ function AdminWalletDashboard() {
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === 'overview' && stats && (
         <div>
-          {/* Stats grid */}
+          {/* Stats grid — 4 cột cân đối */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-            gap: '1rem', marginBottom: '2rem'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '1.25rem', marginBottom: '2rem'
           }}>
             <StatCard icon={Users}        label="Số dư ví Khách hàng"   value={stats.total_customer_balance}  color="#0284c7" bg="#e0f2fe" note={`Tổng ${stats.total_wallets} ví`} />
             <StatCard icon={ShoppingBag}  label="Số dư ví Người bán"    value={stats.total_seller_balance}    color="#7c3aed" bg="#ede9fe" />
@@ -521,8 +522,9 @@ function AdminWalletDashboard() {
                   style={{
                     padding: '5px 12px', borderRadius: '20px', cursor: 'pointer',
                     fontSize: '0.78rem', fontWeight: 600, border: 'none', transition: 'all 0.15s',
-                    background: datePreset === p.key ? '#1e293b' : '#f1f5f9',
-                    color: datePreset === p.key ? '#fff' : '#475569',
+                    background: datePreset === p.key ? '#ee4d2d' : '#F3F4F6',
+                    color: datePreset === p.key ? '#fff' : '#4B5563',
+                    height: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
                   }}
                 >
                   {p.label}

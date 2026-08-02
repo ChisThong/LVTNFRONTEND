@@ -101,14 +101,14 @@ export default function SellerDashboard() {
       {!loading && shop && (
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '15px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', paddingRight: '140px' }}>
             <div>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#2C3A29', margin: '0 0 0.5rem 0' }}>Tổng quan gian hàng</h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#8C7B6D', fontSize: '0.9rem' }}>
+              <h2 className="admin-title">Tổng quan gian hàng</h2>
+              <p className="admin-header-subtitle">
                 <span style={{ fontWeight: 600, color: '#4A5B45' }}>{shop.TenShop}</span>
-                <span>•</span>
+                <span> • </span>
                 <span>Loại hình kinh doanh: <strong style={{ color: '#D97706' }}>{shop.LoaiHinhKinhDoanh === 'doanh_nghiep' ? 'Doanh nghiệp' : 'Hộ kinh doanh cá thể'}</strong></span>
-              </div>
+              </p>
             </div>
             
             {shop.TrangThaiDuyet === 'da_duyet' ? (

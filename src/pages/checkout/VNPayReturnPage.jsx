@@ -9,13 +9,15 @@ export default function VNPayReturnPage() {
 
   // Đọc các tham số từ URL do VNPay trả về
   const responseCode = searchParams.get('vnp_ResponseCode');
-  const transactionNo = searchParams.get('vnp_TransactionNo');
-  const amountParam = searchParams.get('vnp_Amount');
+  const status = searchParams.get('status');
+  const transactionNo = searchParams.get('vnp_TransactionNo') || searchParams.get('txn_ref');
+  const amountParam = searchParams.get('vnp_Amount') || searchParams.get('amount');
   
-  // VNPay gửi số tiền nhân với 100, nên ta chia lại cho 100 để hiển thị đúng
-  const amount = amountParam ? parseInt(amountParam) / 100 : 0;
+  // VNPay gửi số tiền nhân với 100 nếu vnp_Amount, hoặc số tiền trực tiếp
+  const rawAmount = amountParam ? parseFloat(amountParam) : 0;
+  const amount = rawAmount > 1000000 ? rawAmount / 100 : rawAmount;
   
-  const isSuccess = responseCode === '00';
+  const isSuccess = responseCode === '00' || status === 'success';
 
   useEffect(() => {
     if (isSuccess) {

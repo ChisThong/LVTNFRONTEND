@@ -354,16 +354,16 @@ function SellerLayout() {
         {/* Main content */}
         <main className="admin-main" style={{ background: '#F8F5F1', minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
           
-          {/* Floating Notification Bell matching Admin dashboard styling */}
-          {shop && (
+          {/* Floating Notification Bell for Desktop Seller Panel */}
+          {user && (
             <div className="desktop-notification-container" style={{
-              position: 'fixed',
-              top: '20px',
-              right: '30px',
-              zIndex: 999,
+              position: 'absolute',
+              top: '24px',
+              right: '28px',
+              zIndex: 100,
               display: 'flex',
               alignItems: 'center',
-              gap: '15px'
+              gap: '12px'
             }}>
               <button 
                 className="filter-btn" 
@@ -374,14 +374,16 @@ function SellerLayout() {
                 style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '8px', 
-                  padding: '0.5rem 1rem', 
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  gap: '6px', 
+                  padding: '5px 14px', 
+                  height: '34px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                   borderRadius: '20px',
                   background: '#ffffff',
-                  border: '1px solid rgba(44, 58, 41, 0.25)',
+                  border: '1px solid #E5E7EB',
                   position: 'relative',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 <Bell size={18} color="#2C3A29" />

@@ -79,7 +79,10 @@ export default function NguoiDungControl() {
 
     return (
         <div className="view-section">
-            <h1 className="admin-title">Quản lý người dùng</h1>
+            <div style={{ marginBottom: '1.25rem' }}>
+                <h2 className="admin-title">Quản lý người dùng</h2>
+                <p className="admin-header-subtitle">Quản lý thành viên, gian hàng và quyền hạn trong hệ thống</p>
+            </div>
 
             {/* Khu vực thẻ thống kê */}
             <div className="stat-grid">

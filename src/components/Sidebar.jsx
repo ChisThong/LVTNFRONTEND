@@ -68,8 +68,10 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('wallet');
+        window.dispatchEvent(new Event('auth-change'));
+        window.dispatchEvent(new CustomEvent('cart-change'));
         navigate('/login');
-        // Gọi API xóa token phía server sau (fire-and-forget)
         axiosClient.post('/auth/logout').catch(() => {});
     };
 

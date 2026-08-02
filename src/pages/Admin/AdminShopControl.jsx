@@ -235,9 +235,9 @@ function AdminShopControl() {
 
     return (
         <div className="view-section" style={{ position: 'relative' }}>
-            <div style={{ marginBottom: '2rem' }}>
-                <h2 className="admin-title" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 900, color: '#3A2E26' }}>Kiểm duyệt gian hàng</h2>
-                <p style={{ color: '#8C7B6D', marginTop: '0.5rem', fontSize: '1rem' }}>Chào mừng trở lại, hôm nay hệ thống có gì mới?</p>
+            <div style={{ marginBottom: '1.25rem' }}>
+                <h2 className="admin-title">Kiểm duyệt gian hàng</h2>
+                <p className="admin-header-subtitle">Chào mừng trở lại, hôm nay hệ thống có gì mới?</p>
             </div>
 
             <div className="admin-filters" style={{ background: 'transparent', padding: 0, boxShadow: 'none' }}>
