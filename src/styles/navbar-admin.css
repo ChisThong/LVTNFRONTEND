@@ -363,7 +363,7 @@ body {
 .admin-main {
     margin-left: 280px;
     flex-grow: 1;
-    padding: 2.5rem;
+    padding: 1.75rem 2rem;
     max-width: calc(100% - 280px);
     transition: margin-left 0.3s ease, max-width 0.3s ease, var(--transition);
     position: relative;
@@ -376,23 +376,31 @@ body {
 }
 
 .admin-title {
-    font-size: 1.85rem;
-    font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 2rem;
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: #2D241E !important;
+    margin-bottom: 0.25rem !important;
     position: relative;
     display: inline-block;
+    letter-spacing: -0.3px;
 }
 
 .admin-title::after {
     content: '';
     position: absolute;
     left: 0;
-    bottom: -6px;
-    width: 40px;
-    height: 4px;
+    bottom: -4px;
+    width: 28px;
+    height: 3px;
     border-radius: 2px;
     background: var(--sidebar-active);
+}
+
+.admin-header-subtitle {
+    color: #786C62 !important;
+    margin-top: 0.35rem !important;
+    font-size: 0.88rem !important;
+    font-weight: 400 !important;
 }
 
 .view-section {

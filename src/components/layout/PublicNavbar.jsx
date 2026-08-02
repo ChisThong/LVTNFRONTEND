@@ -159,11 +159,13 @@ export default function PublicNavbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Logout ────────────────────────────
+  // ── Logout siêu tốc ────────────────────
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('wallet');
+    window.dispatchEvent(new Event('auth-change'));
+    window.dispatchEvent(new CustomEvent('cart-change'));
     setUser(null);
     setUserMenuOpen(false);
     navigate('/');

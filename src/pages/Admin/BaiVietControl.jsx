@@ -231,7 +231,10 @@ export default function BaiVietController() {
 
     return (
         <div className="view-section">
-            <h1 className="admin-title">Quản lý bài viết</h1>
+            <div style={{ marginBottom: '1.25rem' }}>
+                <h2 className="admin-title">Quản lý bài viết</h2>
+                <p className="admin-header-subtitle">Quản lý bài viết truyền thông, tin tức & sự kiện văn hóa Nam Bộ</p>
+            </div>
 
             {/* Bộ lọc và Tìm kiếm */}
             <div className="admin-filters">
@@ -258,7 +261,7 @@ export default function BaiVietController() {
                         </button>
                     </div>
 
-                    <button className="btn-action btn-primary flex-align-center-gap-6" onClick={handleOpenFormThem}>
+                    <button className="btn-action btn-primary flex-align-center-gap-6" onClick={handleOpenFormThem} style={{ whiteSpace: 'nowrap', flexShrink: 0, height: '38px', padding: '0 16px' }}>
                         <Plus size={16} /> Thêm bài viết mới
                     </button>
                 </div>

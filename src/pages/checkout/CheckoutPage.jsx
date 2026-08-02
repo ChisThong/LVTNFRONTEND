@@ -20,9 +20,44 @@ export default function CheckoutPage() {
   const [diaChiGiao, setDiaChiGiao] = useState('');
   const [sdtNhanHang, setSdtNhanHang] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('COD'); // 'COD' hoặc 'VNPAY' hoặc 'WALLET'
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
   
   // Tính số dư từ Context thay vì state cục bộ
   const walletBalance = parseFloat(wallet?.balance || 0);
+
+  useEffect(() => {
+    // Tải thông tin người dùng từ API /me hoặc localStorage
+    const loadUser = async () => {
+      try {
+        const res = await axiosClient.get('/me');
+        if (res.data?.data) {
+          const usr = res.data.data;
+          setCurrentUser(usr);
+          if (usr.sdt) setSdtNhanHang(usr.sdt);
+          if (usr.diachi) setDiaChiGiao(usr.diachi);
+          if (!usr.sdt || !usr.diachi) {
+            setIsEditingAddress(true);
+          }
+        }
+      } catch (err) {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          try {
+            const usr = JSON.parse(stored);
+            setCurrentUser(usr);
+            if (usr.sdt) setSdtNhanHang(usr.sdt);
+            if (usr.diachi) setDiaChiGiao(usr.diachi);
+            if (!usr.sdt || !usr.diachi) {
+              setIsEditingAddress(true);
+            }
+          } catch (e) { /* ignore */ }
+        }
+      }
+    };
+
+    loadUser();
+  }, []);
 
   useEffect(() => {
     // Dùng từ CartContext (đã load từ API hoặc localStorage)
@@ -126,37 +161,87 @@ export default function CheckoutPage() {
         
         {/* Thông tin Giao Hàng */}
         <div className="shopee-card" style={{ padding: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <MapPin size={20} color="var(--shopee-orange)" /> Địa Chỉ Nhận Hàng
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div className="form-group">
-              <label>Số điện thoại người nhận <span className="required">*</span></label>
-              <div style={{ position: 'relative' }}>
-                <Smartphone size={18} style={{ position: 'absolute', top: '10px', left: '10px', color: '#888' }} />
-                <input 
-                  type="text" 
-                  style={{ paddingLeft: '35px' }}
-                  placeholder="Ví dụ: 0912345678" 
-                  value={sdtNhanHang} 
-                  onChange={e => setSdtNhanHang(e.target.value)} 
-                />
-              </div>
-            </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Địa chỉ giao hàng chi tiết <span className="required">*</span></label>
-              <div style={{ position: 'relative' }}>
-                <MapPin size={18} style={{ position: 'absolute', top: '10px', left: '10px', color: '#888' }} />
-                <input 
-                  type="text" 
-                  style={{ paddingLeft: '35px' }}
-                  placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố" 
-                  value={diaChiGiao} 
-                  onChange={e => setDiaChiGiao(e.target.value)} 
-                />
-              </div>
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MapPin size={20} color="var(--shopee-orange)" /> Địa Chỉ Nhận Hàng
+            </h3>
+            {!isEditingAddress && (sdtNhanHang && diaChiGiao) && (
+              <button 
+                type="button" 
+                onClick={() => setIsEditingAddress(true)}
+                style={{ background: 'none', border: 'none', color: 'var(--shopee-orange)', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem' }}
+              >
+                Thay đổi
+              </button>
+            )}
           </div>
+
+          {!isEditingAddress && (sdtNhanHang && diaChiGiao) ? (
+            <div style={{ background: '#FAF7F5', border: '1px solid #F5EAE6', padding: '1rem 1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ fontWeight: 'bold', fontSize: '1.05rem', color: '#222', marginBottom: '4px' }}>
+                  👤 {currentUser?.HoTen || 'Người nhận'} ({sdtNhanHang})
+                </div>
+                <div style={{ color: '#555', fontSize: '0.95rem', lineHeight: '1.4' }}>
+                  📍 {diaChiGiao}
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setIsEditingAddress(true)}
+                className="shopee-btn-outline"
+                style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+              >
+                Chỉnh sửa địa chỉ
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label>Số điện thoại người nhận <span className="required">*</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <Smartphone size={18} style={{ position: 'absolute', top: '10px', left: '10px', color: '#888' }} />
+                    <input 
+                      type="text" 
+                      style={{ paddingLeft: '35px' }}
+                      placeholder="Ví dụ: 0912345678" 
+                      value={sdtNhanHang} 
+                      onChange={e => setSdtNhanHang(e.target.value)} 
+                    />
+                  </div>
+                </div>
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label>Địa chỉ giao hàng chi tiết <span className="required">*</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <MapPin size={18} style={{ position: 'absolute', top: '10px', left: '10px', color: '#888' }} />
+                    <input 
+                      type="text" 
+                      style={{ paddingLeft: '35px' }}
+                      placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố" 
+                      value={diaChiGiao} 
+                      onChange={e => setDiaChiGiao(e.target.value)} 
+                    />
+                  </div>
+                </div>
+              </div>
+              {(sdtNhanHang.trim() && diaChiGiao.trim()) && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsEditingAddress(false)}
+                    className="shopee-btn"
+                    style={{ padding: '8px 18px', fontSize: '0.9rem' }}
+                  >
+                    Xác nhận địa chỉ
+                  </button>
+                </div>
+              )}
+              <p style={{ margin: '8px 0 0 0', fontSize: '0.82rem', color: '#888', fontStyle: 'italic' }}>
+                * Số điện thoại & địa chỉ này sẽ được tự động lưu vào hồ sơ tài khoản của bạn để sử dụng cho lần sau.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Product List */}

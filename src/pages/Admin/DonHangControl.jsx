@@ -258,11 +258,11 @@ function DonHangControl() {
     return (
         <div className="view-section" style={{ position: 'relative' }}>
             {/* Tiêu đề trang */}
-            <div style={{ marginBottom: '2rem' }}>
-                <h2 className="admin-title" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 900, color: '#3A2E26' }}>
+            <div style={{ marginBottom: '1.25rem' }}>
+                <h2 className="admin-title">
                     Quản lý đơn hàng toàn hệ thống
                 </h2>
-                <p style={{ color: '#8C7B6D', marginTop: '0.5rem', fontSize: '1rem' }}>
+                <p className="admin-header-subtitle">
                     Theo dõi, kiểm tra thông tin giao dịch giữa các Shop bán hàng và Khách hàng.
                 </p>
             </div>
@@ -343,61 +343,61 @@ function DonHangControl() {
                 </div>
                 
                 <form onSubmit={handleApplyFilters}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
                         
                         {/* Tìm theo mã đơn hàng con */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mã đơn hàng con</label>
-                            <div className="search-box" style={{ maxWidth: '100%', padding: '0.5rem 1rem' }}>
+                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mã đơn hàng con</label>
+                            <div className="search-box" style={{ maxWidth: '100%', height: '38px', padding: '0 10px' }}>
                                 <Search size={16} color="var(--text-muted)" />
                                 <input 
                                     type="text"
                                     placeholder="Nhập mã đơn (DH-...)"
                                     value={maDonCon}
                                     onChange={(e) => setMaDonCon(e.target.value)}
-                                    style={{ margin: 0, fontSize: '0.9rem' }}
+                                    style={{ margin: 0, fontSize: '0.85rem' }}
                                 />
                             </div>
                         </div>
 
                         {/* Tìm theo tên khách hàng */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tên khách hàng</label>
-                            <div className="search-box" style={{ maxWidth: '100%', padding: '0.5rem 1rem' }}>
+                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tên khách hàng</label>
+                            <div className="search-box" style={{ maxWidth: '100%', height: '38px', padding: '0 10px' }}>
                                 <Search size={16} color="var(--text-muted)" />
                                 <input 
                                     type="text"
                                     placeholder="Họ tên người mua..."
                                     value={tenKhach}
                                     onChange={(e) => setTenKhach(e.target.value)}
-                                    style={{ margin: 0, fontSize: '0.9rem' }}
+                                    style={{ margin: 0, fontSize: '0.85rem' }}
                                 />
                             </div>
                         </div>
 
                         {/* Tìm theo tên shop */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gian hàng (Shop)</label>
-                            <div className="search-box" style={{ maxWidth: '100%', padding: '0.5rem 1rem' }}>
+                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gian hàng (Shop)</label>
+                            <div className="search-box" style={{ maxWidth: '100%', height: '38px', padding: '0 10px' }}>
                                 <Search size={16} color="var(--text-muted)" />
                                 <input 
                                     type="text"
                                     placeholder="Tên gian hàng..."
                                     value={tenShop}
                                     onChange={(e) => setTenShop(e.target.value)}
-                                    style={{ margin: 0, fontSize: '0.9rem' }}
+                                    style={{ margin: 0, fontSize: '0.85rem' }}
                                 />
                             </div>
                         </div>
 
                         {/* Tìm theo trạng thái */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Trạng thái đơn hàng</label>
+                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Trạng thái đơn hàng</label>
                             <select
                                 className="admin-form-control"
                                 value={trangThai}
                                 onChange={(e) => setTrangThai(e.target.value)}
-                                style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', height: '42px' }}
+                                style={{ padding: '0 0.9rem', fontSize: '0.85rem', height: '38px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF' }}
                             >
                                 <option value="">Tất cả trạng thái</option>
                                 <option value="0">Chờ xác nhận</option>
@@ -410,43 +410,43 @@ function DonHangControl() {
 
                         {/* Từ ngày */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Từ ngày</label>
+                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Từ ngày</label>
                             <input 
                                 type="date"
                                 className="admin-form-control"
                                 value={tuNgay}
                                 onChange={(e) => setTuNgay(e.target.value)}
-                                style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', height: '42px' }}
+                                style={{ padding: '0 0.9rem', fontSize: '0.85rem', height: '38px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF' }}
                             />
                         </div>
 
                         {/* Đến ngày */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Đến ngày</label>
+                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Đến ngày</label>
                             <input 
                                 type="date"
                                 className="admin-form-control"
                                 value={denNgay}
                                 onChange={(e) => setDenNgay(e.target.value)}
-                                style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', height: '42px' }}
+                                style={{ padding: '0 0.9rem', fontSize: '0.85rem', height: '38px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF' }}
                             />
                         </div>
                     </div>
 
                     {/* Dòng nút hành động gọn gàng ở góc dưới bên phải */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', borderTop: '1px dashed var(--border-color)', paddingTop: '1.25rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', borderTop: '1px dashed var(--border-color)', paddingTop: '1rem' }}>
                         <button 
                             type="button" 
                             className="filter-btn"
                             onClick={handleClearFilters}
-                            style={{ height: '38px', padding: '0 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem' }}
+                            style={{ height: '38px', padding: '0 1.25rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0 }}
                         >
                             Thiết lập lại
                         </button>
                         <button 
                             type="submit" 
                             className="btn-action btn-primary"
-                            style={{ height: '38px', padding: '0 1.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
+                            style={{ height: '38px', padding: '0 1.5rem', display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0 }}
                         >
                             <Search size={14} /> Áp dụng bộ lọc
                         </button>

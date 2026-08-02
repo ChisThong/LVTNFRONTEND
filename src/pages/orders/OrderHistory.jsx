@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
-import { Package, Clock, CheckCircle, Truck, XCircle, Store, Star, ShoppingBag } from 'lucide-react';
+import { Package, Clock, CheckCircle, Truck, XCircle, Store, Star, ShoppingBag, CreditCard, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatPrice } from '../../api/productPublicApi';
 import '../../styles/orders.css';
@@ -229,6 +229,40 @@ export default function OrderHistory() {
     }
   };
 
+  // ── Thanh toán lại ──
+  const [repayModalOrder, setRepayModalOrder] = useState(null);
+  const [repayPaymentMethod, setRepayPaymentMethod] = useState('VNPAY');
+  const [repayLoading, setRepayLoading] = useState(false);
+
+  const handleOpenRepayModal = (donHangTong) => {
+    setRepayModalOrder(donHangTong);
+    setRepayPaymentMethod(donHangTong.PhuongThucThanhToan === 'WALLET' ? 'WALLET' : 'VNPAY');
+  };
+
+  const handleRepaySubmit = async () => {
+    if (!repayModalOrder) return;
+    setRepayLoading(true);
+    try {
+      const res = await axiosClient.post(`/don-hang/${repayModalOrder.ID_DonHangTong}/repay`, {
+        PhuongThucThanhToan: repayPaymentMethod,
+      });
+      if (res.data?.success) {
+        if (repayPaymentMethod === 'VNPAY' && res.data?.vnpay_url) {
+          toast.loading('Đang chuyển hướng sang VNPay...', { id: 'repay' });
+          window.location.href = res.data.vnpay_url;
+        } else {
+          toast.success(res.data?.message || 'Thanh toán thành công!', { id: 'repay' });
+          setRepayModalOrder(null);
+          fetchOrders();
+        }
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Thanh toán thất bại. Vui lòng thử lại.', { id: 'repay' });
+    } finally {
+      setRepayLoading(false);
+    }
+  };
+
   // ── Status helper ──
   const getStatusInfo = (status) => {
     switch (status) {
@@ -356,7 +390,7 @@ export default function OrderHistory() {
             <div key={donHangTong.ID_DonHangTong} className="order-group-wrapper">
 
               {/* Header đơn hàng tổng */}
-              <div className="order-group-header">
+              <div className="order-group-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
                   <strong className="order-group-id">
                     Mã Đơn Tổng: #{donHangTong.ID_DonHangTong}
@@ -366,9 +400,20 @@ export default function OrderHistory() {
                     {donHangTong.TrangThaiThanhToan === 1 ? ' · Đã thanh toán' : ' · Chưa thanh toán'}
                   </span>
                 </div>
-                <strong className="order-group-total">
-                  Tổng: {formatPrice(donHangTong.TongGiaTien)}
-                </strong>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <strong className="order-group-total">
+                    Tổng: {formatPrice(donHangTong.TongGiaTien)}
+                  </strong>
+                  {donHangTong.TrangThaiThanhToan !== 1 && donHangTong.don_hangs?.some(d => d.TrangThai !== 4) && (
+                    <button
+                      onClick={() => handleOpenRepayModal(donHangTong)}
+                      className="shopee-btn"
+                      style={{ padding: '6px 14px', fontSize: '0.88rem', backgroundColor: '#ee4d2d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      Thanh toán lại
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Danh sách đơn con */}
@@ -728,6 +773,108 @@ export default function OrderHistory() {
                 }}
               >
                 Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          MODAL THANH TOÁN LẠI
+          ══════════════════════════════════════════════════ */}
+      {repayModalOrder && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(3px)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          zIndex: 9999, padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFF', borderRadius: '16px', width: '100%',
+            maxWidth: '480px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            display: 'flex', flexDirection: 'column'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #E5E7EB', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#111827', fontWeight: 800 }}>
+                Thanh toán lại Đơn hàng #{repayModalOrder.ID_DonHangTong}
+              </h3>
+              <button
+                onClick={() => setRepayModalOrder(null)}
+                style={{ background: '#F3F4F6', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontSize: '1.2rem', color: '#4B5563', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ background: '#FFF5F2', border: '1px solid #FFDDD2', padding: '14px 16px', borderRadius: '10px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#4B5563', fontWeight: 600 }}>Tổng tiền cần thanh toán:</span>
+              <strong style={{ color: '#EE4D2D', fontSize: '1.2rem' }}>{formatPrice(repayModalOrder.TongGiaTien)}</strong>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontWeight: 700, marginBottom: '12px', color: '#374151', fontSize: '0.95rem' }}>
+                Chọn phương thức thanh toán:
+              </label>
+
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px',
+                border: repayPaymentMethod === 'VNPAY' ? '2px solid #EE4D2D' : '1px solid #E5E7EB',
+                borderRadius: '12px', cursor: 'pointer', marginBottom: '12px',
+                background: repayPaymentMethod === 'VNPAY' ? '#FFF5F2' : '#FFF',
+                transition: 'all 0.2s'
+              }}>
+                <input
+                  type="radio"
+                  name="repayMethod"
+                  value="VNPAY"
+                  checked={repayPaymentMethod === 'VNPAY'}
+                  onChange={() => setRepayPaymentMethod('VNPAY')}
+                  style={{ accentColor: '#EE4D2D', width: '18px', height: '18px' }}
+                />
+                <CreditCard size={22} color="#EE4D2D" />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#111827' }}>Thanh toán qua VNPay</div>
+                  <div style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '2px' }}>Thẻ ATM / QR Code / Mobile Banking</div>
+                </div>
+              </label>
+
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px',
+                border: repayPaymentMethod === 'WALLET' ? '2px solid #EE4D2D' : '1px solid #E5E7EB',
+                borderRadius: '12px', cursor: 'pointer',
+                background: repayPaymentMethod === 'WALLET' ? '#FFF5F2' : '#FFF',
+                transition: 'all 0.2s'
+              }}>
+                <input
+                  type="radio"
+                  name="repayMethod"
+                  value="WALLET"
+                  checked={repayPaymentMethod === 'WALLET'}
+                  onChange={() => setRepayPaymentMethod('WALLET')}
+                  style={{ accentColor: '#EE4D2D', width: '18px', height: '18px' }}
+                />
+                <Wallet size={22} color="#2563EB" />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#111827' }}>Số dư Ví NamBộ Specialties</div>
+                  <div style={{ fontSize: '0.8rem', color: '#6B7280', marginTop: '2px' }}>Thanh toán ngay bằng Ví tài khoản của bạn</div>
+                </div>
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+              <button
+                onClick={() => setRepayModalOrder(null)}
+                disabled={repayLoading}
+                style={{ padding: '10px 20px', background: '#F3F4F6', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleRepaySubmit}
+                disabled={repayLoading}
+                style={{ padding: '10px 24px', background: '#EE4D2D', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(238, 77, 45, 0.25)' }}
+              >
+                {repayLoading ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
               </button>
             </div>
           </div>

@@ -229,10 +229,11 @@ function BanDoControl() {
     return (
         <>
             {/* THANH TIÊU ĐỀ TRÊN CÙNG */}
-            <div className="admin-top-bar" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <h1 className="admin-title" style={{ marginBottom: 0 }}>
-                    Quản Lý Danh Mục Vùng Miền & Bản Đồ
-                </h1>
+            <div style={{ marginBottom: '1.25rem' }}>
+                <h2 className="admin-title">
+                    Quản lý danh mục vùng miền & bản đồ
+                </h2>
+                <p className="admin-header-subtitle">Quản lý vị trí ghim đặc sản, khu vực địa lý vùng miền Nam Bộ</p>
             </div>
 
             {/* 1. MÀN HÌNH DANH SÁCH CHÍNH */}
@@ -252,7 +253,7 @@ function BanDoControl() {
                                 Tìm kiếm
                             </button>
                         </form>
-                        <button className="btn-action btn-primary" onClick={handleOpenAdd} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button className="btn-action btn-primary" onClick={handleOpenAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', flexShrink: 0, height: '38px', padding: '0 16px' }}>
                             <Plus size={16} /> Thêm điểm ghim mới
                         </button>
                     </div>

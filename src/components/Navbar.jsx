@@ -129,16 +129,16 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Logout ─────────────────────────────────────────────────────────────────
+  // ── Logout siêu tốc ─────────────────────────────────────────────────────────
   const handleLogout = () => {
-    // Xóa token, user, wallet và navigate ngay lập tức — không chờ API
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('wallet');
+    window.dispatchEvent(new Event('auth-change'));
+    window.dispatchEvent(new CustomEvent('cart-change'));
     setUser(null);
     setUserMenuOpen(false);
     navigate('/');
-    // Gọi API backend sau (fire-and-forget) để xóa token phía server
     axiosClient.post('/auth/logout').catch(() => {});
   };
 

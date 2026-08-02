@@ -127,6 +127,7 @@ export default function Login() {
     const { access_token, user } = data;
     localStorage.setItem('token', access_token);
     localStorage.setItem('user', JSON.stringify(user));
+    window.dispatchEvent(new Event('auth-change'));
     navigateByRole(user, navigate);
   };
 
