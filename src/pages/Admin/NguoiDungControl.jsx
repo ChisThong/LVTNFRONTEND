@@ -210,7 +210,7 @@ export default function NguoiDungControl() {
                                         </div>
                                     </td>
                                     <td>
-                                        <span className={`badge ${u.ID_role === 1 ? 'badge-role-admin' : u.ID_role === 3 ? 'badge-role-seller' : 'badge-role-buyer'}`}>
+                                        <span >
                                             {u.role?.Ten_role || 'Chưa cập nhật'}
                                         </span>
                                     </td>

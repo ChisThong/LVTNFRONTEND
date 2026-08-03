@@ -47,17 +47,6 @@ export default function PublicFooter() {
           <Link to="/map">Bản đồ đặc sản</Link>
           <Link to="/stories">Câu chuyện sản vật</Link>
         </div>
-
-        {/* Bản tin */}
-        <div className="footer-newsletter">
-          <h4>Bản tin</h4>
-          <p>Nhận thông báo về các đặc sản mới nhất.</p>
-          <div className="subscribe-box">
-            <input type="email" placeholder="Email của bạn" aria-label="Email đăng ký bản tin" />
-            <button type="button">Gửi</button>
-          </div>
-        </div>
-
       </div>
 
       <div className="footer-bottom">

@@ -306,7 +306,7 @@ export default function BaiVietController() {
                                     </td>
                                     <td>{b.user?.HoTen}</td>
                                     <td>
-                                        <span className={`badge ${b.LoaiTin == 0 ? 'badge-role-buyer' : 'badge-role-seller'}`}>
+                                        <span >
                                             {b.LoaiTin == 0 ? "Bài viết" : "Tin tức & sự kiện"}
                                         </span>
                                     </td>

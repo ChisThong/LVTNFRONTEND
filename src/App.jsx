@@ -20,6 +20,10 @@ import About from './pages/About';
 import AccountPage from './pages/account/AccountPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import CauChuyenSanVat from './pages/Khampha/CauChuyenSanVat';
+import BaiVietTinhThanh from './pages/Khampha/BaiVietTinhThanh';
+import BanDoDacSan from './pages/Khampha/BanDoDacSan';
+import Chitietbaiviet from './pages/Khampha/Chitietbaiviet';
 
 // ── Seller Pages ────────────────────────────────────────────
 import SellerRegister from './pages/seller/SellerRegister';
@@ -52,9 +56,6 @@ import AdminShopControl from './pages/Admin/AdminShopControl';
 import AdminProductControl from './pages/Admin/AdminProductControl';
 import NguoiDungControl from './pages/Admin/NguoiDungControl';
 import DonHangControl from './pages/Admin/DonHangControl';
-import CauChuyenSanVat from './pages/shops/CauChuyenSanVat';
-import BaiVietTinhThanh from './pages/shops/BaiVietTinhThanh';
-import BanDoDacSan from './pages/BanDoDacSan';
 import BaoCaoThongKe from './pages/Admin/BaoCaoThongKe';
 
 import { WalletProvider } from './context/WalletContext';
@@ -82,6 +83,7 @@ function App() {
             <Route path="/map" element={<BanDoDacSan />} />
             <Route path="/stories" element={<CauChuyenSanVat />} />
             <Route path="/tinh-thanh/:id/blogs" element={<BaiVietTinhThanh />} />
+            <Route path="/blogs/:id" element={<Chitietbaiviet />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             {/* VNPay redirect target */}

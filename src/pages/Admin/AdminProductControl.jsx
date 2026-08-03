@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, Search, Eye, EyeOff, Store, Check, X, Trash2, RefreshCcw } from 'lucide-react';
+import {  Search, Eye, EyeOff, Store, Check, X } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 import '../../styles/admin-product.css';
 import { handleImageError } from '../../api/config';

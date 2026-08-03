@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../../styles/navbar-admin.css';
-import { Search, ChevronRight, ChevronLeft, Edit, Trash2, Plus, ArrowLeft, Save, X } from 'lucide-react';
+import { Search, ChevronRight, ChevronLeft, Edit, Trash2, Plus, Save, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
 import axiosClient from '../../api/axiosClient'; 
@@ -34,7 +34,7 @@ function BanDoControl() {
     const [hinhAnhFile, setHinhAnhFile] = useState(null); 
 
     // ==================== CÁC KHỐI HOOK GỌI API (DANH SÁCH) ====================
-    const { data, isLoading } = useQuery({
+    const { data} = useQuery({
         queryKey: ['maps', tinhthanh, xa, ap, searchMap, page],
         queryFn: async () => {
             const params = new URLSearchParams();
@@ -253,7 +253,7 @@ function BanDoControl() {
                                 Tìm kiếm
                             </button>
                         </form>
-                        <button className="btn-action btn-primary" onClick={handleOpenAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', flexShrink: 0, height: '38px', padding: '0 16px' }}>
+                        <button className="btn-action btn-primary" onClick={handleOpenAdd} >
                             <Plus size={16} /> Thêm điểm ghim mới
                         </button>
                     </div>
