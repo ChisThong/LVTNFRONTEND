@@ -308,7 +308,7 @@
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  flex-wrap: wrap !alignment;
+  flex-wrap: wrap !important;
   margin-bottom: 1.25rem !important;
   background: transparent !important;
   padding: 0 !important;
@@ -481,4 +481,4 @@
 .btn-action-icon.view:hover { color: #2563EB !important; background: #EFF6FF !important; border-color: #BFDBFE !important; }
 .btn-action-icon.edit:hover { color: #D97706 !important; background: #FFFBEB !important; border-color: #FDE68A !important; }
 .btn-action-icon.delete:hover { color: #DC2626 !important; background: #FEF2F2 !important; border-color: #FECACA !important; }
-.btn-action-icon.approve:hover { color: #059669 !important; background: #ECFDF5 !important; border-color: #A7F3D0 !important; }
+.btn-action-icon.approve:hover { color: #059669 !important; background: #ECFDF5 !important; border-color: #A7F3D0 !important; }
