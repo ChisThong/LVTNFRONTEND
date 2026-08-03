@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://lvtnfrontend.vercel.app/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://lvtnbackend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
