@@ -8,7 +8,7 @@ import './BaivietTT.css';
 export default function BaiVietTinhThanh() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const url = `http://localhost:8000/storage/`;
+    const url = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
 
     const { data: blogs = [], isLoading: blogsLoading } = useQuery({
         queryKey: ['provinceBlogs', id],
