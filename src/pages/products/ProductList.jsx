@@ -3,6 +3,7 @@ import { useSearchParams, useOutletContext } from 'react-router-dom';
 import ProductCard from '../../components/products/ProductCard';
 import { useCart } from '../../context/CartContext';
 import './ProductList.css';
+import { getPublicProducts } from '../../api/productPublicApi';
 
 /* ── Icon SVG ── */
 const IconSearch = () => (
