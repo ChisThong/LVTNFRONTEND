@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Wallet, Lock, History, ArrowUpCircle, ArrowDownCircle, X, Store,
-  RefreshCw,
+  RefreshCw, Clock, CheckCircle, XCircle,
 } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 import walletApi from '../../api/walletApi';
@@ -65,8 +65,25 @@ function SellerWallet() {
     }
   }, []);
 
+  // ── Lịch sử rút tiền ──
+  const [withdrawalHistory, setWithdrawalHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const fetchWithdrawalHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const res = await walletApi.getWithdrawalHistory();
+      setWithdrawalHistory(res.data?.data || []);
+    } catch {
+      // silent
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchSellerWallet();
+    fetchWithdrawalHistory();
 
     // Lấy thông tin shop để hiển thị ngân hàng mặc định
     axiosClient
@@ -75,7 +92,7 @@ function SellerWallet() {
         if (res.data?.data?.shop) setShop(res.data.data.shop);
       })
       .catch((err) => console.error('SellerWallet: failed to fetch /me', err));
-  }, [fetchSellerWallet]);
+  }, [fetchSellerWallet, fetchWithdrawalHistory]);
 
   // ── Helpers ──
   const openWithdrawModal = () => {
@@ -127,6 +144,7 @@ function SellerWallet() {
       });
       closeWithdrawModal();
       fetchSellerWallet(); // Reload số dư sau khi gửi yêu cầu
+      fetchWithdrawalHistory(); // Reload lịch sử rút tiền
     } catch (err) {
       toast.error(
         err.response?.data?.message || 'Có lỗi xảy ra khi yêu cầu rút tiền',
@@ -306,6 +324,13 @@ function SellerWallet() {
         </div>
       </div>
 
+      {/* ── Lịch sử yêu cầu rút tiền ── */}
+      <SellerWithdrawalHistorySection
+        history={withdrawalHistory}
+        loading={historyLoading}
+        onRefresh={fetchWithdrawalHistory}
+      />
+
       {/* ── Modal Yêu cầu rút tiền ── */}
       {showWithdrawModal && (
         <div id="sw-withdraw-modal" className="wallet-modal-overlay">
@@ -452,3 +477,111 @@ function SellerWallet() {
 }
 
 export default SellerWallet;
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  SellerWithdrawalHistorySection — Lịch sử yêu cầu rút tiền của Seller
+// ────────────────────────────────────────────────────────────────────────────────
+const SELLER_STATUS_CONFIG = {
+  pending:  { label: 'Chờ duyệt',   color: '#f57f17', bg: '#fff8e1', Icon: Clock },
+  approved: { label: 'Đã duyệt',    color: '#2e7d32', bg: '#e8f5e9', Icon: CheckCircle },
+  rejected: { label: 'Bị từ chối',  color: '#c62828', bg: '#ffebee', Icon: XCircle },
+};
+
+function SellerWithdrawalHistorySection({ history, loading, onRefresh }) {
+  return (
+    <div className="shopee-card wallet-utilities-card" style={{ marginTop: '1.5rem' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3 className="wallet-utilities-title" style={{ margin: 0 }}>
+          <ArrowUpCircle size={18} color={TEAL} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+          Lịch Sử Yêu Cầu Rút Tiền
+        </h3>
+        <button
+          id="sw-history-refresh-btn"
+          onClick={onRefresh}
+          disabled={loading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '4px',
+            background: 'none', border: '1px solid #ddd', borderRadius: '6px',
+            padding: '4px 10px', cursor: loading ? 'not-allowed' : 'pointer',
+            color: '#666', fontSize: '0.8rem',
+          }}
+        >
+          <RefreshCw size={13} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+          Làm mới
+        </button>
+      </div>
+
+      {/* Body */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#aaa' }}>
+          <div className="spinner" style={{ borderColor: TEAL, margin: '0 auto 0.5rem' }} />
+          Đang tải...
+        </div>
+      ) : history.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#bbb' }}>
+          Chưa có yêu cầu rút tiền nào.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {history.map((item) => {
+            const cfg = SELLER_STATUS_CONFIG[item.status] || SELLER_STATUS_CONFIG.pending;
+            const { Icon } = cfg;
+            return (
+              <div
+                key={item.id}
+                style={{
+                  border: `1px solid ${cfg.color}33`,
+                  borderLeft: `4px solid ${cfg.color}`,
+                  borderRadius: '8px',
+                  padding: '0.85rem 1rem',
+                  background: cfg.bg,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: '0.5rem',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {/* Left: trạng thái + ngân hàng */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                    <Icon size={15} color={cfg.color} />
+                    <span style={{ fontWeight: 600, color: cfg.color, fontSize: '0.85rem' }}>
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#555' }}>
+                    {item.bank_name} — {item.bank_account}
+                  </div>
+                  {/* Lý do từ chối */}
+                  {item.status === 'rejected' && item.note && (
+                    <div style={{
+                      marginTop: '4px', fontSize: '0.78rem', color: '#c62828',
+                      background: '#ffcdd2', borderRadius: '4px', padding: '3px 8px',
+                    }}>
+                      Lý do: {item.note}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: số tiền + ngày */}
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 700, color: '#333', fontSize: '0.95rem' }}>
+                    -{formatCurrency(item.amount)}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#999', marginTop: '2px' }}>
+                    {new Date(item.created_at).toLocaleDateString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit',
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

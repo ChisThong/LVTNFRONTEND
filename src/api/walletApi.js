@@ -14,6 +14,14 @@ const walletApi = {
     return axiosClient.post('/withdrawals', data);
   },
 
+  /**
+   * Lịch sử các yêu cầu rút tiền của user đang đăng nhập
+   * @param {Object} params - { status } (optional)
+   */
+  getWithdrawalHistory: (params = {}) => {
+    return axiosClient.get('/withdrawals', { params });
+  },
+
   // ── VNPay — Tạo thanh toán ───────────────────────────────────
   createVNPayPayment: (data) => {
     return axiosClient.post('/vnpay/create-payment', data);

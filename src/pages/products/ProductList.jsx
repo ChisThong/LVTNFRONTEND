@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
 import ProductCard from '../../components/products/ProductCard';
-import {
-  getPublicProducts,
-} from '../../api/productPublicApi';
 import { useCart } from '../../context/CartContext';
 import './ProductList.css';
 
