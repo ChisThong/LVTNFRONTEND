@@ -3,12 +3,9 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Filter, Layers, Box, Globe, RotateCw, X, User, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import axiosClient from '../api/axiosClient';
-import bannerBg from '../assets/bannermap.webp';
-import '../styles/map.css';
-import '../styles/baiviet.css';
-
-const BACKEND_STORAGE = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
+import axiosClient from '../../api/axiosClient';
+import bannerBg from '../../assets/bannermap.webp';
+import './Bando.css'
 
 // Coordinated lookups for Southern Vietnam provinces
 const PROVINCE_COORDINATES = {
@@ -165,7 +162,7 @@ export default function BanDoDacSan() {
                       Dưới đây là thông tin mô tả sơ lược của sản vật trên bản đồ.
                     </div>
                     <p style="line-height: 1.8; color: #334155;">${pin.desc || 'Đang cập nhật thông tin mô tả cho đặc sản này...'}</p>`,
-          hinhanh: pin.thumb.replace(`${BACKEND_STORAGE}/`, ''),
+          hinhanh: pin.thumb.replace('https://lvtnbackend.onrender.com/storage/', ''),
           user: { HoTen: 'Ban quản trị' },
           ngaydang: 'Gần đây'
         });
@@ -175,7 +172,7 @@ export default function BanDoDacSan() {
       setSelectedStory({
         tittel: `Câu chuyện về ${pin.title}`,
         noidung: pin.desc || 'Đang cập nhật nội dung câu chuyện cho đặc sản này...',
-        hinhanh: pin.thumb.replace(`${BACKEND_STORAGE}/`, ''),
+        hinhanh: pin.thumb.replace('https://lvtnbackend.onrender.com/storage/', ''),
         user: { HoTen: 'Ban quản trị' },
         ngaydang: 'Gần đây'
       });
@@ -258,7 +255,7 @@ export default function BanDoDacSan() {
         category: item.PhanLoai || '',
         location: provinceName,
         detailedLocation: [item.ap?.Ten_ap, item.xa?.Ten_xa].filter(Boolean).join(', ') || provinceName,
-        thumb: item.HinhAnh ? `${BACKEND_STORAGE}/${item.HinhAnh}` : "https://via.placeholder.com/300x200?text=No+Image"
+        thumb: item.HinhAnh ? `https://lvtnbackend.onrender.com/storage/${item.HinhAnh}` : "https://via.placeholder.com/300x200?text=No+Image"
       };
     });
   }, [rawMapsData]);
@@ -875,7 +872,7 @@ export default function BanDoDacSan() {
             <div className="blog-modal-header">
               <img 
                 className="blog-modal-banner" 
-                src={selectedStory.hinhanh ? (selectedStory.hinhanh.startsWith('http') ? selectedStory.hinhanh : `${BACKEND_STORAGE}/${selectedStory.hinhanh}`) : 'https://via.placeholder.com/800x450?text=Cau+Chuyen'} 
+                src={selectedStory.hinhanh ? (selectedStory.hinhanh.startsWith('http') ? selectedStory.hinhanh : `https://lvtnbackend.onrender.com/storage/${selectedStory.hinhanh}`) : 'https://via.placeholder.com/800x450?text=Cau+Chuyen'} 
                 alt={selectedStory.tittel} 
               />
               <button className="blog-modal-close" onClick={() => setSelectedStory(null)}>

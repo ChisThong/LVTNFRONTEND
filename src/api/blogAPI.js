@@ -10,8 +10,13 @@ export const createBaiViet = (formData) => {
         }
     });
 };
-export const updateBaiViet = (id,formData)=>{
-    return axiosClient.post(`/admin/BlogControl/${id}`,formData);
+export const updateBaiViet = (id, formData) => {
+    return axiosClient.post(`/admin/BlogControl/${id}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json'
+        }
+    });
 }
 export const deleteBaiViet = (id)=>{
     return axiosClient.delete(`/admin/BlogControl/${id}`);

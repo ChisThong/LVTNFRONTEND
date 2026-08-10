@@ -1,0 +1,237 @@
+.baiviet-container{
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    padding-top: 150px;
+    padding-bottom: 50px; 
+    overflow: hidden;
+    background: #FAF6F0;
+}
+.baiviet-header{
+    width: 60%;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.baiviet-header p{
+    font-size: 20px;
+    color: #137c1c;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-style: italic;
+}
+.baiviet-back-button{
+    width: 70%;
+    display: flex;
+    justify-content: flex-start;
+}
+.back-button{
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: #118d64;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.baiviet-title{
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.baiviet-subtitle{
+    font-size: 18px;
+    color: #666;
+}
+.baiviet-content{
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+.cauchuyen-section{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+}
+.section-title{
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    border-left: 4px solid #10b981; 
+    padding-left: 15px;
+    font-style: italic;
+}
+.cauchuyen-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+.tintuc-section{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+}
+.cauchuyen-grid, .tintuc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px;
+    width: 100%; 
+}
+.cauchuyen-card, .tintuc-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cauchuyen-card:hover, .tintuc-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+.cauchuyen-image, .tintuc-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background-color: #f3f4f6;
+}
+.cauchuyen-image img, .tintuc-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.cauchuyen-info, .tintuc-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.cauchuyen-title, .tintuc-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #111827;
+    margin: 0;
+}
+.cauchuyen-summary, .tintuc-summary {
+    font-size: 14px;
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.5;
+}
+@media (max-width: 1200px) {
+    .cauchuyen-grid, .tintuc-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Màn hình Tablet dọc (dưới 900px): Hiển thị 2 cột */
+@media (max-width: 900px) {
+    .cauchuyen-grid, .tintuc-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .baiviet-title {
+        font-size: 30px;
+    }
+    .baiviet-header {
+        height: auto;
+        padding: 30px 15px;
+    }
+}
+
+@media (max-width: 600px) {
+    /* 1. Giảm padding của container chính xuống sát mép màn hình hơn */
+    .baiviet-container {
+        padding-top: 130px;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    .back-button {
+        font-size: 14px;
+    }
+
+    /* 2. Mở rộng header chiếm gần như toàn bộ màn hình */
+    .baiviet-header {
+        width: 100% !important;
+        height: auto;
+        padding: 20px 10px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+    }
+
+    /* 3. Thu nhỏ cỡ chữ tiêu đề lớn trong Header */
+    .baiviet-title {
+        font-size: 22px !important; /* Thu nhỏ chữ tiêu đề chính */
+        text-align: center;
+        margin-bottom: 8px;
+    }
+
+    .baiviet-subtitle {
+        font-size: 13px !important; /* Thu nhỏ chữ mô tả */
+        text-align: center;
+        padding: 0 5px;
+    }
+
+    .baiviet-header p {
+        font-size: 14px !important; /* Thu nhỏ chữ "Danh Mục" */
+        margin-bottom: 5px;
+    }
+
+    /* 4. Mở rộng phần content để tận dụng 2 bên khoảng trống */
+    .baiviet-content, .baiviet-back-button {
+        width: 100% !important;
+        padding: 0 4px;
+    }
+
+    /* 5. Thu nhỏ tiêu đề section (Câu chuyện sản vật...) */
+    .section-title {
+        font-size: 18px !important;
+        padding-left: 10px;
+        margin-bottom: 12px;
+    }
+
+    /* 6. Lưới 2 cột tối ưu khoảng cách */
+    .cauchuyen-grid, .tintuc-grid {
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 6px; /* Giảm khoảng cách giữa 2 cột để tiết kiệm diện tích */
+    }
+
+    /* 7. Thu nhỏ ảnh và chữ trong card */
+    .cauchuyen-image, .tintuc-image {
+        height: 105px; 
+    }
+
+    .cauchuyen-info, .tintuc-info {
+        padding: 8px;
+        gap: 4px;
+    }
+
+    .cauchuyen-title, .tintuc-title {
+        font-size: 12px !important; /* Thu nhỏ tiêu đề bài viết */
+        line-height: 1.25;
+    }
+
+    .cauchuyen-summary, .tintuc-summary {
+        font-size: 10px !important; /* Thu nhỏ tóm tắt */
+        line-height: 1.35;
+        -webkit-line-clamp: 2; /* Giới hạn còn 2 dòng cho gọn */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        display: -webkit-box;
+    }
+}
