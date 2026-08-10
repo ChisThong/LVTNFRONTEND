@@ -122,23 +122,23 @@ export default function Login() {
     setIsUnverified(false);
   };
 
-  /* ── Lưu token + user vào localStorage, điều hướng ─────── */
-const handleLoginSuccess = (responseData) => {
-    console.log("Dữ liệu thô từ server trả về:", responseData); // Bật F12 xem nó in ra cái gì
 
-    // Thử các khả năng phổ biến nhất của Laravel:
+const handleLoginSuccess = (responseData) => {
+    console.log("Response data login:", responseData);
+
+
     const token = responseData.access_token || responseData.token || responseData.data?.access_token || responseData.data?.token;
     const user = responseData.user || responseData.data?.user;
 
     if (token) {
-        localStorage.setItem('token', token);
-        if (user) localStorage.setItem('user', JSON.stringify(user));
-        window.dispatchEvent(new Event('auth-change'));
-        navigateByRole(user, navigate);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      window.dispatchEvent(new Event('auth-change'));
+      navigateByRole(user, navigate);
     } else {
-        alert("Hãy chụp lại màn hình Console sau khi ấn dòng log này để biết server đang đặt tên biến token là gì!");
+      console.error("Không tìm thấy token trong phản hồi từ server!");
     }
-};
+  };
 
   /* ── Đăng nhập thông thường ─────────────────────────────── */
   const handleSubmit = async (e) => {

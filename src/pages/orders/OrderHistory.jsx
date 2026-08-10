@@ -11,20 +11,20 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1546069901-ba9599a7e63
 
 // ── Mapping trạng thái DB (số) ↔ tab key (chuỗi) ─────────────────────────────
 const STATUS_MAP = {
-  pending:    [0],       // Chờ xác nhận
+  pending: [0],       // Chờ xác nhận
   processing: [1],       // Đã xác nhận (đang xử lý)
-  shipping:   [2],       // Đang giao
-  completed:  [3],       // Hoàn tất
-  cancelled:  [4],       // Đã hủy
+  shipping: [2],       // Đang giao
+  completed: [3],       // Hoàn tất
+  cancelled: [4],       // Đã hủy
 };
 
 const ORDER_TABS = [
-  { key: 'all',        label: 'Tất cả' },
-  { key: 'pending',    label: 'Chờ xác nhận' },
+  { key: 'all', label: 'Tất cả' },
+  { key: 'pending', label: 'Chờ xác nhận' },
   { key: 'processing', label: 'Đang xử lý' },
-  { key: 'shipping',   label: 'Đang giao' },
-  { key: 'completed',  label: 'Đã giao' },
-  { key: 'cancelled',  label: 'Đã hủy' },
+  { key: 'shipping', label: 'Đang giao' },
+  { key: 'completed', label: 'Đã giao' },
+  { key: 'cancelled', label: 'Đã hủy' },
 ];
 
 // ── Helper lấy ảnh ────────────────────────────────────────────────────────────
@@ -50,9 +50,9 @@ const getProductImage = (item) => {
 // ── Component chính ───────────────────────────────────────────────────────────
 export default function OrderHistory() {
   const navigate = useNavigate();
-  const [orders, setOrders]       = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [activeTab, setActiveTab] = useState('all'); 
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [reviewInputs, setReviewInputs] = useState({});
   const [submittingReview, setSubmittingReview] = useState({});
@@ -134,7 +134,7 @@ export default function OrderHistory() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast.success(res.data.message || 'Gửi đánh giá thành công!', { id: 'submitReview' });
-      
+
       // Cập nhật trạng thái local
       setSelectedOrder(prevOrder => {
         if (!prevOrder) return null;
@@ -266,12 +266,12 @@ export default function OrderHistory() {
   // ── Status helper ──
   const getStatusInfo = (status) => {
     switch (status) {
-      case 0: return { label: 'Chờ xác nhận', color: '#f59e0b', icon: <Clock size={16}/> };
-      case 1: return { label: 'Đã xác nhận',  color: '#3b82f6', icon: <CheckCircle size={16}/> };
-      case 2: return { label: 'Đang giao',    color: '#10b981', icon: <Truck size={16}/> };
-      case 3: return { label: 'Hoàn tất',     color: '#16a34a', icon: <CheckCircle size={16}/> };
-      case 4: return { label: 'Đã hủy',       color: '#ef4444', icon: <XCircle size={16}/> };
-      default:return { label: 'Không rõ',     color: '#6b7280', icon: <Package size={16}/> };
+      case 0: return { label: 'Chờ xác nhận', color: '#f59e0b', icon: <Clock size={16} /> };
+      case 1: return { label: 'Đã xác nhận', color: '#3b82f6', icon: <CheckCircle size={16} /> };
+      case 2: return { label: 'Đang giao', color: '#10b981', icon: <Truck size={16} /> };
+      case 3: return { label: 'Hoàn tất', color: '#16a34a', icon: <CheckCircle size={16} /> };
+      case 4: return { label: 'Đã hủy', color: '#ef4444', icon: <XCircle size={16} /> };
+      default: return { label: 'Không rõ', color: '#6b7280', icon: <Package size={16} /> };
     }
   };
 
@@ -281,13 +281,13 @@ export default function OrderHistory() {
   const filteredOrders = activeTab === 'all'
     ? orders
     : orders
-        .map((dht) => ({
-          ...dht,
-          don_hangs: (dht.don_hangs || []).filter((dc) =>
-            STATUS_MAP[activeTab]?.includes(dc.TrangThai)
-          ),
-        }))
-        .filter((dht) => dht.don_hangs.length > 0);
+      .map((dht) => ({
+        ...dht,
+        don_hangs: (dht.don_hangs || []).filter((dc) =>
+          STATUS_MAP[activeTab]?.includes(dc.TrangThai)
+        ),
+      }))
+      .filter((dht) => dht.don_hangs.length > 0);
 
   // ── Đếm số đơn con theo tab (cho badge) ──
   const countByTab = (key) => {
@@ -324,7 +324,7 @@ export default function OrderHistory() {
             ══════════════════════════════════════════════════ */}
         <div className="order-tabs">
           {ORDER_TABS.map((tab) => {
-            const count   = countByTab(tab.key);
+            const count = countByTab(tab.key);
             const isActive = activeTab === tab.key;
             return (
               <button
@@ -508,9 +508,9 @@ export default function OrderHistory() {
 
                         {/* Nút Đánh giá — chỉ khi hoàn tất */}
                         {donHangCon.TrangThai === 3 && (
-                          <button 
+                          <button
                             onClick={() => handleOpenReviewModal(donHangCon)}
-                            className="shopee-btn" 
+                            className="shopee-btn"
                             style={{ padding: '8px 16px' }}
                           >
                             Đánh Giá
@@ -569,7 +569,7 @@ export default function OrderHistory() {
               <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#111827', fontWeight: 'bold' }}>
                 Đánh giá sản phẩm
               </h3>
-              <button 
+              <button
                 onClick={handleCloseModal}
                 style={{
                   background: 'none',
@@ -605,11 +605,11 @@ export default function OrderHistory() {
                   }}>
                     {/* Product Info */}
                     <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                      <img 
-                        src={getProductImage(ct)} 
-                        onError={(e) => { e.target.src = FALLBACK_IMAGE; }} 
-                        alt="Product" 
-                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #eee' }} 
+                      <img
+                        src={getProductImage(ct)}
+                        onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
+                        alt="Product"
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #eee' }}
                       />
                       <div style={{ flex: 1 }}>
                         <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: '#1f2937' }}>{ct.san_pham?.TenSanPham}</h4>
@@ -631,11 +631,11 @@ export default function OrderHistory() {
                         </div>
                         <div style={{ display: 'flex', gap: '2px', marginBottom: '8px' }}>
                           {[1, 2, 3, 4, 5].map((star) => (
-                            <Star 
-                              key={star} 
-                              size={16} 
-                              fill={star <= ct.danh_gia.XepLoai ? "#FFB300" : "none"} 
-                              stroke="#FFB300" 
+                            <Star
+                              key={star}
+                              size={16}
+                              fill={star <= ct.danh_gia.XepLoai ? "#FFB300" : "none"}
+                              stroke="#FFB300"
                             />
                           ))}
                         </div>
@@ -644,10 +644,10 @@ export default function OrderHistory() {
                         </p>
                         {ct.danh_gia.HinhAnh && (
                           <div style={{ marginTop: '8px' }}>
-                            <img 
-                              src={`${BACKEND_URL}${ct.danh_gia.HinhAnh}`} 
-                              alt="Review image" 
-                              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }} 
+                            <img
+                              src={`${BACKEND_URL}${ct.danh_gia.HinhAnh}`}
+                              alt="Review image"
+                              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }}
                             />
                           </div>
                         )}
@@ -660,11 +660,11 @@ export default function OrderHistory() {
                           <span style={{ fontSize: '0.9rem', color: '#4b5563', fontWeight: 600 }}>Chất lượng sản phẩm:</span>
                           <div style={{ display: 'flex', gap: '4px' }}>
                             {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star} 
-                                size={22} 
-                                fill={star <= input.XepLoai ? "#FFB300" : "none"} 
-                                stroke="#FFB300" 
+                              <Star
+                                key={star}
+                                size={22}
+                                fill={star <= input.XepLoai ? "#FFB300" : "none"}
+                                stroke="#FFB300"
                                 style={{ cursor: 'pointer' }}
                                 onClick={() => handleRatingChange(ct.ID_ChiTiet, star)}
                               />
@@ -674,8 +674,8 @@ export default function OrderHistory() {
 
                         {/* Comment Input */}
                         <div>
-                          <textarea 
-                            rows="3" 
+                          <textarea
+                            rows="3"
                             placeholder="Hãy chia sẻ nhận xét của bạn về sản phẩm này nhé..."
                             value={input.BinhLuan}
                             onChange={(e) => handleCommentChange(ct.ID_ChiTiet, e.target.value)}
@@ -707,23 +707,23 @@ export default function OrderHistory() {
                               fontWeight: 500
                             }}>
                               Chọn ảnh thực tế
-                              <input 
-                                type="file" 
-                                accept="image/*" 
+                              <input
+                                type="file"
+                                accept="image/*"
                                 onChange={(e) => handleImageChange(ct.ID_ChiTiet, e.target.files[0])}
-                                style={{ display: 'none' }} 
+                                style={{ display: 'none' }}
                               />
                             </label>
                             {input.previewUrl && (
-                              <img 
-                                src={input.previewUrl} 
-                                alt="Preview" 
-                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #eee' }} 
+                              <img
+                                src={input.previewUrl}
+                                alt="Preview"
+                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #eee' }}
                               />
                             )}
                           </div>
 
-                          <button 
+                          <button
                             onClick={() => handleSubmitReview(ct.ID_ChiTiet, ct.ID_SanPham)}
                             disabled={isSubmitting}
                             style={{
@@ -760,7 +760,7 @@ export default function OrderHistory() {
               backgroundColor: '#fff',
               zIndex: 1
             }}>
-              <button 
+              <button
                 onClick={handleCloseModal}
                 style={{
                   padding: '8px 20px',

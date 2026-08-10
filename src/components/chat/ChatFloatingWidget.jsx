@@ -30,6 +30,8 @@ export default function ChatFloatingWidget() {
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
   const currentUserRef = useRef(null);
+  const pollingRef = useRef(null);
+  const lastMsgIdRef = useRef(null);
 
   // 1. Fetch current user info
   useEffect(() => {
@@ -117,15 +119,21 @@ export default function ChatFloatingWidget() {
         if (roomData?.ID_PhongChat) {
           // Step B: Load message history
           const msgRes = await axiosClient.get(`/chat/phong/${roomData.ID_PhongChat}/tin-nhan`);
-          setMessages(msgRes.data ?? []);
+          const initialMsgs = msgRes.data ?? [];
+          setMessages(initialMsgs);
+          // Track last message ID for polling
+          if (initialMsgs.length > 0) {
+            lastMsgIdRef.current = initialMsgs[initialMsgs.length - 1].ID_TinNhan;
+          }
           window.dispatchEvent(new CustomEvent('chat-unread-change'));
           
-          // Step C: Listen to Realtime Messages via Pusher
+          // Step C: Kết nối Pusher (cả private lẫn public channel để chắc ăn)
           const token = localStorage.getItem('token');
+          const apiUrl = import.meta.env.VITE_API_URL || 'https://lvtnbackend.onrender.com/api';
           const pusher = new Pusher('74b5dea7d94f427dbf7b', {
             cluster: 'ap1',
             forceTLS: true,
-            authEndpoint: 'https://lvtnbackend.onrender.com/api/broadcasting/auth',
+            authEndpoint: `${apiUrl}/broadcasting/auth`,
             auth: {
               headers: {
                 Authorization: `Bearer ${token}`
@@ -134,25 +142,57 @@ export default function ChatFloatingWidget() {
           });
           pusherRef.current = pusher;
 
-          const channelName = `private-phong-chat.${roomData.ID_PhongChat}`;
-          const channel = pusher.subscribe(channelName);
-          channelRef.current = channel;
-
-          channel.bind('tin-nhan.moi', (data) => {
+          const appendMessage = (payload) => {
             setMessages(prev => {
-              const exists = prev.some(m => m.ID_TinNhan === data.ID_TinNhan || (m.ThoiGianGui === data.ThoiGianGui && m.NoiDung === data.NoiDung));
+              const exists = prev.some(m =>
+                m.ID_TinNhan === payload.ID_TinNhan ||
+                (m.ThoiGianGui === payload.ThoiGianGui && m.NoiDung === payload.NoiDung)
+              );
               if (exists) return prev;
+              lastMsgIdRef.current = payload.ID_TinNhan;
               return [...prev, {
-                ID_TinNhan: data.ID_TinNhan,
-                ID_PhongChat: data.ID_PhongChat,
-                LoaiNguoiGui: data.LoaiNguoiGui,
-                ID_NguoiGui: data.ID_NguoiGui,
-                NoiDung: data.NoiDung,
-                ThoiGianGui: data.ThoiGianGui
+                ID_TinNhan: payload.ID_TinNhan,
+                ID_PhongChat: payload.ID_PhongChat,
+                LoaiNguoiGui: payload.LoaiNguoiGui,
+                ID_NguoiGui: payload.ID_NguoiGui,
+                NoiDung: payload.NoiDung,
+                ThoiGianGui: payload.ThoiGianGui
               }];
             });
             window.dispatchEvent(new CustomEvent('chat-unread-change'));
-          });
+          };
+
+          // Try subscribing to private channel
+          try {
+            const privateChannel = pusher.subscribe(`private-phong-chat.${roomData.ID_PhongChat}`);
+            channelRef.current = privateChannel;
+            privateChannel.bind('tin-nhan.moi', (data) => appendMessage(data.message || data));
+            privateChannel.bind('.tin-nhan.moi', (data) => appendMessage(data.message || data));
+            privateChannel.bind('pusher:subscription_error', (err) => {
+              console.warn('[Pusher] Private channel auth failed, relying on polling:', err);
+            });
+          } catch(e) {
+            console.warn('[Pusher] Subscribe error:', e);
+          }
+
+          // Step D: Polling every 3s as guaranteed fallback
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          pollingRef.current = setInterval(async () => {
+            try {
+              const pollRes = await axiosClient.get(`/chat/phong/${roomData.ID_PhongChat}/tin-nhan`);
+              const allMsgs = pollRes.data ?? [];
+              setMessages(prev => {
+                if (allMsgs.length === prev.length) return prev;
+                const prevIds = new Set(prev.map(m => m.ID_TinNhan));
+                const newMsgs = allMsgs.filter(m => !prevIds.has(m.ID_TinNhan));
+                if (newMsgs.length === 0) return prev;
+                window.dispatchEvent(new CustomEvent('chat-unread-change'));
+                return [...prev, ...newMsgs];
+              });
+            } catch(e) {
+              // ignore polling errors
+            }
+          }, 3000);
         }
       } catch (err) {
         console.error('Lỗi khi vào phòng chat:', err);
@@ -165,9 +205,13 @@ export default function ChatFloatingWidget() {
     connectToRoom();
 
     return () => {
-      if (pusherRef.current && phongChat?.ID_PhongChat) {
-        pusherRef.current.unsubscribe(`private-phong-chat.${phongChat.ID_PhongChat}`);
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+      if (pusherRef.current) {
         pusherRef.current.disconnect();
+        pusherRef.current = null;
       }
       setPhongChat(null);
       setMessages([]);
@@ -255,7 +299,6 @@ export default function ChatFloatingWidget() {
 
   return (
     <div className="chat-floating-container">
-      {/* ── BUBBLE BUTTON ── */}
       {!isOpen && (
         <button 
           className="chat-bubble-btn" 
@@ -266,7 +309,7 @@ export default function ChatFloatingWidget() {
               navigate('/login');
               return;
             }
-            setView('list'); // Open conversations list by default
+            setView('list');
             setIsOpen(true);
           }}
           title="Trò chuyện với Shop"
@@ -311,7 +354,6 @@ export default function ChatFloatingWidget() {
 
           {/* Body */}
           <div className="chat-body">
-            {/* VIEW A: LIST OF CONVERSATIONS */}
             {view === 'list' && (
               <div className="conversations-list-container">
                 {listLoading ? (
@@ -414,7 +456,6 @@ export default function ChatFloatingWidget() {
             )}
           </div>
 
-          {/* Footer (Only shown in Chat View) */}
           {view === 'chat' && (
             <form className="chat-footer" onSubmit={handleSendMessage}>
               <input

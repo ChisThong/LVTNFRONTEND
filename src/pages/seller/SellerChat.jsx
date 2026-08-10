@@ -20,6 +20,7 @@ export default function SellerChat() {
   const messagesEndRef = useRef(null);
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
+  const pollingRef = useRef(null);
 
   // 1. Fetch all conversations for this Shop
   const fetchConversations = async () => {
@@ -56,12 +57,16 @@ export default function SellerChat() {
       if (pusherRef.current) {
         pusherRef.current.disconnect();
       }
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
 
       const token = localStorage.getItem('token');
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://lvtnbackend.onrender.com/api';
       const pusher = new Pusher('74b5dea7d94f427dbf7b', {
         cluster: 'ap1',
         forceTLS: true,
-        authEndpoint: 'https://lvtnbackend.onrender.com/api/broadcasting/auth',
+        authEndpoint: `${apiUrl}/broadcasting/auth`,
         auth: {
           headers: {
             Authorization: `Bearer ${token}`
@@ -74,18 +79,48 @@ export default function SellerChat() {
       const channel = pusher.subscribe(channelName);
       channelRef.current = channel;
 
-      channel.bind('tin-nhan.moi', (data) => {
+      const handleNewMessage = (data) => {
+        const payload = data.message || data;
         setMessages((prev) => {
           const exists = prev.some(
             (m) =>
-              m.ID_TinNhan === data.ID_TinNhan ||
-              (m.ThoiGianGui === data.ThoiGianGui && m.NoiDung === data.NoiDung)
+              m.ID_TinNhan === payload.ID_TinNhan ||
+              (m.ThoiGianGui === payload.ThoiGianGui && m.NoiDung === payload.NoiDung)
           );
           if (exists) return prev;
-          return [...prev, data];
+          return [...prev, payload];
         });
         window.dispatchEvent(new CustomEvent('chat-unread-change'));
+      };
+
+      channel.bind('tin-nhan.moi', handleNewMessage);
+      channel.bind('.tin-nhan.moi', handleNewMessage);
+      channel.bind('App\\Events\\Message', handleNewMessage);
+      channel.bind('pusher:subscription_error', (err) => {
+        console.warn('[Pusher SellerChat] Auth failed, relying on polling:', err);
       });
+
+      pusher.bind_global((eventName, data) => {
+        console.log(`[Pusher SellerChat] Event: ${eventName}`, data);
+      });
+
+      // Polling fallback every 3s
+      pollingRef.current = setInterval(async () => {
+        try {
+          const pollRes = await axiosClient.get(`/chat/phong/${room.ID_PhongChat}/tin-nhan`);
+          const allMsgs = pollRes.data ?? [];
+          setMessages(prev => {
+            if (allMsgs.length === prev.length) return prev;
+            const prevIds = new Set(prev.map(m => m.ID_TinNhan));
+            const newMsgs = allMsgs.filter(m => !prevIds.has(m.ID_TinNhan));
+            if (newMsgs.length === 0) return prev;
+            window.dispatchEvent(new CustomEvent('chat-unread-change'));
+            return [...prev, ...newMsgs];
+          });
+        } catch(e) {
+          // ignore polling errors
+        }
+      }, 3000);
     } catch (err) {
       console.error('Lỗi tải tin nhắn:', err);
       toast.error('Không thể tải lịch sử tin nhắn.');
@@ -97,6 +132,9 @@ export default function SellerChat() {
   // 3. Cleanup Pusher connection
   useEffect(() => {
     return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
       if (pusherRef.current) {
         pusherRef.current.disconnect();
       }
