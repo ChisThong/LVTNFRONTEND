@@ -359,7 +359,7 @@
 .marker-line {
   position: absolute;
   bottom: 4px;
-  left: 50%;
+  left: 0;
   width: 1.5px;
   height: 6px;
   background: var(--secondary);
@@ -371,7 +371,7 @@
 .marker-card {
   position: absolute;
   bottom: 10px;
-  left: 50%;
+  left: 0;
   transform: translateX(-50%);
   width: 36px;
   height: 36px;
@@ -757,17 +757,213 @@
 
 /* --- Specialty Marker Container styling to prevent zoom drift --- */
 .specialty-marker-container {
-  width: 40px;
+  width: 0;
+  height: 0;
+  position: absolute;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.marker-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--secondary);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--secondary);
+  z-index: 6;
+}
+
+/* --- Province Capsule Markers styling --- */
+.province-marker-wrapper {
+  width: 140px;
   height: 50px;
   position: absolute;
   cursor: pointer;
 }
 
-.marker-dot {
+.province-pulse {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translate(-50%, 50%);
+  width: 10px;
+  height: 10px;
+  background: #ef4444;
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.province-pulse::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #ef4444;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: provinceRipple 1.6s ease-out infinite;
+}
+
+@keyframes provinceRipple {
+  0% {
+    width: 10px;
+    height: 10px;
+    opacity: 1;
+  }
+
+  100% {
+    width: 35px;
+    height: 35px;
+    opacity: 0;
+  }
+}
+
+.province-capsule {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 30px;
+  padding: 6px 14px;
+  color: white;
+  white-space: nowrap;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+}
+
+.province-capsule:hover {
+  transform: translateX(-50%) scale(1.05);
+  background: rgba(163, 67, 45, 0.95);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 30px rgba(163, 67, 45, 0.4);
+}
+
+.province-capsule-icon {
+  font-size: 0.95rem;
+}
+
+.province-capsule-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.province-capsule-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.province-capsule-count {
+  font-size: 0.65rem;
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+/* Premium Switch Toggle */
+.switch-premium {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch-premium input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-premium {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider-premium:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.switch-premium input:checked+.slider-premium {
+  background-color: var(--secondary);
+}
+
+.switch-premium input:focus+.slider-premium {
+  box-shadow: 0 0 1px var(--secondary);
+}
+
+.switch-premium input:checked+.slider-premium:before {
+  transform: translateX(22px);
+}
+
+/* CSS 3D Carousel Styles */
+.css-3d-scene {
+  width: 100%;
+  height: 100%;
+  perspective: 1000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  user-select: none;
+  cursor: grab;
+}
+
+.css-3d-scene:active {
+  cursor: grabbing;
+}
+
+.css-3d-carousel {
+  width: 260px;
+  height: 360px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+/* --- Specialty Marker Container styling to prevent zoom drift --- */
+.specialty-marker-container {
+  width: 0;
+  height: 0;
+  position: absolute;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.marker-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
   width: 8px;
   height: 8px;
   background: var(--secondary);
@@ -954,50 +1150,447 @@
 
 .css-3d-card {
   position: absolute;
-  width: 260px;
-  height: 360px;
-  background: #1e1e1e;
-  border-radius: 24px;
+  width: 280px;
+  height: 400px;
+  background: #ffffff;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   backface-visibility: visible;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: auto; /* Ensure buttons are clickable */
 }
 
-.css-3d-card img {
-  width: calc(100% - 20px);
-  height: 200px;
+/* Card Image Section */
+.card-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+}
+
+.card-image-wrap img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 16px;
-  margin: 10px 10px 0 10px;
   pointer-events: none;
 }
 
-.css-3d-card .card-info {
-  background: #a3432d;
-  margin: 10px 10px 12px 10px;
-  padding: 15px 12px;
-  border-radius: 16px;
-  text-align: center;
-  flex-grow: 1;
+.card-fav-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: white;
+  border: none;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  color: #ef4444;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.card-fav-btn:hover {
+  transform: scale(1.1);
 }
 
-.css-3d-card .card-info h3 {
-  color: #ffffff;
-  font-size: 1.15rem;
+.card-loc-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.card-loc-badge svg {
+  color: #c0392b;
+}
+
+/* Card Body Section */
+.card-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.card-category {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #c0392b;
+  margin-bottom: 6px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0 0 6px 0;
   line-height: 1.3;
 }
 
-.css-3d-card .card-info p {
-  color: #ffcc80;
-  font-size: 0.85rem;
-  margin: 0;
-  line-height: 1.2;
+.card-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+
+.card-features {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.feat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  color: #475569;
+  text-align: center;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.btn-card-buy {
+  flex: 1;
+  background: #a3432d;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-card-buy:hover {
+  opacity: 0.9;
+}
+
+.btn-card-story {
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a3432d;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-card-story:hover {
+  background: #f8fafc;
+}
+
+/* ============================================================
+   PROVINCE TEARDROP PIN MARKERS
+   anchor:'center' on a 0x0 wrapper.
+   The origin (0,0) is exactly the map coordinate.
+   ============================================================ */
+
+.prov-marker-wrap {
+  position: absolute;
+  width: 0;
+  height: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* Flex container nội dung, canh theo chiều cao */
+.prov-marker {
+  position: absolute;
+  /* We want the bottom center of this 60x80 container to be at (0,0).
+     So we shift it left by 30px (half width) and up by 80px (full height) */
+  left: -30px;
+  top: -80px;
+  width: 60px;
+  height: 80px;
+}
+
+/* ---- PIN GIỌT NƯỚC ---- */
+.prov-marker-pin {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  width: 52px;
+  height: 52px;
+  background-color: var(--c, #10b981);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -3px 3px 10px rgba(0,0,0,0.22);
+  z-index: 2;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prov-marker-wrap:hover .prov-marker-pin {
+  transform: rotate(-45deg) scale(1.08);
+  box-shadow: -4px 4px 16px rgba(0,0,0,0.3);
+}
+
+.prov-marker-img-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  transform: rotate(45deg);
+  border: 2.5px solid #fff;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+.prov-marker-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ---- VÒNG TRÒN ĐỒNG TÂM Ở CHÂN PIN ---- */
+.prov-marker-rings {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.prov-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--c, #10b981);
+}
+
+.prov-ring.r1 {
+  width: 10px;
+  height: 10px;
+  background: var(--c, #10b981);
+  opacity: 0.9;
+}
+
+.prov-ring.r2 {
+  width: 20px;
+  height: 20px;
+  opacity: 0.4;
+}
+
+.prov-ring.r3 {
+  width: 30px;
+  height: 30px;
+  opacity: 0.2;
+}
+
+/* ---- LABEL BÊN PHẢI ---- */
+.prov-marker-label {
+  position: absolute;
+  top: 8px;
+  left: 60px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 7px 14px 7px 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+  white-space: nowrap;
+  border: 1px solid rgba(0,0,0,0.05);
+  z-index: 4;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: none;
+}
+
+.prov-marker-wrap:hover .prov-marker-label {
+  transform: translateX(4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+.prov-marker-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.prov-marker-count {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.prov-marker-bar {
+  width: 22px;
+  height: 2.5px;
+  border-radius: 2px;
+  margin-top: 5px;
+}
+
+
+/*
+  Layout (tất cả absolute từ điểm (0,0)):
+  - Giọt nước (52×52px): trung tâm tại (-26px, -26px), đỉnh nhọn tại (0,0)
+    → transform từ gốc: translateX(-26px) translateY(-62px)  [vì 52/2 + tail_height ≈ 10]
+  - Bóng đổ: ngay tại (0,0), dịch lên chút
+  - Label: bên phải giọt nước
+*/
+
+.prov-pin {
+  position: absolute;
+  /* Giọt nước 52×52, đỉnh nhọn ở dưới. 
+     Dịch để tâm giọt = -26px trái, và đáy nhọn = 0px (tức đỉnh giọt lên trên -62px) */
+  left: 0;
+  top: 0;
+  transform: translate(-50%, calc(-100% - 12px));
+  width: 52px;
+  height: 52px;
+  background-color: var(--pc, #10b981);
+  border-radius: 50% 50% 50% 0;
+  transform-origin: bottom left;
+  rotate: -45deg;
+  translate: -26px -62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -3px 3px 8px rgba(0,0,0,0.2);
+  z-index: 2;
+  transition: translate 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.prov-pin:hover {
+  box-shadow: -4px 4px 14px rgba(0,0,0,0.3);
+  translate: -26px -67px;
+}
+
+.prov-pin-img-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  rotate: 45deg;
+  border: 2px solid #fff;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+.prov-pin-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Đuôi tam giác (mũi nhọn) — đỉnh tại (0,0) */
+.prov-pin-tail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* tam giác chỉ xuống, đỉnh tại (0,0) */
+  transform: translate(-50%, 0);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid var(--pc, #10b981);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Bóng tròn phía dưới mũi ghim */
+.prov-pin-shadow {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.18);
+  filter: blur(3px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Label nổi bên phải */
+.prov-label {
+  position: absolute;
+  left: 16px;
+  top: 0;
+  transform: translateY(calc(-100% - 16px));
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 14px 6px 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+  border: 1px solid rgba(0,0,0,0.05);
+  z-index: 3;
+  pointer-events: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prov-label-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.prov-label-count {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.prov-label-bar {
+  width: 22px;
+  height: 2.5px;
+  border-radius: 2px;
+  margin-top: 5px;
+}
+

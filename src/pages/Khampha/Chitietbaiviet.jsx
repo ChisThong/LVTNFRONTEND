@@ -42,13 +42,18 @@ const Chitietbaiviet = () => {
         }
     }, [id]);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return (
+        <div className="blog-loading-container">
+            <div className="blog-spinner"></div>
+            <p>Đang tải bài viết...</p>
+        </div>
+    );
 
     return (
         <div className='chitietbaiviet-container'>
             <div className='chitietbaiviet-content'>
                 <div>
-                    <button onClick={() => Navigate(-1)}>
+                    <button className="blog-back-btn" onClick={() => Navigate(-1)}>
                         <ArrowLeft size={16} />
                         Quay lại
                     </button>

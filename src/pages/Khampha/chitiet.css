@@ -1,103 +1,232 @@
+/* Reset & Basic Variables */
+:root {
+  --blog-primary: #10b981;
+  --blog-primary-dark: #059669;
+  --blog-text-main: #4a3b32; /* Warmer dark brown/gray for text */
+  --blog-text-light: #735e51;
+  --blog-text-muted: #a39185;
+  --blog-bg: #FAF6F0; /* Warm beige background */
+  --blog-card-bg: #ffffff;
+  --blog-border: #e8ded3;
+}
+
 .chitietbaiviet-container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--blog-bg);
+    padding: 120px 20px 60px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--blog-text-main);
+}
+
+.chitietbaiviet-content {
+    max-width: 800px; /* Optimal reading width */
+    margin: 0 auto;
     position: relative;
+}
+
+/* Loading State */
+.blog-loading-container {
     width: 100%;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center; 
-    padding-top: 150px;
-    padding-bottom: 50px; 
-    overflow: hidden;
-    background: #FAF6F0;
-}
-.chitietbaiviet-content{
-    width: 50%;
-    background: #FAF6F0;
-    margin: 0 auto;
-    padding: 20px;
-    border-radius: 8px;
-}
-.chitietbaiviet-content button{
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    margin-bottom: 20px;
-
-}
-.chitietbaiviet-detail{
-    background: #fff;
-    padding: 30px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.chitietbaiviet-image{
-    width: 100%;
-    height: 500px;
-    object-fit: cover;
-    border-radius: 8px;
-    display: flex;
+    align-items: center;
     justify-content: center;
+    background-color: var(--blog-bg);
+    color: var(--blog-text-light);
+    font-family: 'Inter', sans-serif;
+    gap: 16px;
 }
-img {
-    width: 100%;
+
+.blog-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(16, 185, 129, 0.2);
+    border-top-color: var(--blog-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Back Button */
+.blog-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid var(--blog-border);
+    border-radius: 8px;
+    color: var(--blog-text-light);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 10px 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+}
+
+.blog-back-btn:hover {
+    color: var(--blog-primary);
+    border-color: var(--blog-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.1);
+}
+
+/* Main Card */
+.chitietbaiviet-detail {
+    background: var(--blog-card-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 40px;
+    overflow: hidden;
+}
+
+/* Image */
+.chitietbaiviet-image {
+    width: calc(100% + 80px); /* Pull out to edges based on padding */
+    margin: -40px -40px 30px -40px;
     height: 450px;
+    position: relative;
+    overflow: hidden;
 }
-.chitietbaiviet-meta{
-    
-    width: 80%;
-    justify-content: space-between;
+
+.chitietbaiviet-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.chitietbaiviet-detail:hover .chitietbaiviet-image img {
+    transform: scale(1.02);
+}
+
+/* Meta info */
+.chitietbaiviet-meta {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    color: var(--blog-text-light);
+    border-bottom: 1px solid var(--blog-border);
     padding-bottom: 20px;
 }
-.chitietbaiviet-detail h2{
-    font-size: 30px;
-    font-weight: bold;
-    margin-bottom: 20px;
+
+.chitietbaiviet-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
-.tomtat{
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    border-left: 4px solid #10b981; 
-    padding-left: 15px;
-    margin: 10px 0;
+
+.chitietbaiviet-meta span:first-child {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    background-color: #ecfdf5; /* Default fallback */
+}
+
+/* Title */
+.chitietbaiviet-detail h2 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 24px;
+    color: #111827;
+    letter-spacing: -0.02em;
+}
+
+/* Summary (TomTat) */
+.tomtat {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--blog-text-light);
+    margin-bottom: 32px;
+    padding: 20px 24px;
+    background-color: #f8fafc;
+    border-left: 4px solid var(--blog-primary);
+    border-radius: 0 8px 8px 0;
+    font-weight: 500;
     font-style: italic;
 }
-@media screen and (max-width: 768px) {
-     .chitietbaiviet-content {
-        width: 90%;
 
+/* Content */
+.noidung {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #374151;
+}
+
+.noidung p {
+    margin-bottom: 1.5em;
+}
+
+.noidung img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 24px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.noidung h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 2em 0 1em;
+    color: #111827;
+}
+
+.noidung ul, .noidung ol {
+    margin-bottom: 1.5em;
+    padding-left: 1.5em;
+}
+
+.noidung li {
+    margin-bottom: 0.5em;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .chitietbaiviet-container {
+        padding-top: 100px;
+        padding-left: 15px;
+        padding-right: 15px;
     }
-    .chitietbaiviet-detail h2 {
-        font-size: 20px;
+
+    .chitietbaiviet-detail {
+        padding: 24px;
+        border-radius: 12px;
     }
-     .tomtat {
-        font-size: 14px;
-    }
-    .chitietbaiviet-meta {
-        width: 100%;
-       font-size: 10px;
-    }
+
     .chitietbaiviet-image {
-        height: 200px;
+        width: calc(100% + 48px);
+        margin: -24px -24px 20px -24px;
+        height: 250px;
     }
-    .chitietbaiviet-image img {
-        height: 200px;
-        width: 100%;
-    }
-    .noidung {
-        font-size: 14px;
-    }
-    
-}
-@media screen and (max-width: 1024px) {
-   .chitietbaiviet-content {
-        width: 90%;
-    }
+
     .chitietbaiviet-detail h2 {
-        font-size: 24px;
+        font-size: 1.75rem;
     }
+
     .tomtat {
-        font-size: 16px;
+        font-size: 1.05rem;
+        padding: 16px;
+    }
+
+    .noidung {
+        font-size: 1.05rem;
     }
     
-}
+    .chitietbaiviet-meta {
+        gap: 12px;
+    }
+}

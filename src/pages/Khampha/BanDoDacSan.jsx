@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Filter, Layers, Box, Globe, RotateCw, X, User, Calendar } from 'lucide-react';
+import { Filter, Layers, Box, Globe, RotateCw, X, Heart, MapPin, Package, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import bannerBg from '../../assets/bannermap.webp';
 import './Bando.css'
-
-// Coordinated lookups for Southern Vietnam provinces
 const PROVINCE_COORDINATES = {
   "TP. Hồ Chí Minh": { lat: 10.776, lng: 106.701 },
   "Tây Ninh": { lat: 11.362, lng: 106.126 },
@@ -29,64 +28,62 @@ const PROVINCE_COORDINATES = {
   "Bình Phước": { lat: 11.532, lng: 106.884 },
   "Bà Rịa - Vũng Tàu": { lat: 10.496, lng: 107.170 },
 };
-
-// Post-merger groups mapping
 const MERGER_GROUPS = {
   "TP. Hồ Chí Minh": {
     name: "Thành phố Hồ Chí Minh",
     constituents: ["TP. Hồ Chí Minh", "Thành phố Hồ Chí Minh", "Bà Rịa - Vũng Tàu", "Bình Dương"],
     geojsonNames: ["HồChíMinh", "BàRịa-VũngTàu", "BìnhDương"],
     color: "#ff4d4d",
-    center: { lat: 10.776, lng: 106.701 } // Đặt tại TP. HCM hiện nay
+    center: { lat: 10.776, lng: 106.701 } 
   },
   "Đồng Nai": {
     name: "Tỉnh Đồng Nai",
     constituents: ["Đồng Nai", "Bình Phước"],
     geojsonNames: ["ĐồngNai", "BìnhPhước"],
     color: "#ff9f43",
-    center: { lat: 10.957, lng: 106.842 } // Đặt tại Đồng Nai hiện nay
+    center: { lat: 10.957, lng: 106.842 }
   },
   "Tây Ninh": {
     name: "Tỉnh Tây Ninh",
     constituents: ["Tây Ninh", "Long An"],
     geojsonNames: ["TâyNinh", "LongAn"],
     color: "#10b981",
-    center: { lat: 10.538, lng: 106.413 } // Đặt tại Long An
+    center: { lat: 10.538, lng: 106.413 }
   },
   "Cần Thơ": {
     name: "Thành phố Cần Thơ",
     constituents: ["Cần Thơ", "TP. Cần Thơ", "Sóc Trăng", "Hậu Giang"],
     geojsonNames: ["CầnThơ", "SócTrăng", "HậuGiang"],
     color: "#2e86de",
-    center: { lat: 10.036, lng: 105.787 } // Đặt tại Cần Thơ hiện nay
+    center: { lat: 10.036, lng: 105.787 } 
   },
   "Vĩnh Long": {
     name: "Tỉnh Vĩnh Long",
     constituents: ["Vĩnh Long", "Bến Tre", "Trà Vinh"],
     geojsonNames: ["VĩnhLong", "BếnTre", "TràVinh"],
     color: "#ff9ff3",
-    center: { lat: 10.252, lng: 105.972 } // Đặt tại Vĩnh Long hiện nay
+    center: { lat: 10.252, lng: 105.972 }
   },
   "Đồng Tháp": {
     name: "Tỉnh Đồng Tháp",
     constituents: ["Đồng Tháp", "Tiền Giang"],
     geojsonNames: ["ĐồngTháp", "TiềnGiang"],
     color: "#00d2d3",
-    center: { lat: 10.449, lng: 106.341 } // Đặt tại Tiền Giang
+    center: { lat: 10.449, lng: 106.341 } 
   },
   "Cà Mau": {
     name: "Tỉnh Cà Mau",
     constituents: ["Cà Mau", "Bạc Liêu"],
     geojsonNames: ["CàMau", "BạcLiêu"],
     color: "#ee5253",
-    center: { lat: 9.176, lng: 105.152 } // Đặt tại Cà Mau hiện nay
+    center: { lat: 9.176, lng: 105.152 }
   },
   "An Giang": {
     name: "Tỉnh An Giang",
     constituents: ["An Giang", "Kiên Giang"],
     geojsonNames: ["AnGiang", "KiênGiang"],
     color: "#5f27cd",
-    center: { lat: 9.982, lng: 105.124 } // Đặt tại Kiên Giang
+    center: { lat: 9.982, lng: 105.124 }
   }
 };
 
@@ -100,15 +97,13 @@ const FRIENDLY_NAMES = {
   "Cà Mau": "Tỉnh Cà Mau",
   "An Giang": "Tỉnh An Giang"
 };
-
-
-
 export default function BanDoDacSan() {
+  const navigate = useNavigate();
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const rotationRequestRef = useRef(null);
 
-  // Trạng thái
+ 
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [selectedProvince, setSelectedProvince] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,8 +113,6 @@ export default function BanDoDacSan() {
   const [isRotating, setIsRotating] = useState(false);
   
   const [ranhGioiData, setRanhGioiData] = useState(null);
-
-  // Load RanhGioi.json asynchronously from public folder
   useEffect(() => {
     fetch('/RanhGioi.json')
       .then(res => res.json())
@@ -127,25 +120,17 @@ export default function BanDoDacSan() {
       .catch(err => console.error("Error loading boundary data:", err));
   }, []);
 
-  // Thông báo Toast
+ 
   const [toast, setToast] = useState({ active: false, title: '', desc: '' });
-  
-  // Modal Showroom 3D
   const [showShowroom, setShowShowroom] = useState(false);
   const [showroomProduct, setShowroomProduct] = useState(null);
-
-  // Trạng thái Modal chi tiết câu chuyện
-  const [selectedStory, setSelectedStory] = useState(null);
   const [loadingStory, setLoadingStory] = useState(false);
 
   const handleOpenStory = async (pin) => {
     setLoadingStory(true);
     try {
-      // Gọi API công khai lấy toàn bộ câu chuyện sản vật của tỉnh
       const response = await axiosClient.get(`/Cauchuyensanvat/${pin.ID_TinhThanh}`);
       const blogsList = response.data?.data || [];
-      
-      // Tìm bài viết có tiêu đề chứa tên đặc sản
       const matchingBlog = blogsList.find(blog => {
         const blogTitle = blog.tittel.toLowerCase();
         const specialtyTitle = pin.title.toLowerCase();
@@ -153,35 +138,18 @@ export default function BanDoDacSan() {
       });
 
       if (matchingBlog) {
-        setSelectedStory(matchingBlog);
+        navigate(`/blogs/${matchingBlog.ID_Blog || matchingBlog.id}`);
       } else {
-        setSelectedStory({
-          tittel: `Giới thiệu về ${pin.title}`,
-          noidung: `<div style="padding: 15px; background: #fffbeb; border-radius: 12px; border-left: 4px solid #d97706; margin-bottom: 20px; font-size: 0.9rem; color: #d97706;">
-                      <strong style="display: block; margin-bottom: 4px;">Sản vật này chưa có câu chuyện chi tiết!</strong>
-                      Dưới đây là thông tin mô tả sơ lược của sản vật trên bản đồ.
-                    </div>
-                    <p style="line-height: 1.8; color: #334155;">${pin.desc || 'Đang cập nhật thông tin mô tả cho đặc sản này...'}</p>`,
-          hinhanh: pin.thumb.replace('https://lvtnbackend.onrender.com/storage/', ''),
-          user: { HoTen: 'Ban quản trị' },
-          ngaydang: 'Gần đây'
-        });
+        alert("Sản vật này hiện tại chưa có câu chuyện chi tiết!");
       }
     } catch (error) {
       console.error("Error fetching story:", error);
-      setSelectedStory({
-        tittel: `Câu chuyện về ${pin.title}`,
-        noidung: pin.desc || 'Đang cập nhật nội dung câu chuyện cho đặc sản này...',
-        hinhanh: pin.thumb.replace('https://lvtnbackend.onrender.com/storage/', ''),
-        user: { HoTen: 'Ban quản trị' },
-        ngaydang: 'Gần đây'
-      });
+      alert("Đã xảy ra lỗi khi tìm câu chuyện. Vui lòng thử lại sau!");
     } finally {
       setLoadingStory(false);
     }
   };
 
-  // Trạng thái và trình xử lý kéo thả của CSS 3D Carousel
   const [rotationAngle, setRotationAngle] = useState(0);
   const [zoomScale, setZoomScale] = useState(1);
   const isDraggingRef = useRef(false);
@@ -211,9 +179,6 @@ export default function BanDoDacSan() {
       return Math.min(Math.max(0.5, next), 2.0);
     });
   };
-
-
-  // Lấy dữ liệu từ máy chủ (backend)
   const { data: rawMapsData } = useQuery({
     queryKey: ['publicMaps'],
     queryFn: async () => {
@@ -239,8 +204,6 @@ export default function BanDoDacSan() {
     },
     staleTime: 30000,
   });
-
-  // Chuyển đổi dữ liệu ghim từ backend sang model giao diện (frontend)
   const specialtyPins = useMemo(() => {
     const pins = rawMapsData || [];
     return pins.map(item => {
@@ -259,30 +222,35 @@ export default function BanDoDacSan() {
       };
     });
   }, [rawMapsData]);
-
-  // Compute dynamic province flags
   const provinceFlags = useMemo(() => {
     const counts = {};
+    const thumbMap = {};
     specialtyPins.forEach(pin => {
       if (pin.location) {
         counts[pin.location] = (counts[pin.location] || 0) + 1;
+        if (!thumbMap[pin.location]) thumbMap[pin.location] = pin.thumb;
       }
     });
 
     return Object.entries(counts).map(([province, count], index) => {
       const group = MERGER_GROUPS[province];
       const coords = group ? group.center : (PROVINCE_COORDINATES[province] || { lat: 10.0, lng: 105.0 });
+      const color = group ? group.color : '#10b981';
+      const provinceInfo = TinhThanh.find(t => t.TenTinhThanh === province);
+      const thumb = provinceInfo?.HinhAnh
+        ? `https://lvtnbackend.onrender.com/storage/${provinceInfo.HinhAnh}`
+        : (thumbMap[province] || 'https://via.placeholder.com/150');
       return {
         id: index,
         lat: coords.lat,
         lng: coords.lng,
         province,
+        color,
+        thumb,
         count: `${count} đặc sản`
       };
     });
-  }, [specialtyPins]);
-
-  // Filter logic
+  }, [specialtyPins, TinhThanh]);
   const filteredPins = useMemo(() => {
     return specialtyPins.filter(pin => {
       const matchSearch = pin.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -292,8 +260,6 @@ export default function BanDoDacSan() {
       return matchSearch && matchCategory && matchProvince;
     });
   }, [specialtyPins, selectedCategory, selectedProvince, searchQuery]);
-
-  // Compute province specialties for 3D showroom
   const provinceSpecialties = useMemo(() => {
     if (!showroomProduct) return [];
     if (showroomProduct.isProvince) {
@@ -305,8 +271,6 @@ export default function BanDoDacSan() {
     }
     return [showroomProduct];
   }, [showroomProduct, specialtyPins]);
-
-  // Tự động xoay chậm CSS 3D Carousel khi người dùng không kéo thả
   useEffect(() => {
     if (!showShowroom || provinceSpecialties.length <= 1) return;
 
@@ -323,16 +287,12 @@ export default function BanDoDacSan() {
       cancelAnimationFrame(reqId);
     };
   }, [showShowroom, provinceSpecialties]);
-
-  // Hiển thị thông báo Toast
   const triggerToast = (title, desc) => {
     setToast({ active: true, title, desc });
     setTimeout(() => {
       setToast(prev => ({ ...prev, active: false }));
     }, 3500);
   };
-
-  // Khởi tạo bản đồ
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -355,8 +315,6 @@ export default function BanDoDacSan() {
         tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
         tileSize: 256
       });
-
-      // Add Boundary GeoJSON Source
       map.addSource('province-boundaries', {
         type: 'geojson',
         data: {
@@ -364,8 +322,6 @@ export default function BanDoDacSan() {
           features: []
         }
       });
-
-      // Fill Layer
       map.addLayer({
         id: 'province-boundaries-fill',
         type: 'fill',
@@ -375,8 +331,6 @@ export default function BanDoDacSan() {
           'fill-opacity': 0.15
         }
       });
-
-      // Outline Line Layer
       map.addLayer({
         id: 'province-boundaries-line',
         type: 'line',
@@ -387,36 +341,27 @@ export default function BanDoDacSan() {
         }
       });
     });
-
     return () => {
       if (rotationRequestRef.current) cancelAnimationFrame(rotationRequestRef.current);
       map.remove();
     };
   }, []);
 
-  // Update Province Boundaries on Map
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-
     const updateBoundaries = () => {
       const source = map.getSource('province-boundaries');
       if (!source) return;
       if (!ranhGioiData) return;
-
       let features = [];
-
       if (selectedProvince === 'all') {
-        // Do not show any boundaries normally when "all" is selected
         features = [];
       } else {
-        // Show only selected merged group's constituents
         const group = MERGER_GROUPS[selectedProvince];
         if (group) {
           const activeGeojsonNames = group.geojsonNames;
           const boundaryColor = group.color;
-
-          // Fly to the specified headquarters position
           map.flyTo({
             center: [group.center.lng, group.center.lat],
             zoom: 9.2,
@@ -452,8 +397,6 @@ export default function BanDoDacSan() {
       map.once('load', updateBoundaries);
     }
   }, [selectedProvince, ranhGioiData]);
-
-  // Update Satellite Layer
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -483,28 +426,33 @@ export default function BanDoDacSan() {
       map.once('load', updateSatellite);
     }
   }, [isSatellite]);
-
-  // Update Markers (Province Red Flags & Specialty Teardrops)
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-
-    // Clear existing markers by selecting elements with maplibre-marker class
     const existingMarkers = document.querySelectorAll('.mapboxgl-marker, .maplibregl-marker');
     existingMarkers.forEach(el => el.remove());
-
-    // 1. Add Province Red Flags
     provinceFlags.forEach(flag => {
       const el = document.createElement('div');
-      el.className = 'province-marker-wrapper';
-      
+      // anchor:'bottom' → MapLibre ghim bottom-center của el vào tọa độ
+      // Wrapper có chiều cao cố định, không dùng CSS transform trên chính nó
+      el.className = 'prov-marker-wrap';
+
       el.innerHTML = `
-        <div class="province-pulse"></div>
-        <div class="province-capsule">
-          <span class="province-capsule-icon">✨</span>
-          <div class="province-capsule-info">
-            <span class="province-capsule-name">${flag.province}</span>
-            <span class="province-capsule-count">${flag.count}</span>
+        <div class="prov-marker">
+          <div class="prov-marker-label">
+            <span class="prov-marker-name" style="color: ${flag.color}">${flag.province}</span>
+            <span class="prov-marker-count">${flag.count}</span>
+            <div class="prov-marker-bar" style="background:${flag.color}"></div>
+          </div>
+          <div class="prov-marker-pin" style="--c:${flag.color}">
+            <div class="prov-marker-img-wrap">
+              <img src="${flag.thumb}" alt="${flag.province}" class="prov-marker-img" />
+            </div>
+          </div>
+          <div class="prov-marker-rings" style="--c:${flag.color}">
+            <span class="prov-ring r1"></span>
+            <span class="prov-ring r2"></span>
+            <span class="prov-ring r3"></span>
           </div>
         </div>
       `;
@@ -521,8 +469,6 @@ export default function BanDoDacSan() {
           duration: 1500 
         });
         triggerToast(flag.province, `Đang hiển thị danh mục sản vật tại ${flag.province} dưới dạng 2D.`);
-        
-        // Open showroom for this province
         setShowroomProduct({
           title: flag.province,
           location: 'Đặc sản',
@@ -532,12 +478,10 @@ export default function BanDoDacSan() {
         setShowShowroom(true);
       });
 
-      new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([flag.lng, flag.lat])
         .addTo(map);
     });
-
-    // 2. Add Specialty Teardrop Pins
     filteredPins.forEach(pin => {
       const el = document.createElement('div');
       el.className = 'specialty-marker-container';
@@ -564,14 +508,12 @@ export default function BanDoDacSan() {
         map.flyTo({ center: [pin.lng, pin.lat], zoom: 11.5, duration: 1200 });
       });
 
-      new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([pin.lng, pin.lat])
         .addTo(map);
     });
 
   }, [filteredPins, provinceFlags]);
-
-  // Rotation effect
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -595,8 +537,6 @@ export default function BanDoDacSan() {
       if (rotationRequestRef.current) cancelAnimationFrame(rotationRequestRef.current);
     };
   }, [isRotating]);
-
-  // Helper Controls
   const resetView = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -626,16 +566,9 @@ export default function BanDoDacSan() {
       return next;
     });
   };
-
-  // Close Popup
   const closeProductPopup = () => {
     setActivePin(null);
   };
-
-
-
-
-
   const closeShowroom = () => {
     setShowShowroom(false);
     setRotationAngle(0);
@@ -644,7 +577,6 @@ export default function BanDoDacSan() {
 
   return (
     <main className="marketplace-map-page">
-      {/* Hero Header */}
       <section 
         className="map-hero-marketplace" 
         style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${bannerBg})` }}
@@ -663,9 +595,7 @@ export default function BanDoDacSan() {
         </div>
       </section>
 
-      {/* Main Core Map Area */}
       <section id="map-core">
-        {/* Left Sidebar Filter Section */}
         <div className="map-left-sidebar">
           <div className="search-container-map">
             <input 
@@ -691,23 +621,18 @@ export default function BanDoDacSan() {
             <div className="filter-grid">
               <div>
                 <span className="filter-label">Loại đặc sản</span>
-                <div className="specialty-tags">
-                  <button 
-                    className={`tag-btn ${selectedCategory === 'Tất cả' ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory('Tất cả')}
-                  >
-                    Tất cả
-                  </button>
+                <select 
+                  className="province-select" 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="Tất cả">Tất cả</option>
                   {listPhanLoai.map(pl => (
-                    <button 
-                      key={pl.ID_PhanLoai || pl.id} 
-                      className={`tag-btn ${selectedCategory === pl.TenLoai ? 'active' : ''}`}
-                      onClick={() => setSelectedCategory(pl.TenLoai)}
-                    >
+                    <option key={pl.ID_PhanLoai || pl.id} value={pl.TenLoai}>
                       {pl.TenLoai}
-                    </button>
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
               <div>
@@ -726,17 +651,67 @@ export default function BanDoDacSan() {
                   ))}
                 </select>
               </div>
+            </div>
 
-
+            <div className="filter-results-list" style={{ marginTop: '20px', maxHeight: 'calc(100vh - 350px)', overflowY: 'auto', paddingRight: '5px' }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: '15px', color: 'var(--text-color)' }}>Danh sách kết quả ({filteredPins.length})</h3>
+              {filteredPins.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {filteredPins.map(pin => (
+                    <div 
+                      key={pin.id} 
+                      className="result-item" 
+                      onClick={() => {
+                        const map = mapRef.current;
+                        if (map) {
+                          map.flyTo({ center: [pin.lng, pin.lat], zoom: 11.5, duration: 1200 });
+                          setActivePin(pin);
+                        }
+                      }}
+                      style={{ 
+                        display: 'flex', 
+                        gap: '12px', 
+                        padding: '12px', 
+                        backgroundColor: '#f8fafc',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f1f5f9';
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                      }}
+                    >
+                      <img 
+                        src={pin.thumb} 
+                        alt={pin.title} 
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }} 
+                      />
+                      <div style={{ flex: 1 }}>
+                        <h4 style={{ margin: '0 0 6px 0', fontSize: '0.95rem', color: '#0f172a' }}>{pin.title}</h4>
+                        <p style={{ margin: '0', fontSize: '0.8rem', color: '#64748b' }}>
+                          <span style={{ display: 'inline-block', width: '8px', height: '8px', backgroundColor: '#3b82f6', borderRadius: '50%', marginRight: '6px' }}></span>
+                          {pin.detailedLocation}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: '#94a3b8' }}>
+                  <p>Không tìm thấy sản vật nào phù hợp.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Mapbox Container */}
         <div id="specialty-map">
           <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
-
-          {/* Layer and Rotation Controls */}
           <div className="map-overlay-controls">
             <button 
               className={`map-ctrl-btn ${!is3DMode ? 'active' : ''}`} 
@@ -771,8 +746,6 @@ export default function BanDoDacSan() {
               <RotateCw size={18} />
             </button>
           </div>
-
-          {/* Premium Toast Notification */}
           <div id="map-toast" className={`map-toast ${toast.active ? 'active' : ''}`}>
             <span className="map-toast-icon">✨</span>
             <div class="map-toast-content">
@@ -782,8 +755,6 @@ export default function BanDoDacSan() {
           </div>
         </div>
       </section>
-
-      {/* Floating Product Detail Card */}
       <div id="product-popup" className={`product-popup-card ${activePin ? 'active' : ''}`}>
         <button className="close-popup" onClick={closeProductPopup}>
           <X size={16} />
@@ -796,21 +767,19 @@ export default function BanDoDacSan() {
               <h3 id="popup-title">{activePin.title}</h3>
               <p id="popup-desc">{activePin.desc}</p>
               <div className="popup-actions">
-                <button className="btn-buy" onClick={() => alert('Đã thêm vào giỏ hàng!')}>MUA NGAY</button>
+                <button className="btn-buy" onClick={() => navigate(`/products?search=${encodeURIComponent(activePin.title)}`)}>MUA NGAY</button>
                 <button 
                   className="btn-story" 
                   disabled={loadingStory} 
                   onClick={() => handleOpenStory(activePin)}
                 >
-                  {loadingStory ? 'ĐANG TẢI...' : 'CÂU CHUYỆN'}
+                  {loadingStory ? 'ĐANG TÌM...' : 'CÂU CHUYỆN'}
                 </button>
               </div>
             </div>
           </>
         )}
       </div>
-
-      {/* 3D Showroom Modal */}
       {showShowroom && (
         <div id="showroom-modal" className="active">
           <div className="showroom-container">
@@ -850,10 +819,35 @@ export default function BanDoDacSan() {
                         transform: `rotateY(${angle}rad) translateZ(${radius}px)`,
                       }}
                     >
-                      <img src={pin.thumb} alt={pin.title} />
-                      <div className="card-info">
-                        <h3>{pin.title}</h3>
-                        <p>{pin.detailedLocation}</p>
+                      <div className="card-image-wrap">
+                        <img src={pin.thumb} alt={pin.title} />
+                        <button className="card-fav-btn"><Heart size={14} /></button>
+                        <div className="card-loc-badge">
+                          <MapPin size={12} /> {pin.location}
+                        </div>
+                      </div>
+                      <div className="card-body">
+                        <div className="card-category">
+                          <Package size={12} /> ĐẶC SẢN {pin.location?.toUpperCase()}
+                        </div>
+                        <h3 className="card-title">{pin.title}</h3>
+                        <p className="card-desc">{pin.desc}</p>
+
+                        <div className="card-actions">
+                          <button 
+                            className="btn-card-buy" 
+                            onClick={(e) => { e.stopPropagation(); navigate(`/products?search=${encodeURIComponent(pin.title)}`); closeShowroom(); }}
+                          >
+                            <ShoppingCart size={16} /> Mua ngay
+                          </button>
+                          <button 
+                            className="btn-card-story"
+                            title="Xem câu chuyện"
+                            onClick={(e) => { e.stopPropagation(); handleOpenStory(pin); }}
+                          >
+                            <ArrowRight size={16} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -862,35 +856,6 @@ export default function BanDoDacSan() {
             </div>
 
             <div className="showroom-instruction">Kéo để xoay • Cuộn để phóng to</div>
-          </div>
-        </div>
-      )}
-      {/* Story Detail Modal */}
-      {selectedStory && (
-        <div className="blog-modal-overlay" style={{ display: 'flex' }} onClick={() => setSelectedStory(null)}>
-          <div className="blog-modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="blog-modal-header">
-              <img 
-                className="blog-modal-banner" 
-                src={selectedStory.hinhanh ? (selectedStory.hinhanh.startsWith('http') ? selectedStory.hinhanh : `https://lvtnbackend.onrender.com/storage/${selectedStory.hinhanh}`) : 'https://via.placeholder.com/800x450?text=Cau+Chuyen'} 
-                alt={selectedStory.tittel} 
-              />
-              <button className="blog-modal-close" onClick={() => setSelectedStory(null)}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="blog-modal-body" style={{ color: '#1e293b' }}>
-              <div className="blog-modal-meta" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', fontSize: '0.85rem', color: '#64748b', marginBottom: '15px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <User size={16} /> Tác giả: {selectedStory.user?.HoTen || 'Ban quản trị'}
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Calendar size={16} /> Đăng ngày: {selectedStory.ngaydang || 'Gần đây'}
-                </span>
-              </div>
-              <h3 className="blog-modal-title" style={{ fontSize: '1.75rem', fontWeight: '800', margin: '0 0 15px 0', color: '#0f172a' }}>{selectedStory.tittel}</h3>
-              <div className="blog-modal-content" style={{ fontSize: '1rem', lineHeight: '1.7', color: '#334155' }} dangerouslySetInnerHTML={{ __html: selectedStory.noidung }} />
-            </div>
           </div>
         </div>
       )}
