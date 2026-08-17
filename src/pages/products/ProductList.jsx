@@ -4,7 +4,6 @@ import ProductCard from '../../components/products/ProductCard';
 import { useCart } from '../../context/CartContext';
 import { getPublicProducts } from '../../api/productPublicApi';
 import './ProductList.css';
-import { getPublicProducts } from '../../api/productPublicApi';
 
 /* ── Icon SVG ── */
 const IconSearch = () => (
