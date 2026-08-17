@@ -995,11 +995,40 @@ body {
         flex-shrink: 0 !important;
     }
 
-    /* Footer layout under 768px */
+}
+
+@media (max-width: 768px) {
+    #footer {
+        padding: 4rem 1.5rem 1.5rem;
+    }
+
     .footer-content {
-        grid-template-columns: 1fr !important;
-        gap: 2.5rem !important;
-        text-align: center !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1rem !important;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .footer-links {
+        text-align: left;
+    }
+
+    .footer-links h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .footer-links a {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-brand .logo {
+        justify-content: center;
     }
 
     .subscribe-box {

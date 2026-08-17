@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Filter, Layers, Box, Globe, RotateCw, X, Heart, MapPin, Package, ShoppingCart, ArrowRight, Home } from 'lucide-react';
+import { Filter, Layers, Box, Globe, RotateCw, X,  MapPin,  Home } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import bannerBg from '../../assets/bannermap.webp';
@@ -184,7 +184,8 @@ export default function BanDoDacSan() {
     queryFn: async () => {
       const response = await axiosClient.get('/bando?all=1');
       return response.data?.data || [];
-    }
+    },
+    staleTime: 3000,
   });
 
   const { data: TinhThanh = [] } = useQuery({
@@ -454,8 +455,6 @@ export default function BanDoDacSan() {
     existingMarkers.forEach(el => el.remove());
     provinceFlags.forEach(flag => {
       const el = document.createElement('div');
-      // anchor:'bottom' → MapLibre ghim bottom-center của el vào tọa độ
-      // Wrapper có chiều cao cố định, không dùng CSS transform trên chính nó
       el.className = 'prov-marker-wrap';
 
       el.innerHTML = `
