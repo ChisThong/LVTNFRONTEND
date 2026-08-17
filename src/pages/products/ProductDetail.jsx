@@ -371,7 +371,7 @@ export default function ProductDetail() {
           </div>
           <div className="shop-details">
             <h3>{shopName}</h3>
-            <p><CheckCircle size={14} /> Online 5 phút trước</p>
+
             <p style={{ marginTop: '5px' }}><MapPin size={14} /> {tinhThanh}, Việt Nam</p>
           </div>
         </div>
