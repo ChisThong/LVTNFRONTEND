@@ -10,6 +10,22 @@ export default function BaiVietTinhThanh() {
     const navigate = useNavigate();
     const url = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
 
+    const getImageUrl = (hinhanh) => {
+        if (!hinhanh) return null;
+        let imagePath = hinhanh;
+        try {
+            const parsed = JSON.parse(hinhanh);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                imagePath = parsed[0];
+            }
+        } catch (e) {}
+        
+        if (imagePath.startsWith('http')) return imagePath;
+        // Ensure there's a slash between storage and the path
+        const separator = imagePath.startsWith('/') ? '' : '/';
+        return `${url}${separator}${imagePath}`;
+    };
+
     const { data: blogs = [], isLoading: blogsLoading } = useQuery({
         queryKey: ['provinceBlogs', id],
         queryFn: async () => {
@@ -64,7 +80,7 @@ export default function BaiVietTinhThanh() {
                                 <Link to={`/blogs/${blog.ID_Blog}`} key={blog.ID_Blog} className="cauchuyen-card">
                                     <div className="cauchuyen-image">
                                         {blog.hinhanh ? (
-                                            <img src={`${url}${blog.hinhanh}`} alt={blog.tittel} />
+                                            <img src={getImageUrl(blog.hinhanh)} alt={blog.tittel} />
                                         ) : (
                                             <div className="no-image">Không có hình ảnh</div>
                                         )}
@@ -88,7 +104,7 @@ export default function BaiVietTinhThanh() {
                                 <Link to={`/blogs/${blog.ID_Blog}`} key={blog.ID_Blog} className="tintuc-card">
                                     <div className="tintuc-image">
                                         {blog.hinhanh ? (
-                                            <img src={`${url}${blog.hinhanh}`} alt={blog.tittel} />
+                                            <img src={getImageUrl(blog.hinhanh)} alt={blog.tittel} />
                                         ) : (
                                             <div className="no-image">Không có hình ảnh</div>
                                         )}

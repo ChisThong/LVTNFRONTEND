@@ -1594,3 +1594,78 @@
   margin-top: 5px;
 }
 
+/* --- Redesigned 3D Card --- */
+.css-3d-card.redesigned {
+  width: 280px;
+  height: 380px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  backface-visibility: visible;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.css-3d-card.redesigned:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.card-image-wrap-new {
+  width: 100%;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+
+.card-image-wrap-new img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.card-body-new {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  background: linear-gradient(to bottom, #ffffff, #f1f2f6);
+  border-radius: 0 0 16px 16px;
+}
+
+.card-title-new {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2f3640;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.card-divider-new {
+  width: 100%;
+  height: 1px;
+  border-bottom: 1.5px dashed #dcdde1;
+  margin-bottom: 16px;
+}
+
+.card-loc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: #4b6584;
+  font-weight: 600;
+}
+
+.card-loc-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -21,25 +21,43 @@ export default function SellerChat() {
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
   const pollingRef = useRef(null);
+  const listPollingRef = useRef(null);
+  const activeRoomRef = useRef(null);
+
+  useEffect(() => {
+    activeRoomRef.current = activeRoom;
+  }, [activeRoom]);
 
   // 1. Fetch all conversations for this Shop
-  const fetchConversations = async () => {
-    setListLoading(true);
+  const fetchConversations = async (silent = false) => {
+    if (!silent) setListLoading(true);
     try {
       const res = await axiosClient.get('/chat/danh-sach-phong?role=seller');
       if (res.data?.success) {
-        setConversations(res.data.data ?? []);
+        let newList = res.data.data ?? [];
+        if (activeRoomRef.current) {
+          newList = newList.map(c => 
+            c.ID_PhongChat === activeRoomRef.current.ID_PhongChat ? { ...c, tin_chua_doc: 0 } : c
+          );
+        }
+        setConversations(newList);
       }
     } catch (err) {
       console.error('Lỗi lấy danh sách chat của shop:', err);
-      toast.error('Không thể tải danh sách cuộc trò chuyện.');
+      if (!silent) toast.error('Không thể tải danh sách cuộc trò chuyện.');
     } finally {
-      setListLoading(false);
+      if (!silent) setListLoading(false);
     }
   };
 
   useEffect(() => {
     fetchConversations();
+    listPollingRef.current = setInterval(() => {
+      fetchConversations(true);
+    }, 5000);
+    return () => {
+      if (listPollingRef.current) clearInterval(listPollingRef.current);
+    };
   }, []);
 
   // 2. Select conversation and load messages
@@ -52,6 +70,10 @@ export default function SellerChat() {
       const res = await axiosClient.get(`/chat/phong/${room.ID_PhongChat}/tin-nhan`);
       setMessages(res.data ?? []);
       window.dispatchEvent(new CustomEvent('chat-unread-change'));
+
+      setConversations(prev => prev.map(c => 
+        c.ID_PhongChat === room.ID_PhongChat ? { ...c, tin_chua_doc: 0 } : c
+      ));
 
       // Realtime listener
       if (pusherRef.current) {
@@ -175,7 +197,7 @@ export default function SellerChat() {
         setConversations((prevList) =>
           prevList.map((c) =>
             c.ID_PhongChat === activeRoom.ID_PhongChat
-              ? { ...c, TinNhanCuoi: contentToSend, ThoiGianCapNhat: new Date().toISOString() }
+              ? { ...c, TinNhanCuoi: contentToSend, ThoiGianCapNhat: new Date().toISOString(), tin_chua_doc: 0 }
               : c
           )
         );

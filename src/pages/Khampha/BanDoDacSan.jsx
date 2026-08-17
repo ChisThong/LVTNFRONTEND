@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Filter, Layers, Box, Globe, RotateCw, X, Heart, MapPin, Package, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Filter, Layers, Box, Globe, RotateCw, X, Heart, MapPin, Package, ShoppingCart, ArrowRight, Home } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import bannerBg from '../../assets/bannermap.webp';
@@ -206,8 +206,28 @@ export default function BanDoDacSan() {
   });
   const specialtyPins = useMemo(() => {
     const pins = rawMapsData || [];
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
     return pins.map(item => {
       const provinceName = item.tinh_thanh?.TenTinhThanh || '';
+      
+      let thumbImg = "https://via.placeholder.com/300x200?text=No+Image";
+      if (item.HinhAnh) {
+        try {
+          const parsed = JSON.parse(item.HinhAnh);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            thumbImg = `${backendUrl}/storage/${parsed[0]}`;
+          } else {
+            thumbImg = `${backendUrl}/storage/${item.HinhAnh}`;
+          }
+        } catch (e) {
+          if (item.HinhAnh.startsWith('http')) {
+            thumbImg = item.HinhAnh;
+          } else {
+            thumbImg = `${backendUrl}/storage/${item.HinhAnh}`;
+          }
+        }
+      }
+
       return {
         id: item.ID,
         ID_TinhThanh: item.ID_TinhThanh,
@@ -218,7 +238,7 @@ export default function BanDoDacSan() {
         category: item.PhanLoai || '',
         location: provinceName,
         detailedLocation: [item.ap?.Ten_ap, item.xa?.Ten_xa].filter(Boolean).join(', ') || provinceName,
-        thumb: item.HinhAnh ? `https://lvtnbackend.onrender.com/storage/${item.HinhAnh}` : "https://via.placeholder.com/300x200?text=No+Image"
+        thumb: thumbImg
       };
     });
   }, [rawMapsData]);
@@ -237,8 +257,9 @@ export default function BanDoDacSan() {
       const coords = group ? group.center : (PROVINCE_COORDINATES[province] || { lat: 10.0, lng: 105.0 });
       const color = group ? group.color : '#10b981';
       const provinceInfo = TinhThanh.find(t => t.TenTinhThanh === province);
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
       const thumb = provinceInfo?.HinhAnh
-        ? `https://lvtnbackend.onrender.com/storage/${provinceInfo.HinhAnh}`
+        ? (provinceInfo.HinhAnh.startsWith('http') ? provinceInfo.HinhAnh : `${backendUrl}/storage/${provinceInfo.HinhAnh}`)
         : (thumbMap[province] || 'https://via.placeholder.com/150');
       return {
         id: index,
@@ -814,39 +835,25 @@ export default function BanDoDacSan() {
                   return (
                     <div 
                       key={pin.id || i}
-                      className="css-3d-card"
+                      className="css-3d-card redesigned"
                       style={{
                         transform: `rotateY(${angle}rad) translateZ(${radius}px)`,
                       }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/products?search=${encodeURIComponent(pin.title)}`); closeShowroom(); }}
                     >
-                      <div className="card-image-wrap">
+                      <div className="card-image-wrap-new">
                         <img src={pin.thumb} alt={pin.title} />
-                        <button className="card-fav-btn"><Heart size={14} /></button>
-                        <div className="card-loc-badge">
-                          <MapPin size={12} /> {pin.location}
-                        </div>
                       </div>
-                      <div className="card-body">
-                        <div className="card-category">
-                          <Package size={12} /> ĐẶC SẢN {pin.location?.toUpperCase()}
+                      <div className="card-body-new">
+                        <h3 className="card-title-new">{pin.title}</h3>
+                        <div className="card-divider-new"></div>
+                        <div className="card-loc-item">
+                          <MapPin size={16} color="#c0392b" />
+                          <span>Tỉnh: {pin.location}</span>
                         </div>
-                        <h3 className="card-title">{pin.title}</h3>
-                        <p className="card-desc">{pin.desc}</p>
-
-                        <div className="card-actions">
-                          <button 
-                            className="btn-card-buy" 
-                            onClick={(e) => { e.stopPropagation(); navigate(`/products?search=${encodeURIComponent(pin.title)}`); closeShowroom(); }}
-                          >
-                            <ShoppingCart size={16} /> Mua ngay
-                          </button>
-                          <button 
-                            className="btn-card-story"
-                            title="Xem câu chuyện"
-                            onClick={(e) => { e.stopPropagation(); handleOpenStory(pin); }}
-                          >
-                            <ArrowRight size={16} />
-                          </button>
+                        <div className="card-loc-item">
+                          <Home size={16} color="#c0392b" />
+                          <span>Xã/Phường: {pin.detailedLocation}</span>
                         </div>
                       </div>
                     </div>

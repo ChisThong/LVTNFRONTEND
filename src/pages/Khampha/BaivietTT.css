@@ -235,3 +235,43 @@
         display: -webkit-box;
     }
 }
+/* --- Loading State --- */
+.baiviet-loading {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #FAF6F0;
+    color: #4b5563;
+    font-family: 'Inter', sans-serif;
+    gap: 16px;
+}
+
+.baiviet-loading::before {
+    content: '';
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(16, 185, 129, 0.2);
+    border-top-color: #10b981;
+    border-radius: 50%;
+    animation: baiviet-spin 1s ease-in-out infinite;
+}
+
+.baiviet-loading p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #10b981;
+    animation: baiviet-pulse 1.5s ease-in-out infinite;
+    margin: 0;
+}
+
+@keyframes baiviet-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes baiviet-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}

@@ -9,31 +9,33 @@ import '../../styles/chat-widget.css';
 export default function ChatFloatingWidget() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [view, setView] = useState('list'); // 'list' or 'chat'
+  const [view, setView] = useState('list'); 
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
   const [sending, setSending] = useState(false);
   
-  // Conversations list
   const [conversations, setConversations] = useState([]);
 
-  // Active Chat Room state
   const [phongChat, setPhongChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [shopId, setShopId] = useState(null);
   const [shopName, setShopName] = useState('');
-  const [vaiTro, setVaiTro] = useState('user'); // 'user' (acting as buyer) or 'shop' (acting as seller/replier)
+  const [vaiTro, setVaiTro] = useState('user'); 
   
-  // References
   const messagesEndRef = useRef(null);
   const pusherRef = useRef(null);
   const channelRef = useRef(null);
   const currentUserRef = useRef(null);
   const pollingRef = useRef(null);
   const lastMsgIdRef = useRef(null);
+  const listPollingRef = useRef(null);
+  const activeRoomRef = useRef(null);
 
-  // 1. Fetch current user info
+  useEffect(() => {
+    activeRoomRef.current = phongChat;
+  }, [phongChat]);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -49,29 +51,38 @@ export default function ChatFloatingWidget() {
     }
   }, [isOpen]);
 
-  // 2. Fetch all conversations for the user
-  const fetchConversations = async () => {
-    setListLoading(true);
+  const fetchConversations = async (silent = false) => {
+    if (!silent) setListLoading(true);
     try {
       const res = await axiosClient.get('/chat/danh-sach-phong');
       if (res.data?.success) {
-        setConversations(res.data.data ?? []);
+        let newList = res.data.data ?? [];
+        if (activeRoomRef.current) {
+          newList = newList.map(c => 
+            c.ID_PhongChat === activeRoomRef.current.ID_PhongChat ? { ...c, tin_chua_doc: 0 } : c
+          );
+        }
+        setConversations(newList);
       }
     } catch (err) {
       console.error('Lỗi tải danh sách phòng chat:', err);
     } finally {
-      setListLoading(false);
+      if (!silent) setListLoading(false);
     }
   };
 
-  // Fetch list when panel is opened and we are in list view
   useEffect(() => {
-    if (isOpen && view === 'list') {
-      fetchConversations();
+    if (isOpen) {
+      fetchConversations(view !== 'list');
+      listPollingRef.current = setInterval(() => {
+        fetchConversations(true);
+      }, 5000);
+      return () => {
+        if (listPollingRef.current) clearInterval(listPollingRef.current);
+      };
     }
-  }, [isOpen, view]);
+  }, [isOpen]);
 
-  // 3. Register global function on window for "Chat ngay" buttons
   useEffect(() => {
     window.openChatWithShop = (idShop, nameShop) => {
       const token = localStorage.getItem('token');
@@ -82,8 +93,8 @@ export default function ChatFloatingWidget() {
       }
       setShopId(idShop);
       setShopName(nameShop);
-      setVaiTro('user'); // Buyer starts chat
-      setView('chat'); // Bypass list and open chat directly
+      setVaiTro('user'); 
+      setView('chat'); 
       setIsOpen(true);
     };
 
@@ -103,31 +114,28 @@ export default function ChatFloatingWidget() {
       delete window.openChatWidget;
     };
   }, [navigate]);
-
-  // 4. Connect to room
   useEffect(() => {
     if (!isOpen || !shopId || view !== 'chat') return;
 
     const connectToRoom = async () => {
       setLoading(true);
       try {
-        // Step A: Find or Create room
         const roomRes = await axiosClient.post('/chat/vao-phong', { ID_Shop: shopId });
         const roomData = roomRes.data?.du_lieu;
         setPhongChat(roomData);
 
         if (roomData?.ID_PhongChat) {
-          // Step B: Load message history
           const msgRes = await axiosClient.get(`/chat/phong/${roomData.ID_PhongChat}/tin-nhan`);
           const initialMsgs = msgRes.data ?? [];
           setMessages(initialMsgs);
-          // Track last message ID for polling
           if (initialMsgs.length > 0) {
             lastMsgIdRef.current = initialMsgs[initialMsgs.length - 1].ID_TinNhan;
           }
           window.dispatchEvent(new CustomEvent('chat-unread-change'));
+          setConversations(prev => prev.map(c => 
+            c.ID_PhongChat === roomData.ID_PhongChat ? { ...c, tin_chua_doc: 0 } : c
+          ));
           
-          // Step C: Kết nối Pusher (cả private lẫn public channel để chắc ăn)
           const token = localStorage.getItem('token');
           const apiUrl = import.meta.env.VITE_API_URL || 'https://lvtnbackend.onrender.com/api';
           const pusher = new Pusher('74b5dea7d94f427dbf7b', {
@@ -190,7 +198,6 @@ export default function ChatFloatingWidget() {
                 return [...prev, ...newMsgs];
               });
             } catch(e) {
-              // ignore polling errors
             }
           }, 3000);
         }
@@ -247,6 +254,13 @@ export default function ChatFloatingWidget() {
           return [...prev, savedMsg];
         });
         window.dispatchEvent(new CustomEvent('chat-unread-change'));
+        setConversations(prevList =>
+          prevList.map(c =>
+            c.ID_PhongChat === phongChat.ID_PhongChat
+              ? { ...c, TinNhanCuoi: contentToSend, ThoiGianCapNhat: new Date().toISOString(), tin_chua_doc: 0 }
+              : c
+          )
+        );
       }
     } catch (err) {
       console.error('Lỗi gửi tin nhắn:', err);
@@ -358,7 +372,6 @@ export default function ChatFloatingWidget() {
               <div className="conversations-list-container">
                 {listLoading ? (
                   <div className="chat-loading">
-                    <Loader className="spinner" size={24} />
                     <p>Đang tải danh sách hộp thư...</p>
                   </div>
                 ) : conversations.length === 0 ? (
@@ -422,7 +435,6 @@ export default function ChatFloatingWidget() {
               <>
                 {loading ? (
                   <div className="chat-loading">
-                    <Loader className="spinner" size={24} />
                     <p>Đang kết nối phòng chat...</p>
                   </div>
                 ) : !phongChat ? (
