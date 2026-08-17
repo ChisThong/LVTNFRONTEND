@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import '../../styles/navbar-admin.css';
 import { Search, ChevronRight, ChevronLeft, Edit, Trash2, Plus, Save, X } from 'lucide-react';
-import Swal from 'sweetalert2';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
-import axiosClient from '../../api/axiosClient'; 
+import axiosClient from '../../api/axiosClient';
 
 const BACKEND_STORAGE = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000'}/storage`;
 
@@ -21,6 +20,7 @@ function BanDoControl() {
 
     // 2. CÁC STATE QUẢN LÝ FORM (THÊM / SỬA)
     const [editingId, setEditingId] = useState(null); 
+    const [validateError, setValidateError] = useState({});
     const [formValues, setFormValues] = useState({
         TenDacSan: '',
         ViDo: '',
@@ -31,7 +31,7 @@ function BanDoControl() {
         ID_Xa: '',
         ID_Ap: ''
     });
-    const [hinhAnhFile, setHinhAnhFile] = useState(null); 
+    const [hinhAnhFile, setHinhAnhFile] = useState(null);
 
     // ==================== CÁC KHỐI HOOK GỌI API (DANH SÁCH) ====================
     const { data} = useQuery({
@@ -48,7 +48,7 @@ function BanDoControl() {
             const response = await axiosClient.get(api);
             return response?.data || {};
         },
-        staleTime: 1000,
+        staleTime: 3000,
         keepPreviousData: true
     });
 
@@ -93,7 +93,6 @@ function BanDoControl() {
         staleTime: 10000,
     });
 
-    // Các bộ query riêng biệt để phục vụ dropdown động TRONG Form Thêm/Sửa
     const { data: FormXa = [] } = useQuery({
         queryKey: ['FormXa', formValues.ID_TinhThanh],
         queryFn: async () => {
@@ -112,9 +111,6 @@ function BanDoControl() {
         enabled: !!formValues.ID_Xa,
     });
 
-
-    // ==================== KHỐI XỬ LÝ MUTATION (THÊM, XÓA, SỬA) ====================
-    // HÀM MUTATION: THÊM MỚI (STORE)
     const addMutation = useMutation({
         mutationFn: async (formData) => {
             return await axiosClient.post('/admin/bandoControl', formData, {
@@ -122,29 +118,44 @@ function BanDoControl() {
             });
         },
         onSuccess: () => {
-            Swal.fire('Thành công', 'Thêm điểm ghim mới thành công!', 'success');
-            queryClient.invalidateQueries({ queryKey: ['maps'] }); 
-            setTinhThanh(''); setXa(''); setAp(''); setSelectedRegion('Tất cả'); 
+            alert('Thêm điểm ghim mới thành công!');
+            setValidateError({});
+            queryClient.invalidateQueries({ queryKey: ['maps'] });
+            setTinhThanh(''); setXa(''); setAp(''); setSelectedRegion('Tất cả');
             setViewMode('list');
         },
-        onError: (err) => Swal.fire('Lỗi hệ thống', err.response?.data?.message || err.message, 'error')
+        onError: (err) => {
+            if (err.response && err.response.status === 422) {
+                setValidateError(err.response.data.errors || {});
+                alert('Dữ liệu nhập vào không hợp lệ. Vui lòng kiểm tra lại!');
+            } else {
+                alert(err.response?.data?.message || 'Thêm mới thất bại! Lỗi hệ thống.');
+            }
+        }
     });
 
     // HÀM MUTATION: CẬP NHẬT (UPDATE)
     const updateMutation = useMutation({
         mutationFn: async ({ id, formData }) => {
-            formData.append('_method', 'PUT'); 
+            formData.append('_method', 'PUT');
             return await axiosClient.post(`/admin/bandoControl/${id}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
         },
         onSuccess: () => {
-            Swal.fire('Thành công', 'Cập nhật điểm ghim thành công!', 'success');
-            queryClient.invalidateQueries({ queryKey: ['maps'] }); 
-            
+            alert('Cập nhật điểm ghim thành công!');
+            setValidateError({});
+            queryClient.invalidateQueries({ queryKey: ['maps'] });
             setViewMode('list');
         },
-        onError: (err) => Swal.fire('Lỗi hệ thống', err.response?.data?.message || err.message, 'error')
+        onError: (err) => {
+            if (err.response && err.response.status === 422) {
+                setValidateError(err.response.data.errors || {});
+                alert('Dữ liệu nhập vào không hợp lệ. Vui lòng kiểm tra lại!');
+            } else {
+                alert(err.response?.data?.message || 'Cập nhật thất bại! Lỗi hệ thống.');
+            }
+        }
     });
 
     const deleteMutation = useMutation({
@@ -152,26 +163,28 @@ function BanDoControl() {
             return await axiosClient.delete(`/admin/bandoControl/${id}`);
         },
         onSuccess: () => {
-            Swal.fire('Đã xóa!', 'Điểm ghim đã được gỡ bỏ khỏi hệ thống.', 'success');
+            alert('Điểm ghim đã được gỡ bỏ khỏi hệ thống.');
             queryClient.invalidateQueries(['maps']);
         },
-        onError: (err) => Swal.fire('Lỗi xóa file', err.response?.data?.message || err.message, 'error')
+        onError: (err) => alert(err.response?.data?.message || 'Xóa thất bại! Lỗi hệ thống.')
     });
 
 
     // ==================== CÁC SỰ KIỆN TƯƠNG TÁC GIAO DIỆN ====================
     const handleOpenAdd = () => {
         setEditingId(null);
+        setValidateError({});
         setFormValues({
             TenDacSan: '', ViDo: '', KinhDo: '', MoTa: '', PhanLoai: 'Đặc sản',
-            ID_TinhThanh: tinhthanh, ID_Xa: xa, ID_Ap: ap 
+            ID_TinhThanh: tinhthanh, ID_Xa: xa, ID_Ap: ap
         });
         setHinhAnhFile(null);
         setViewMode('add');
     };
 
     const handleEditClick = (item) => {
-        setEditingId(item.ID || item.id || item.ID_map); // 🌟 ĐÃ SỬA: Bỏ biến 'data' không tồn tại
+        setEditingId(item.ID || item.id || item.ID_map);
+        setValidateError({});
         setFormValues({
             TenDacSan: item.TenDacSan || item.TenDiaDiem || '',
             ViDo: item.ViDo || '',
@@ -182,26 +195,15 @@ function BanDoControl() {
             ID_Xa: item.ID_Xa || '',
             ID_Ap: item.ID_Ap || ''
         });
-        setHinhAnhFile(null); 
+        setHinhAnhFile(null);
         setViewMode('edit');
     };
 
     const handleDeleteClick = (item) => {
         const id = item.ID || item.id || item.ID_map;
-        Swal.fire({
-            title: 'Xác nhận xóa?',
-            text: `Bạn có chắc muốn xóa điểm ghim "${item.TenDacSan || item.TenDiaDiem}" không?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#EF4444',
-            cancelButtonColor: '#6B7280',
-            confirmButtonText: 'Vâng, xóa ngay!',
-            cancelButtonText: 'Hủy bỏ'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                deleteMutation.mutate(id);
-            }
-        });
+        if (window.confirm(`Bạn có chắc muốn xóa điểm ghim "${item.TenDacSan || item.TenDiaDiem}" không?`)) {
+            deleteMutation.mutate(id);
+        }
     };
 
     const handleInputChange = (e) => {
@@ -410,16 +412,19 @@ function BanDoControl() {
                             <div className="admin-form-group">
                                 <label>Tên đặc sản / Địa điểm ghim <span style={{ color: '#EF4444' }}>*</span></label>
                                 <input type="text" name="TenDacSan" value={formValues.TenDacSan} onChange={handleInputChange} className="admin-form-control" placeholder="Nhập tên đặc sản..." required />
+                                {validateError.TenDacSan && <span className="error-message">{validateError.TenDacSan[0]}</span>}
                             </div>
 
                             <div className="admin-form-row">
                                 <div className="admin-form-group">
                                     <label>Tọa độ Vĩ độ (Latitude) <span style={{ color: '#EF4444' }}>*</span></label>
                                     <input type="text" name="ViDo" value={formValues.ViDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 10.2435" required />
+                                    {validateError.ViDo && <span className="error-message">{validateError.ViDo[0]}</span>}
                                 </div>
                                 <div className="admin-form-group">
                                     <label>Tọa độ Kinh độ (Longitude) <span style={{ color: '#EF4444' }}>*</span></label>
                                     <input type="text" name="KinhDo" value={formValues.KinhDo} onChange={handleInputChange} className="admin-form-control" placeholder="Ví dụ: 106.3752" required />
+                                    {validateError.KinhDo && <span className="error-message">{validateError.KinhDo[0]}</span>}
                                 </div>
                             </div>
 
@@ -430,6 +435,7 @@ function BanDoControl() {
                                         <option value="">-- Chọn Tỉnh --</option>
                                         {TinhThanh.map((t, index) => <option key={t.ID_TinhThanh || index} value={t.ID_TinhThanh}>{t.TenTinhThanh}</option>)}
                                     </select>
+                                    {validateError.ID_TinhThanh && <span className="error-message">{validateError.ID_TinhThanh[0]}</span>}
                                 </div>
                                 <div className="admin-form-group">
                                     <label>Xã / Phường <span style={{ color: '#EF4444' }}>*</span></label>
@@ -437,10 +443,11 @@ function BanDoControl() {
                                         <option value="">-- Chọn Xã --</option>
                                         {FormXa.map((x, index) => <option key={x.ID_Xa || index} value={x.ID_Xa}>{x.Ten_xa}</option>)}
                                     </select>
+                                    {validateError.ID_Xa && <span className="error-message">{validateError.ID_Xa[0]}</span>}
                                 </div>
                                 <div className="admin-form-group">
                                     <label>Ấp / Khu Phố</label>
-                                    <select name="ID_Ap" value={formValues.ID_Ap} onChange={handleInputChange} className="admin-form-control" disabled={!formValues.ID_Xa}> 
+                                    <select name="ID_Ap" value={formValues.ID_Ap} onChange={handleInputChange} className="admin-form-control" disabled={!formValues.ID_Xa}>
                                         <option value="">-- Chọn Ấp (Không bắt buộc) --</option>
                                         {FormAp.map((a, index) => <option key={a.ID_Ap || index} value={a.ID_Ap}>{a.Ten_ap}</option>)}
                                     </select>
@@ -449,10 +456,10 @@ function BanDoControl() {
 
                             <div className="admin-form-group">
                                 <label>Phân loại <span style={{ color: '#EF4444' }}>*</span></label>
-                                <select 
-                                    name="PhanLoai" 
-                                    value={formValues.PhanLoai} 
-                                    onChange={handleInputChange} 
+                                <select
+                                    name="PhanLoai"
+                                    value={formValues.PhanLoai}
+                                    onChange={handleInputChange}
                                     className="admin-form-control"
                                     required
                                 >
@@ -463,20 +470,23 @@ function BanDoControl() {
                                         </option>
                                     ))}
                                 </select>
+                                {validateError.PhanLoai && <span className="error-message">{validateError.PhanLoai[0]}</span>}
                             </div>
 
                             <div className="admin-form-group">
-                                <label>Mô tả chi tiết</label>
+                                <label>Mô tả chi tiết <span style={{ color: '#EF4444' }}>*</span></label>
                                 <textarea name="MoTa" value={formValues.MoTa} onChange={handleInputChange} className="admin-form-control" style={{ height: '80px', resize: 'vertical' }} placeholder="Nhập mô tả về điểm ghim này..."></textarea>
+                                {validateError.MoTa && <span className="error-message">{validateError.MoTa[0]}</span>}
                             </div>
 
                             <div className="admin-form-group">
-                                <label>Hình ảnh đặc sản</label>
+                                <label>Hình ảnh đặc sản{viewMode === 'add' && <span style={{ color: '#EF4444' }}> *</span>}</label>
                                 <input type="file" accept="image/*" onChange={(e) => setHinhAnhFile(e.target.files[0])} className="admin-form-control" />
+                                {validateError.HinhAnh && <span className="error-message">{validateError.HinhAnh[0]}</span>}
                             </div>
 
                             <div className="nam-modal-footer">
-                                <button type="button" className="filter-btn" onClick={() => setViewMode('list')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><X size={16} /> Hủy bỏ</button>
+                                <button type="button" className="filter-btn" onClick={() => { setViewMode('list'); setValidateError({}); }} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><X size={16} /> Hủy bỏ</button>
                                 <button type="submit" className="btn-action btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={16} /> Lưu thông tin</button>
                             </div>
                         </form>

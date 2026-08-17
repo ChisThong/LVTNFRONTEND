@@ -24,9 +24,7 @@ const BACKEND_STORAGE = `${import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1
 
 function DonHangControl() {
     // Các bộ lọc & Phân trang
-    const [maDonCon, setMaDonCon] = useState('');
-    const [tenKhach, setTenKhach] = useState('');
-    const [tenShop, setTenShop] = useState('');
+    const [search, setSearch] = useState('');
     const [trangThai, setTrangThai] = useState('');
     const [tuNgay, setTuNgay] = useState('');
     const [denNgay, setDenNgay] = useState('');
@@ -35,9 +33,7 @@ function DonHangControl() {
     // Lưu trữ tạm thời các giá trị lọc trước khi bấm "Lọc" (hoặc tự động debounce)
     // Để nâng cao UX, chúng ta sẽ cho lọc tự động khi nhập có debounce nhẹ hoặc lọc ngay lập tức
     const [filterParams, setFilterParams] = useState({
-        MaDonHangCon: '',
-        TenKhachHang: '',
-        TenShop: '',
+        search: '',
         TrangThai: '',
         TuNgay: '',
         DenNgay: ''
@@ -52,9 +48,7 @@ function DonHangControl() {
         queryKey: ['adminOrders', filterParams, page],
         queryFn: async () => {
             const params = new URLSearchParams();
-            if (filterParams.MaDonHangCon) params.append('MaDonHangCon', filterParams.MaDonHangCon);
-            if (filterParams.TenKhachHang) params.append('TenKhachHang', filterParams.TenKhachHang);
-            if (filterParams.TenShop) params.append('TenShop', filterParams.TenShop);
+            if (filterParams.search) params.append('search', filterParams.search);
             if (filterParams.TrangThai !== '') params.append('TrangThai', filterParams.TrangThai);
             if (filterParams.TuNgay) params.append('TuNgay', filterParams.TuNgay);
             if (filterParams.DenNgay) params.append('DenNgay', filterParams.DenNgay);
@@ -77,7 +71,7 @@ function DonHangControl() {
             return;
         }
 
-        let isMounted = true; // Tránh set state khi component unmount
+        let isMounted = true; 
 
         const fetchOrderDetail = async () => {
             setIsLoadingDetail(true);
@@ -119,32 +113,20 @@ function DonHangControl() {
     const handleApplyFilters = (e) => {
         if (e) e.preventDefault();
         setFilterParams({
-            MaDonHangCon: maDonCon,
-            TenKhachHang: tenKhach,
-            TenShop: tenShop,
+            search: search.trim(),
             TrangThai: trangThai,
             TuNgay: tuNgay,
             DenNgay: denNgay
         });
-        setPage(1); // Reset về trang 1 khi lọc
+        setPage(1);
     };
 
-    // Xóa bộ lọc
     const handleClearFilters = () => {
-        setMaDonCon('');
-        setTenKhach('');
-        setTenShop('');
+        setSearch('');
         setTrangThai('');
         setTuNgay('');
         setDenNgay('');
-        setFilterParams({
-            MaDonHangCon: '',
-            TenKhachHang: '',
-            TenShop: '',
-            TrangThai: '',
-            TuNgay: '',
-            DenNgay: ''
-        });
+        setFilterParams({ search: '', TrangThai: '', TuNgay: '', DenNgay: '' });
         setPage(1);
     };
 
@@ -327,7 +309,7 @@ function DonHangControl() {
                         <Filter size={18} />
                         <span>Bộ lọc tìm kiếm đơn hàng</span>
                     </div>
-                    {(maDonCon || tenKhach || tenShop || trangThai || tuNgay || denNgay) && (
+                    {(search || trangThai || tuNgay || denNgay) && (
                         <button 
                             type="button" 
                             onClick={handleClearFilters}
@@ -343,46 +325,17 @@ function DonHangControl() {
                 <form onSubmit={handleApplyFilters}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
                         
-                        {/* Tìm theo mã đơn hàng con */}
+                        {/* Ô tìm kiếm chung */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mã đơn hàng con</label>
+                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tìm kiếm</label>
                             <div className="search-box" style={{ maxWidth: '100%', height: '38px', padding: '0 10px' }}>
                                 <Search size={16} color="var(--text-muted)" />
-                                <input 
+                                <input
                                     type="text"
-                                    placeholder="Nhập mã đơn (DH-...)"
-                                    value={maDonCon}
-                                    onChange={(e) => setMaDonCon(e.target.value)}
-                                    style={{ margin: 0, fontSize: '0.85rem' }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Tìm theo tên khách hàng */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tên khách hàng</label>
-                            <div className="search-box" style={{ maxWidth: '100%', height: '38px', padding: '0 10px' }}>
-                                <Search size={16} color="var(--text-muted)" />
-                                <input 
-                                    type="text"
-                                    placeholder="Họ tên người mua..."
-                                    value={tenKhach}
-                                    onChange={(e) => setTenKhach(e.target.value)}
-                                    style={{ margin: 0, fontSize: '0.85rem' }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Tìm theo tên shop */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gian hàng (Shop)</label>
-                            <div className="search-box" style={{ maxWidth: '100%', height: '38px', padding: '0 10px' }}>
-                                <Search size={16} color="var(--text-muted)" />
-                                <input 
-                                    type="text"
-                                    placeholder="Tên gian hàng..."
-                                    value={tenShop}
-                                    onChange={(e) => setTenShop(e.target.value)}
+                                    placeholder="Mã đơn, tên khách hàng, tên gian hàng..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
                                     style={{ margin: 0, fontSize: '0.85rem' }}
                                 />
                             </div>
