@@ -29,14 +29,25 @@ function WalletTransactions({ backPath = '/wallet' }) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  const getTypeLabel = (type) => {
-    switch(type) {
-      case 'deposit': return <span className="wallet-type-label wallet-type-label--deposit">Nạp tiền</span>;
-      case 'payment': return <span className="wallet-type-label wallet-type-label--payment">Thanh toán đơn hàng</span>;
-      case 'release': return <span className="wallet-type-label wallet-type-label--release">Tiền hàng về ví</span>;
+  const getTypeLabel = (t) => {
+    const { type, reference_type, status } = t;
+
+    // ── Hoa hồng COD ─────────────────────────────────────────────
+    if (type === 'commission' && reference_type === 'cod_commission_settled') {
+      return <span className="wallet-type-label wallet-type-label--commission">✅ Đã trả nợ hoa hồng COD</span>;
+    }
+    if (type === 'commission' && reference_type === 'donhang_cod_commission' && status === 'pending') {
+      return <span className="wallet-type-label wallet-type-label--pending">🔴 Nợ hoa hồng COD (chưa thu)</span>;
+    }
+
+    // ── Các loại giao dịch thông thường ──────────────────────────
+    switch (type) {
+      case 'deposit':    return <span className="wallet-type-label wallet-type-label--deposit">Nạp tiền</span>;
+      case 'payment':    return <span className="wallet-type-label wallet-type-label--payment">Thanh toán đơn hàng</span>;
+      case 'release':    return <span className="wallet-type-label wallet-type-label--release">Tiền hàng về ví</span>;
       case 'commission': return <span className="wallet-type-label wallet-type-label--commission">Phí hoa hồng</span>;
-      case 'withdraw': return <span className="wallet-type-label wallet-type-label--withdraw">Rút tiền</span>;
-      default: return <span>{type}</span>;
+      case 'withdraw':   return <span className="wallet-type-label wallet-type-label--withdraw">Rút tiền</span>;
+      default:           return <span>{type}</span>;
     }
   };
 
@@ -106,7 +117,12 @@ function WalletTransactions({ backPath = '/wallet' }) {
                     filteredData.map((t) => (
                       <tr key={t.id} className="wallet-table-tr">
                         <td className="wallet-table-td">{formatDate(t.created_at)}</td>
-                        <td className="wallet-table-td wallet-table-td--type">{getTypeLabel(t.type)}</td>
+                        <td className="wallet-table-td wallet-table-td--type">
+                            {getTypeLabel(t)}
+                            {t.status === 'pending' && (
+                              <span style={{ marginLeft: 4, fontSize: 11, color: '#e53e3e' }}>(pending)</span>
+                            )}
+                          </td>
                         <td className="wallet-table-td wallet-table-td--ref">
                           {t.reference_type ? `${t.reference_type}_${t.reference_id}` : `#${t.id}`}
                         </td>

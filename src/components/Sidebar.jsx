@@ -105,45 +105,70 @@ function Sidebar({ role, mobileOpen, setMobileOpen }) {
 
     return (
         <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
-            <div className="sidebar-header" style={{ position: 'relative', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                <NavLink to={dashboardLink} className="admin-logo">
-                    <img
-                        src={logoImg}
-                        alt="NamBộ Specialties Logo"
-                        style={{ height: '36px', objectFit: 'contain', flexShrink: 0 }}
-                    />
-                    {role === 'admin' ? (
-                        <div className="admin-logo-text" style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '1.2rem', fontWeight: 900, lineHeight: 1 }}>NamBộ</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 700, letterSpacing: '1px' }}>
-                                CENTRAL
+            {/* ── Sidebar Header ── */}
+            <div className="sidebar-header">
+                {/* Logo + Brand name */}
+                {!collapsed && (
+                    <NavLink 
+                        to={dashboardLink} 
+                        className="admin-logo" 
+                        style={{ 
+                            flex: '1 1 auto', 
+                            minWidth: 0,
+                            maxWidth: 'calc(100% - 40px)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <img
+                            src={logoImg}
+                            alt="NamBộ Specialties Logo"
+                            style={{ height: '34px', width: '34px', objectFit: 'contain', flexShrink: 0 }}
+                        />
+                        {role === 'admin' ? (
+                            <div className="admin-logo-text" style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: '1 1 auto' }}>
+                                <span style={{ fontSize: '1.1rem', fontWeight: 900, lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>NamBộ</span>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--gold)', fontWeight: 700, letterSpacing: '1.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    CENTRAL
+                                </span>
+                            </div>
+                        ) : (
+                            <span
+                                className="admin-logo-text"
+                                style={{ color: 'var(--gold)', fontSize: '1.05rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: '1 1 auto' }}
+                            >
+                                {logoText}
                             </span>
-                        </div>
-                    ) : (
-                        <span className="admin-logo-text" style={{ color: 'var(--gold)', fontSize: '1.2rem', fontWeight: 700 }}>{logoText}</span>
-                    )}
-                </NavLink>
+                        )}
+                    </NavLink>
+                )}
+
+                {/* Toggle button */}
                 <button
                     onClick={toggleSidebar}
                     style={{
-                        position: 'absolute',
-                        right: collapsed ? '0' : '15px',
-                        left: collapsed ? '0' : 'auto',
-                        margin: collapsed ? '0 auto' : '0',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'rgba(255,255,255,0.7)',
+                        flexShrink: 0,
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: '8px',
+                        color: 'rgba(255,255,255,0.8)',
                         cursor: 'pointer',
-                        padding: '8px',
-                        display: 'flex'
+                        padding: '7px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'background 0.2s',
+                        margin: collapsed ? '0 auto' : '0',
                     }}
-                    title={collapsed ? "Mở rộng Sidebar" : "Thu gọn Sidebar"}
+                    title={collapsed ? 'Mở rộng Sidebar' : 'Thu gọn Sidebar'}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.14)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
                 >
-                    <Menu size={20} />
+                    <Menu size={18} />
                 </button>
             </div>
+
 
             <nav className="sidebar-menu">
                 {role === 'admin' && (

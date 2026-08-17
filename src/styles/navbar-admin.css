@@ -81,11 +81,11 @@ body {
 
 /* Sidebar Header and Logo when collapsed */
 .admin-sidebar.collapsed .sidebar-header {
-    padding: 1.5rem 0;
+    padding: 1.5rem 8px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 75px;
+    min-height: 72px;
 }
 
 .admin-sidebar.collapsed .admin-logo {
@@ -163,8 +163,13 @@ body {
 }
 
 .sidebar-header {
-    padding: 2rem 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.2rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    min-height: 72px;
+    box-sizing: border-box;
 }
 
 .admin-logo {
