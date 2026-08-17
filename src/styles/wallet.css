@@ -532,6 +532,10 @@
 .wallet-type-label--commission {
   color: var(--wallet-gold);
 }
+.wallet-type-label--pending {
+  color: #e53e3e;
+  font-weight: 600;
+}
 .wallet-type-label--withdraw {
   color: var(--wallet-purple);
 }

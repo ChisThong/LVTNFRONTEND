@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Wallet, Lock, History, ArrowUpCircle, ArrowDownCircle, X, Store,
-  RefreshCw, Clock, CheckCircle, XCircle,
+  RefreshCw, Clock, CheckCircle, XCircle, AlertTriangle,
 } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 import walletApi from '../../api/walletApi';
@@ -65,6 +65,27 @@ function SellerWallet() {
     }
   }, []);
 
+  // ── Nợ hoa hồng COD pending ──
+  const [pendingDebt, setPendingDebt] = useState(0);
+
+  const fetchPendingDebt = useCallback(async () => {
+    try {
+      const res = await walletApi.getTransactions();
+      const txns = res.data?.data || [];
+      const total = txns
+        .filter(
+          (t) =>
+            t.type === 'commission' &&
+            t.reference_type === 'donhang_cod_commission' &&
+            t.status === 'pending'
+        )
+        .reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0);
+      setPendingDebt(total);
+    } catch {
+      // silent
+    }
+  }, []);
+
   // ── Lịch sử rút tiền ──
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -84,6 +105,7 @@ function SellerWallet() {
   useEffect(() => {
     fetchSellerWallet();
     fetchWithdrawalHistory();
+    fetchPendingDebt();
 
     // Lấy thông tin shop để hiển thị ngân hàng mặc định
     axiosClient
@@ -92,7 +114,7 @@ function SellerWallet() {
         if (res.data?.data?.shop) setShop(res.data.data.shop);
       })
       .catch((err) => console.error('SellerWallet: failed to fetch /me', err));
-  }, [fetchSellerWallet, fetchWithdrawalHistory]);
+  }, [fetchSellerWallet, fetchWithdrawalHistory, fetchPendingDebt]);
 
   // ── Helpers ──
   const openWithdrawModal = () => {
@@ -202,6 +224,44 @@ function SellerWallet() {
           Làm mới
         </button>
       </div>
+
+      {/* ── Banner cảnh báo nợ hoa hồng COD ── */}
+      {pendingDebt > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          background: '#fff5f5',
+          border: '1.5px solid #fc8181',
+          borderLeft: '5px solid #e53e3e',
+          borderRadius: '10px',
+          padding: '14px 20px',
+          marginBottom: '1.2rem',
+        }}>
+          <AlertTriangle size={22} color="#e53e3e" style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, color: '#c53030', fontSize: '0.95rem' }}>
+              ⚠️ Bạn đang nợ hoa hồng COD chưa thanh toán
+            </div>
+            <div style={{ color: '#742a2a', fontSize: '0.85rem', marginTop: '3px' }}>
+              Tổng nợ: <strong>{formatCurrency(pendingDebt)}</strong>
+              &nbsp;— Hệ thống sẽ tự động thu khi ví bạn có đủ số dư.
+            </div>
+          </div>
+          <Link
+            to="/seller/wallet/transactions"
+            style={{
+              flexShrink: 0,
+              fontSize: '0.82rem',
+              color: '#e53e3e',
+              textDecoration: 'underline',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Xem chi tiết
+          </Link>
+        </div>
+      )}
 
       {/* ── Cards ── */}
       <div className="wallet-grid">

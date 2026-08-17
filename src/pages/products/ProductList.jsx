@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
 import ProductCard from '../../components/products/ProductCard';
 import { useCart } from '../../context/CartContext';
+import { getPublicProducts } from '../../api/productPublicApi';
 import './ProductList.css';
 
 /* ── Icon SVG ── */
