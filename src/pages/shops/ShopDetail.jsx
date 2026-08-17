@@ -193,12 +193,6 @@ export default function ShopDetail() {
                      <button className="btn-chat-premium" onClick={() => window.openChatWithShop && window.openChatWithShop(shop.ID_Shop, shop.TenShop)}>
                        <MessageCircle /> Chat tư vấn
                      </button>
-                    <button
-                      className={`btn-follow-premium ${followed ? 'followed' : ''}`}
-                      onClick={() => setFollowed(!followed)}
-                    >
-                      {followed ? <><UserCheck /> Đang theo dõi</> : <><Plus /> Theo dõi</>}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -213,10 +207,7 @@ export default function ShopDetail() {
                   <span className="stat-value"><ShoppingBag /> {shopStats.products_count}</span>
                   <span className="stat-label">Sản phẩm có sẵn</span>
                 </div>
-                <div className="mini-stat-item">
-                  <span className="stat-value"><Users /> 1.2k</span>
-                  <span className="stat-label">Người theo dõi</span>
-                </div>
+
               </div>
             </div>
 
@@ -230,10 +221,7 @@ export default function ShopDetail() {
                 <MessageSquareText />
                 <span>Chat phản hồi: <strong>{shopStats.response_rate}% (trong vài phút)</strong></span>
               </div>
-              <div className="meta-tag flex-grow-payment">
-                <CreditCard />
-                <span>Thanh toán: <strong>{shop.TenNganHang || 'Ngân hàng địa phương'} - STK: {shop.SoTaiKhoang ? shop.SoTaiKhoang.replace(/.$/, '***') : 'Đã ẩn'}</strong></span>
-              </div>
+
             </div>
           </div>
 
